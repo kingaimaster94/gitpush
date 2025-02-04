@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/index.js",
+    "start-server": "pm2 start src/index.js --interpreter nodemon --name omaxpumpfun_backend",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
