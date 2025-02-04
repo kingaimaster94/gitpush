@@ -18,7 +18,7 @@ import { toast } from "react-toastify";
 import { useContract } from "../../contexts/ContractContext";
 import { TOKEN_TOTAL_SUPPLY } from "@/engine/consts";
 import { connection, addLookupTableInfo } from "../../engine/config";
-import { createToken } from "../../engine/createToken";
+import { createMetadata } from "../../engine/createMetadata";
 import { send } from "../../engine/utils";
 import { updateToken } from "@/api/token";
 import { Box, Button, Checkbox, Grid, Typography } from "@mui/material";
@@ -408,12 +408,11 @@ function CreateCoinDialog({
         mintKeypair,
         imageUrl,
         createIxs: allIxs,
-      } = await createToken(
+      } = await createMetadata(
         walletCtx,
         name,
         ticker,
         description,
-        imgBuffer,
         imgFile,
         websiteLink,
         twitterLink,
