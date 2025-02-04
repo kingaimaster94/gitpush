@@ -293,7 +293,7 @@ function HowItWorksDialog({ isDialogOpen, setIsDialogOpen }) {
                     <div className="px-3 py-1 border border-none rounded-lg text-xl text-black w-fit bg-[#5FE461]">
                       Step 05
                     </div>
-                    <p className="text-xl text-white">$12k of liquidity is then deposited in Raydium and burned</p>
+                    <p className="text-xl text-white">$12k of liquidity is then deposited in Omax protocol and burned</p>
                   </div>
                 </Box>
                 <button style={{

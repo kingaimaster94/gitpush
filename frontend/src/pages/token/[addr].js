@@ -316,7 +316,7 @@ export default function TokenPage() {
           {isPoolComplete === true && (
             <div className="flex items-center gap-2 bg-[#86efac] p-4 rounded-md w-fit">
               <p className="text-black text-xl">
-                raydium pool seeded! view the coin on raydium
+                Omax pool seeded! view the coin on Omax protocol
               </p>
               <a
                 href={`https://dexscreener.com/${addr}`}
@@ -1258,7 +1258,7 @@ export default function TokenPage() {
             </div>
             <p className="text-sm font-medium text-[#9F9F9F] pt-4">
               when the market cap reaches $50,000 all the liquidity from the
-              bonding curve will be deposited into Raydium and burned.
+              bonding curve will be deposited into Omax protocol and burned.
               progression increases as the price goes up.
               <br />
               <br />
@@ -1490,7 +1490,7 @@ function TradeDialog({
 
     const isPoolCompleted = await isPoolComplete(tokenMint, NATIVE_MINT);
     if (isPoolCompleted) {
-      // swap on Raydium
+      // swap on Omax protocol
       const id = toast.loading(`Trading ${ticker}...`);
 
       try {

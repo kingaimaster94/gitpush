@@ -1,9 +1,4 @@
 
-import {
-    TOKEN_PROGRAM_ID,
-    SPL_ACCOUNT_LAYOUT
-} from '@raydium-io/raydium-sdk';
-
 
 export async function getWalletTokenAccounts(connection, wallet) {
     const walletTokenAccount = await connection.getTokenAccountsByOwner(wallet, {
