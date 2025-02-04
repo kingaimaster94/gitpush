@@ -1,3 +1,4 @@
+import axios from "axios";
 
 const uploadMetadata = async (fileType, fileBuffer) => {
         const formData = new FormData();
@@ -20,13 +21,12 @@ const uploadMetadata = async (fileType, fileBuffer) => {
             maxBodyLength: "Infinity",
             headers: {
                 "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
-                Authorization: PINATA_JWT,
+                Authorization: process.env.PINATA_JWT,
             },
         }
     );
     imageUrl = `https://ipfs.io/ipfs/${res.data.IpfsHash}`;
     return {imageUrl};
 };
-
 
 module.exports = { uploadMetadata };
