@@ -7,7 +7,7 @@ import {
     addLookupTableInfo
 } from "./config";
 import {
-    getWalletTokenAccounts,
+    getWalletTokens,
     send
 } from "./utils";
 
@@ -15,7 +15,7 @@ import {
 export const swap = async (walletCtx, inputTokenAmount, outputToken, marketId, isBuy) => {
     const baseToken = isBuy ? outputToken : inputTokenAmount.token;
     const quoteToken = isBuy ? inputTokenAmount.token : outputToken;
-    const walletTokenAccounts = await getWalletTokenAccounts(walletCtx.publicKey);
+    const walletTokenAccounts = await getWalletTokens(walletCtx.publicKey);
 
     const slippage = new Percent(1, 100);
 
