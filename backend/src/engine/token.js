@@ -19,7 +19,7 @@ const { PROGRAMIDS,
     connection
 } = require('../solana/utils');
 const { generateSHA } = require('../utils/basic');
-const fetchSOLPrice = require('../utils/sol_price');
+const fetchOMAXPrice = require('../utils/omax_price');
 const { broadcastMessage } = require('../utils/socket');
 
 
@@ -49,10 +49,10 @@ const updateToken = async (req, resp) => {
 
     try {
         // check if mint info exists
-        let token = await Token.findOne({ mintAddr: query.mintAddr });
+        let token = await Token.findOne({ tokenAddr: query.tokenAddr });
         if (!token) {
-            console.error(`updateToken error: Failed to find the token with mint ${query.mintAddr}`);
-            return resp.status(400).json({ error: `Failed to find the token with mint ${query.mintAddr}` });
+            console.error(`updateToken error: Failed to find the token with mint ${query.tokenAddr}`);
+            return resp.status(400).json({ error: `Failed to find the token with mint ${query.tokenAddr}` });
         }
 
         let creator = await User.findOne({ _id: req.userId });
@@ -78,7 +78,7 @@ const updateToken = async (req, resp) => {
                 walletAddr: creator.walletAddr, 
                 avatar: creator.avatar, 
                 username: creator.username, 
-                mintAddr: token.mintAddr, 
+                tokenAddr: token.tokenAddr, 
                 tokenName: token.name, 
                 logo: token.logo, 
                 cdate: token.cdate
@@ -109,7 +109,7 @@ const findTokens = async (req, resp) => {
         const tokens = await Token.find(options).populate('creatorId');
         // console.log('tokens:', tokens);
         // console.log('token count:', tokens.length);
-        let solPrice = fetchSOLPrice();
+        let solPrice = fetchOMAXPrice();
         let temp = [];
         let ret = [];
         
@@ -213,7 +213,7 @@ const findTokens = async (req, resp) => {
                 ticker: token.ticker, 
                 desc: token.desc, 
                 logo: token.logo, 
-                mintAddr: token.mintAddr, 
+                tokenAddr: token.tokenAddr, 
                 avatar: token.creatorId.avatar, 
                 username: token.creatorId.username, 
                 walletAddr: token.creatorId.walletAddr, 
@@ -246,9 +246,9 @@ const getKingOfTheHill = async (req, resp) => {
             { $project: {price: 1} }
         ]))[0];
 
-        let solPrice = fetchSOLPrice();
+        let solPrice = fetchOMAXPrice();
         kingOfTheHill = {
-            mintAddr: kingOfTheHill?.mintAddr, 
+            tokenAddr: kingOfTheHill?.tokenAddr, 
             name: kingOfTheHill?.name, 
             ticker: kingOfTheHill?.ticker, 
             logo: kingOfTheHill?.logo, 
@@ -270,10 +270,10 @@ const getTokenInfo = async (req, resp) => {
     console.log('getTokenInfo - query:', query);
 
     try {
-        const token = await Token.findOne({ mintAddr: query.mintAddr }).populate('creatorId');
+        const token = await Token.findOne({ tokenAddr: query.tokenAddr }).populate('creatorId');
         if (!token) {
-            console.error(`getTokenInfo error: Failed to find the token with mint ${query.mintAddr}`);
-            return resp.status(400).json({ error: `Failed to find the token with mint ${query.mintAddr}` });
+            console.error(`getTokenInfo error: Failed to find the token with mint ${query.tokenAddr}`);
+            return resp.status(400).json({ error: `Failed to find the token with mint ${query.tokenAddr}` });
         }
         // console.log('token:', token);
 
@@ -284,7 +284,7 @@ const getTokenInfo = async (req, resp) => {
             { $project: {price: 1, baseReserve: 1, quoteReserve: 1} }
         ]))[0];
         // console.log('lastPrice:', lastPrice);
-        let solPrice = fetchSOLPrice();
+        let solPrice = fetchOMAXPrice();
 
         let tokenBalance = 0;
         let solBalance = 0;
@@ -292,7 +292,7 @@ const getTokenInfo = async (req, resp) => {
         if (parsedUserId) {
             const selfUser = await User.findOne({ _id: parsedUserId });
             if (selfUser) {
-                tokenBalance = await getTokenBalance(new PublicKey(selfUser.walletAddr), new PublicKey(query.mintAddr));
+                tokenBalance = await getTokenBalance(new PublicKey(selfUser.walletAddr), new PublicKey(query.tokenAddr));
                 solBalance = await getTokenBalance(new PublicKey(selfUser.walletAddr), NATIVE_MINT);
             }
         }
@@ -321,7 +321,7 @@ const getTokenInfo = async (req, resp) => {
             crownDate: token.crownDate, 
             tokensAvailableForSale: lastPrice.baseReserve / (10 ** config.tokenDecimals) - config.initVirtBase, 
             realQuoteReserve: (lastPrice.quoteReserve - config.initVirtQuote) / LAMPORTS_PER_SOL, 
-            tokenHolderDistribution: await getTokenHolderDistribution(query.mintAddr)
+            tokenHolderDistribution: await getTokenHolderDistribution(query.tokenAddr)
         };
         // console.log('ret:', ret);
 
@@ -343,11 +343,11 @@ const getFeedData = async (req, resp) => {
     let feedData = [];
 
     try {
-        const token = await Token.findOne({ mintAddr: query.tokenId });
+        const token = await Token.findOne({ tokenAddr: query.tokenId });
         // console.log('token:', token);
         if (!token) {
-            console.error(`getFeedData error: Failed to find the token with mint ${query.mintAddr}`);
-            return resp.status(400).json({ error: `Failed to find the token with mint ${query.mintAddr}` });
+            console.error(`getFeedData error: Failed to find the token with mint ${query.tokenAddr}`);
+            return resp.status(400).json({ error: `Failed to find the token with mint ${query.tokenAddr}` });
         }
         
         for (x = from; x < to; x += interval) {
@@ -403,10 +403,10 @@ const getThreadData = async (req, resp) => {
     console.log('getThreadData - query:', query);
 
     try {
-        let token = await Token.findOne({ mintAddr: query.mintAddr }).populate('creatorId');
+        let token = await Token.findOne({ tokenAddr: query.tokenAddr }).populate('creatorId');
         if (!token) {
-            console.error(`getThreadData error: Failed to find the token with mint ${query.mintAddr}`);
-            return resp.status(400).json({ error: `Failed to find the token with mint ${query.mintAddr}` });
+            console.error(`getThreadData error: Failed to find the token with mint ${query.tokenAddr}`);
+            return resp.status(400).json({ error: `Failed to find the token with mint ${query.tokenAddr}` });
         }
 
         const replies = await TokenReplyMention.find({ tokenId: token._id }).populate('replierId').populate('mentionerId');
@@ -446,9 +446,9 @@ const reply = async (req, resp) => {
     console.log('reply - query:', query);
 
     try {
-        const token = await Token.findOne({ mintAddr: query.mintAddr });
+        const token = await Token.findOne({ tokenAddr: query.tokenAddr });
         if (!token) {
-            throw new Error(`Failed to find user with id ${query.mintAddr}`);
+            throw new Error(`Failed to find user with id ${query.tokenAddr}`);
         }
 
         let newName = null;
@@ -587,10 +587,10 @@ const getTradeHist = async (req, resp) => {
     console.log('getTradeHist - query:', query);
 
     try {
-        const token = await Token.findOne({ mintAddr: query.mintAddr });
+        const token = await Token.findOne({ tokenAddr: query.tokenAddr });
         if (!token) {
-            console.error(`getTradeHist error: Failed to find the token with mint ${query.mintAddr}`);
-            return resp.status(400).json({ error: `Failed to find the token with mint ${query.mintAddr}` });
+            console.error(`getTradeHist error: Failed to find the token with mint ${query.tokenAddr}`);
+            return resp.status(400).json({ error: `Failed to find the token with mint ${query.tokenAddr}` });
         }
 
         const tradeHist = await TokenTrade.find({ tokenId: token._id }).populate('traderId');
@@ -623,10 +623,10 @@ const tradeToken = async (req, resp) => {
     console.log('tradeToken - query:', query);
 
     try {
-        const token = await Token.findOne({ mintAddr: query.mintAddr });
+        const token = await Token.findOne({ tokenAddr: query.tokenAddr });
         if (!token) {
-            console.error(`tradeToken error: Failed to find the token with mint ${query.mintAddr}`);
-            return resp.status(400).json({ error: `Failed to find the token with mint ${query.mintAddr}` });
+            console.error(`tradeToken error: Failed to find the token with mint ${query.tokenAddr}`);
+            return resp.status(400).json({ error: `Failed to find the token with mint ${query.tokenAddr}` });
         }
 
         let trader = await User.findOne({ _id: req.userId });
@@ -665,7 +665,7 @@ const tradeToken = async (req, resp) => {
                 walletAddr: trader.walletAddr, 
                 avatar: trader.avatar, 
                 username: trader.username, 
-                mintAddr: token.mintAddr, 
+                tokenAddr: token.tokenAddr, 
                 tokenName: token.name, 
                 logo: token.logo, 
                 baseAmount: query.baseAmount,

@@ -250,7 +250,7 @@ export default function MyProfile() {
                     </div>
                     <div className='flex justify-between'>
                       <p className='text-xl text-[#97FF73]'>{item.lamports.toFixed(3)} OMAX</p>
-                      <Link href={`/token/${item.mintAddr}`} className='text-xl text-[#97FF73] cursor-pointer'>[View Coin]</Link>
+                      <Link href={`/token/${item.tokenAddr}`} className='text-xl text-[#97FF73] cursor-pointer'>[View Coin]</Link>
                     </div>
                   </div>
                 </div>

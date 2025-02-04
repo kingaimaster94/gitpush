@@ -7,7 +7,7 @@ const tokenSchema = new Schema({
     ticker: { type: String, default: null },
     desc: { type: String, default: null },
     creatorId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    mintAddr: { type: String, required: true },
+    tokenAddr: { type: String, required: true },
     logo: { type: String, default: null },
     twitter: { type: String, default: null },
     telegram: { type: String, default: null },

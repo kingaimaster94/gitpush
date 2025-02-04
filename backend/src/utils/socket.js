@@ -35,7 +35,7 @@ server.listen(port, async () => {
         avatar: lastToken?.creatorId?.avatar, 
         username: lastToken?.creatorId?.username, 
         
-        mintAddr: lastToken?.mintAddr, 
+        tokenAddr: lastToken?.tokenAddr, 
         token: lastToken?.name, 
         logo: lastToken?.logo, 
         
@@ -57,7 +57,7 @@ server.listen(port, async () => {
         username: lastTrade?.traderId?.username, 
         avatar: lastTrade?.traderId?.avatar, 
         
-        mintAddr: lastTrade?.tokenId?.mintAddr, 
+        tokenAddr: lastTrade?.tokenId?.tokenAddr, 
         tokenName: lastTrade?.tokenId?.name, 
         logo: lastTrade?.tokenId?.logo, 
 

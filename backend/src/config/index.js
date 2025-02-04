@@ -10,17 +10,18 @@ exports.config = {
         wss: 2102, 
     }, 
     rpcUrl: (process.env.TEST_MODE === 'true') 
-        ? 'https://api.devnet.solana.com' 
-        : 'https://mainnet.helius-rpc.com/?api-key=e0762009-5522-4263-a855-b8fc58a53dc9', 
+        ? 'https://testapi.omaxray.com' 
+        : 'https://mainapi.omaxscan.com', 
     
-    PROGRAM_ID: '5BXzjtQpmqdXeDNmThjDYHsjFGviDCeW58SpumTW86Fa', 
-    tokenDecimals: 6, 
-    tokenTotalSupply: 1_000_000_000, 
-    initVirtBase: 200_000_000, 
-    initVirtQuote: 28_000_000_000, // 28 SOL
-    kothQuoteReserve: 42_000_000_000, // +42 SOL
-    completeQuoteReserve: 85_000_000_000, // +85 SOL
-    quotesForSelf: 6_000_000_000, // 6 SOL
+    
+    tokenDecimals: 18, 
+    tokenTotalSupply: 10_000_000_000,   // 10 B
+    initVirtBase: 10_000_000_000,       // 10 B
+    initVirtQuote: 500_000,             // 500_000 OMAX
+    kothQuoteReserve: 1_000_000,        // +1_000_000 OMAX
+    completeQuoteReserve: 2_000_000,    // +2_000_000 OMAX
+    createFee: 1_000,                   // 1_000 OMAX
+    quotesForSelf: 100_000,             // 100_000 OMAX
     
     dataType: {
         lastToken: 0xFF01, 

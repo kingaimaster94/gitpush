@@ -46,19 +46,19 @@ const getTokensHeld = async (walletAddr) => {
     return tokens;
 };
 
-const getTokenHolderDistribution = async (mintAddr) => {
+const getTokenHolderDistribution = async (tokenAddr) => {
     let holderDistrib = [];
-    console.log('getTokenHolderDistribution - mintAddr:', mintAddr);
+    console.log('getTokenHolderDistribution - tokenAddr:', tokenAddr);
 
     try {
-        const token = await TokenModel.findOne({ mintAddr })?.populate('creatorId');
+        const token = await TokenModel.findOne({ tokenAddr })?.populate('creatorId');
         const devWallet = token?.creatorId?.walletAddr;
         // console.log('  devWallet:', devWallet);
 
         /* Get totalSupply */
         const mintInfo = await getMint(
             connection, 
-            new PublicKey(mintAddr)
+            new PublicKey(tokenAddr)
         );
         const totalSupply = mintInfo.supply;
         // console.log('  totalSupply:', totalSupply);
@@ -77,7 +77,7 @@ const getTokenHolderDistribution = async (mintAddr) => {
                     {
                         memcmp: {
                             offset: 0,
-                            bytes: mintAddr
+                            bytes: tokenAddr
                         },
                     },
                 ],

@@ -194,7 +194,7 @@ export default function BoardPage() {
                 }}
               >
                 <Link
-                  href={`/token/${kingToken?.mintAddr}`}
+                  href={`/token/${kingToken?.tokenAddr}`}
                   className="flex justify-end"
                 >
                   <div className="flex flex-col gap-4 w-full p-2">
@@ -698,7 +698,7 @@ export default function BoardPage() {
                       <Link
                         key={index}
                         ref={index === 0 ? tokenDiv : null}
-                        href={`/token/${item.mintAddr}`}
+                        href={`/token/${item.tokenAddr}`}
                         className="flex gap-2 items-start p-2"
                       >
                     

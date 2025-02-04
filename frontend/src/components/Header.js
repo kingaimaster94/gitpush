@@ -118,7 +118,7 @@ export default function Header() {
                   <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.username}</p>
                 </Link>
                 <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.isBuy === true ? 'bought' : 'sold'} {lastTradeInfo.quoteAmount} OMAX of</p>
-                <Link href={`/token/${lastTradeInfo.mintAddr}`} className="flex items-center gap-1">
+                <Link href={`/token/${lastTradeInfo.tokenAddr}`} className="flex items-center gap-1">
                   <p className={`text-sm 2xl:text-xl hover:underline ${rajdhani.className}`}>{lastTradeInfo.tokenName}</p>
                   <Image
                     className="rounded-full"
@@ -143,7 +143,7 @@ export default function Header() {
                   <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTokenInfo.username}</p>
                 </Link>
                 <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>created</p>
-                <Link href={`/token/${lastTokenInfo.mintAddr}`} className="flex items-center gap-1">
+                <Link href={`/token/${lastTokenInfo.tokenAddr}`} className="flex items-center gap-1">
                   <p className={`text-sm 2xl:text-xl hover:underline ${rajdhani.className}`}>{lastTokenInfo.token}</p>
                   <Image
                     className="rounded-full"
@@ -225,7 +225,7 @@ export default function Header() {
             <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.username}</p>
           </Link>
           <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.isBuy === true ? 'bought' : 'sold'} {lastTradeInfo.quoteAmount} OMAX of</p>
-          <Link href={`/${lastTradeInfo.mintAddr}`} className="flex items-center gap-1">
+          <Link href={`/${lastTradeInfo.tokenAddr}`} className="flex items-center gap-1">
             <p className={`text-sm 2xl:text-xl hover:underline ${rajdhani.className}`}>{lastTradeInfo.tokenName}</p>
             <Image
               className="rounded-full"

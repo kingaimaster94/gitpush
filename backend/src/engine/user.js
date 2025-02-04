@@ -11,7 +11,7 @@ const { User,
 } = require('../db');
 const { config } = require('../config');
 const { generateSHA } = require('../utils/basic');
-const fetchSOLPrice = require('../utils/sol_price');
+const fetchOMAXPrice = require('../utils/omax_price');
 const { getTokensHeld } = require('../solana/engine');
 
 
@@ -36,7 +36,7 @@ const getUserProfile = async (req, resp) => {
             // console.log('tokenInfo:', tokenInfo);
             if (Number(tokenInfo.balance) === 0) continue;
 
-            const token = await Token.findOne({ mintAddr: tokenInfo.mint });
+            const token = await Token.findOne({ tokenAddr: tokenInfo.mint });
             if (!token) continue;
             // console.log('token:', token);
             
@@ -49,7 +49,7 @@ const getUserProfile = async (req, resp) => {
             // console.log('lastPrice:', lastPrice);
 
             coinsHeld.push({
-                mintAddr: tokenInfo.mint, 
+                tokenAddr: tokenInfo.mint, 
                 ticker: token.ticker, 
                 balance: Number(tokenInfo.balance), 
                 logo: token.logo, 
@@ -107,13 +107,13 @@ const getUserProfile = async (req, resp) => {
                 { $limit: 1 },
                 { $project: {price: 1} }
             ]))[0]?.price;
-            let solPrice = fetchSOLPrice();
+            let solPrice = fetchOMAXPrice();
 
             coinsCreated.push({
                 walletAddr: tokenInfo.creatorId.walletAddr, 
                 avatar: tokenInfo.creatorId.avatar, 
                 username: tokenInfo.creatorId.username, 
-                mintAddr: tokenInfo.mintAddr, 
+                tokenAddr: tokenInfo.tokenAddr, 
                 logo: tokenInfo.logo, 
                 tokenName: tokenInfo.name, 
                 ticker: tokenInfo.ticker, 

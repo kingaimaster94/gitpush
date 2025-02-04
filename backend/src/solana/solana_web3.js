@@ -114,14 +114,14 @@ const contract_withdraw = async (baseToken) => {
 
 
 const onCreateEvent = async (event) => {
-    let token = await Token.findOne({ mintAddr: event.baseMint });
+    let token = await Token.findOne({ tokenAddr: event.baseMint });
     if (token) {
         console.error(`Already registered token with mint ${event.baseMint}`);
         return;
     }
     
     token = new Token({
-        mintAddr: event.baseMint, 
+        tokenAddr: event.baseMint, 
         cdate: Date.now()
     });
     await token.save();
@@ -137,7 +137,7 @@ const onCreateEvent = async (event) => {
 };
 
 const onTradeEvent = async (event) => {
-    const token = await Token.findOne({ mintAddr: event.baseMint });
+    const token = await Token.findOne({ tokenAddr: event.baseMint });
     if (!token) {
         console.error(`Failed to find token with the mint ${event.baseMint}`);
         return;
@@ -173,7 +173,7 @@ const onTradeEvent = async (event) => {
 };
 
 const onCompleteEvent = async (event) => {
-    const token = await Token.findOne({ mintAddr: event.baseMint });
+    const token = await Token.findOne({ tokenAddr: event.baseMint });
     if (!token) {
         console.error(`Failed to find token with the mint ${event.baseMint}`);
         return;

@@ -10,9 +10,9 @@ export async function uploadMetadata(logoFile, metadata) {
   return await response.data;
 }
 
-export async function updateToken(name, ticker, desc, logo, twitter, telegram, website, mintAddr) {
+export async function updateToken(name, ticker, desc, logo, twitter, telegram, website, tokenAddr) {
   const result = await axiosPrivate.post(`/token/update_token`, {
-    name, ticker, desc, logo, twitter, telegram, website, mintAddr
+    name, ticker, desc, logo, twitter, telegram, website, tokenAddr
   });
   return result.data;
 }
@@ -27,22 +27,22 @@ export async function getKing() {
   return result.data
 }
 
-export async function getToken(mintAddr, userId) {
+export async function getToken(tokenAddr, userId) {
   const userIdStr = encodeURIComponent(JSON.stringify(userId))
-  const result = await axiosPublic.get(`/token/get_token_info?mintAddr=${mintAddr}&userId=${userIdStr}`)
+  const result = await axiosPublic.get(`/token/get_token_info?tokenAddr=${tokenAddr}&userId=${userIdStr}`)
   return result.data
 }
 
-export async function getThreadData(mintAddr, userId) {
+export async function getThreadData(tokenAddr, userId) {
   const userIdStr = encodeURIComponent(JSON.stringify(userId))
-  const result = await axiosPublic.get(`/token/get_thread_data?mintAddr=${mintAddr}&userId=${userIdStr}`)
+  const result = await axiosPublic.get(`/token/get_thread_data?tokenAddr=${tokenAddr}&userId=${userIdStr}`)
   return result.data
 }
 
-export async function reply(mintAddr, comment, imageFile) {
+export async function reply(tokenAddr, comment, imageFile) {
   const formData = new FormData()
   formData.append('image', imageFile)
-  formData.append('mintAddr', mintAddr)
+  formData.append('tokenAddr', tokenAddr)
   formData.append('comment', comment)
 
   const result = await axiosPrivate.post('/token/reply', formData)
@@ -69,15 +69,15 @@ export async function mentionReply(replyMentionId, message, imageFile) {
   return result
 }
 
-export async function trade(mintAddr, isBuy, baseAmount, quoteAmount, txhash, comment) {
+export async function trade(tokenAddr, isBuy, baseAmount, quoteAmount, txhash, comment) {
   const result = await axiosPrivate.post(`/token/trade`, {
-    mintAddr, isBuy, baseAmount, quoteAmount, txhash, comment
+    tokenAddr, isBuy, baseAmount, quoteAmount, txhash, comment
   });
   return result.data;
 }
 
-export async function getTradeHistory(mintAddr) {
-  const result = await axiosPublic.get(`/token/get_trade_hist?mintAddr=${mintAddr}`)
+export async function getTradeHistory(tokenAddr) {
+  const result = await axiosPublic.get(`/token/get_trade_hist?tokenAddr=${tokenAddr}`)
   return result.data
 }
 
