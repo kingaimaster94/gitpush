@@ -1,4 +1,4 @@
-import axios from "axios";
+const axios = require("axios");
 
 const uploadMetadata = async (fileType, fileBuffer) => {
         const formData = new FormData();
