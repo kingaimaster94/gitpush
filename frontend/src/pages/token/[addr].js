@@ -594,7 +594,7 @@ export default function TokenPage() {
                           {item.image !== null && (
                             <Image
                               className="h-fit rounded-xl"
-                              src={`${process.env.NEXT_PUBLIC_AVATAR_URL}/images/${item.image}`}
+                              src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/${item.image}`}
                               width={100}
                               height={100}
                               alt=""
