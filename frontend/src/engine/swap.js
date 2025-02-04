@@ -15,7 +15,7 @@ import {
 export const swap = async (walletCtx, inputTokenAmount, outputToken, marketId, isBuy) => {
     const baseToken = isBuy ? outputToken : inputTokenAmount.token;
     const quoteToken = isBuy ? inputTokenAmount.token : outputToken;
-    const walletTokenAccounts = await getWalletTokenAccounts(connection, walletCtx.publicKey);
+    const walletTokenAccounts = await getWalletTokenAccounts(walletCtx.publicKey);
 
     const slippage = new Percent(1, 100);
 

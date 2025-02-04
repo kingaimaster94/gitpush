@@ -1,7 +1,7 @@
 
 import BN from 'bn.js';
 
-import { PUMPFUN_PROGRAM_ID, 
+import { PUMPFUN_ADDRESS, 
     FEE_PRE_DIV 
 } from './constants';
 import { IDL } from './idl';

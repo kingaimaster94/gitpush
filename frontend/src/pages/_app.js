@@ -4,7 +4,6 @@ import "react-toastify/dist/ReactToastify.css";
 import Header from "@/components/Header";
 import Script from 'next/script';
 import WalletContextProvider from "@/contexts/WalletContext";
-import ContractContextProvider from '@/contexts/ContractContext';
 import { Box, Container } from "@mui/material";
 import CopyRight from "@/components/CopyRight";
 import TopRanker from "@/components/TopRanker";
@@ -23,7 +22,6 @@ export default function App({ Component, pageProps }) {
       
     }}>
       <WalletContextProvider>
-        <ContractContextProvider>
         <Container>
           <div className="w-full min-h-screen flex flex-col overflow-hidden">
           <div>
@@ -37,7 +35,6 @@ export default function App({ Component, pageProps }) {
           </div>
           <CopyRight/>
         </Container>
-        </ContractContextProvider>
       </WalletContextProvider>
       <ToastContainer
         autoClose={5000}
