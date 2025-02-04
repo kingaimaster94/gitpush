@@ -19,7 +19,7 @@ const CopyRight = () => {
         }
     }}>
     <Typography>
-    @2024 All rights reserved
+    @2025 All rights reserved
     </Typography>
     <Typography>
     Privacy Policy

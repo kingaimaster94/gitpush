@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const STORAGE_KEY = "token";
-axios.defaults.baseURL = 'https://honk.guru/api';
-// axios.defaults.baseURL = 'https://bvb-webapp.com/api2';
+axios.defaults.baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 axios.interceptors.request.use(
   (config) => {

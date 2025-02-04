@@ -13,6 +13,7 @@ import { useLogout } from "@/hooks/auth/useLogout";
 import logo from "../assets/images/logo.png";
 import logos_telegram from "../assets/images/logos_telegram.png";
 import prime_twitter from "../assets/images/prime_twitter.png";
+import { useAccount } from "wagmi";
 
 import useIsMounted from "./useIsMounted"
 import { DATATYPE_LASTTOKEN, 
@@ -29,11 +30,11 @@ const rajdhani = Rajdhani({
 })
 
 export default function Header() {
-  const wallet = useWallet()
-  const { login } = useLogin()
-  const { logout } = useLogout()
+  const wallet = useAccount();
+  const { login } = useLogin();
+  const { logout } = useLogout();
 
-  const mounted = useIsMounted()
+  const mounted = useIsMounted();
 
   const [ws, setWs] = useState(undefined)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -44,10 +45,10 @@ export default function Header() {
   const baseURL = `${process.env.NEXT_PUBLIC_SOCKET_URL}`
 
   useEffect(() => {
-    if (wallet.publicKey !== null && wallet.disconnecting === false)
-      login(wallet.publicKey.toBase58())
-    if (wallet.disconnecting === true)
-      logout()
+    if (wallet.address !== null && wallet.isConnected === false)
+      login(wallet.address);
+    if (wallet.isDisconnected === true)
+      logout();
   }, [wallet])
 
   useEffect(() => {
@@ -116,7 +117,7 @@ export default function Header() {
                   />
                   <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.username}</p>
                 </Link>
-                <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.isBuy === true ? 'bought' : 'sold'} {lastTradeInfo.quoteAmount} SOL of</p>
+                <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.isBuy === true ? 'bought' : 'sold'} {lastTradeInfo.quoteAmount} OMAX of</p>
                 <Link href={`/token/${lastTradeInfo.mintAddr}`} className="flex items-center gap-1">
                   <p className={`text-sm 2xl:text-xl hover:underline ${rajdhani.className}`}>{lastTradeInfo.tokenName}</p>
                   <Image
@@ -200,9 +201,8 @@ export default function Header() {
             }
           }
         }} className="flex gap-2 items-center">
-          {mounted && <WalletMultiButton />}
-          {wallet.publicKey !== null && (
-            <Link href={`/profile/${wallet.publicKey.toBase58()}`}>
+          {wallet.address !== null && (
+            <Link href={`/profile/${wallet.address}`}>
               <UserCircleIcon className="size-8 fill-white"  style={{
                 width:"42px",
                 height:"42px"
@@ -224,7 +224,7 @@ export default function Header() {
             />
             <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.username}</p>
           </Link>
-          <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.isBuy === true ? 'bought' : 'sold'} {lastTradeInfo.quoteAmount} SOL of</p>
+          <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.isBuy === true ? 'bought' : 'sold'} {lastTradeInfo.quoteAmount} OMAX of</p>
           <Link href={`/${lastTradeInfo.mintAddr}`} className="flex items-center gap-1">
             <p className={`text-sm 2xl:text-xl hover:underline ${rajdhani.className}`}>{lastTradeInfo.tokenName}</p>
             <Image
