@@ -211,7 +211,7 @@ export default function MyProfile() {
                 fontSize:"16px"
             }} className='h-[50px] bg-black text-xl text-white border border-none p-3 rounded-xl' value={walletAddress} disabled />
             {addr !== undefined && (
-              <a href={`https://omaxscan.com/address/${addr}`} style={{opacity:"0.6",fontSize:"15px"}} target='_blank' className='text-xl text-white'>View on Solscan</a>
+              <a href={`https://omaxscan.com/address/${addr}`} style={{opacity:"0.6",fontSize:"15px"}} target='_blank' className='text-xl text-white'>View on Omaxscan</a>
             )}
           </div>
         </div>

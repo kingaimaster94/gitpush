@@ -14,10 +14,18 @@ import logo from "../assets/images/logo.png";
 import logos_telegram from "../assets/images/logos_telegram.png";
 import prime_twitter from "../assets/images/prime_twitter.png";
 import { useAccount } from "wagmi";
+import {
+  createWeb3Modal,
+  useWeb3Modal,
+  useWeb3ModalEvents,
+  useWeb3ModalState,
+  useWeb3ModalTheme,
+} from '@web3modal/wagmi/react';
 
 import useIsMounted from "./useIsMounted"
-import { DATATYPE_LASTTOKEN, 
-  DATATYPE_LASTTRADE 
+import {
+  DATATYPE_LASTTOKEN,
+  DATATYPE_LASTTRADE
 } from "../engine/consts";
 import { Box, Typography } from "@mui/material";
 
@@ -31,6 +39,11 @@ const rajdhani = Rajdhani({
 
 export default function Header() {
   const wallet = useAccount();
+  const modal = useWeb3Modal();
+  const state = useWeb3ModalState();
+  const events = useWeb3ModalEvents();
+  const { themeMode, themeVariables, setThemeMode } = useWeb3ModalTheme();
+
   const { login } = useLogin();
   const { logout } = useLogout();
 
@@ -42,7 +55,15 @@ export default function Header() {
   const div2Ref = useRef(null)
   const [lastTokenInfo, setLastTokenInfo] = useState(null)
   const [lastTradeInfo, setLastTradeInfo] = useState(null)
-  const baseURL = `${process.env.NEXT_PUBLIC_SOCKET_URL}`
+  const baseURL = `${process.env.NEXT_PUBLIC_SOCKET_URL}`;
+
+  async function connectWallet() {
+    modal.open();
+  }
+
+  async function disconnectWallet() {
+    modal.open();
+  }
 
   useEffect(() => {
     if (wallet.address !== null && wallet.isConnected === false)
@@ -88,14 +109,14 @@ export default function Header() {
 
   return (
     <header className="z-20 flex flex-col gap-2 items-center px-5 py-7" style={{
-      background:"#4FCB4F",
-      borderRadius:"50px"
+      background: "#4FCB4F",
+      borderRadius: "50px"
     }}>
       <div className="flex justify-between items-center w-full">
         <div className="flex gap-2 items-center">
           <Link href="/">
             <Typography
-            component={"img"}
+              component={"img"}
               className="rounded-full"
               src={logo.src}
               width={"146px"}
@@ -103,7 +124,7 @@ export default function Header() {
               priority={true}
             />
           </Link>
-        
+
           <div className="flex gap-4 items-center">
             {lastTradeInfo !== null && (
               <div ref={div1Ref} className="hidden sm:flex gap-1 p-4 items-center bg-[#FF3131] rounded-xl h-[58px]">
@@ -159,57 +180,63 @@ export default function Header() {
           </div>
         </div>
         <Box className="hidden xl:flex gap-5" sx={{
-          "& a,p":{
+          "& a,p": {
             fontFamily: "JostBold",
             fontSize: "18px",
-            color:"#fff",
-            cursor:"pointer"
+            color: "#fff",
+            cursor: "pointer"
           }
         }}>
-        <Link href={"/"}>
-        Home
-        </Link>
-        <Link href={"/create"}>
-        Launch
-        </Link>
-        <Typography onClick={() => setIsDialogOpen(true)}>
-        Docs
-        </Typography>
+          <Link href={"/"}>
+            Home
+          </Link>
+          <Link href={"/create"}>
+            Launch
+          </Link>
+          <Typography onClick={() => setIsDialogOpen(true)}>
+            Docs
+          </Typography>
         </Box>
         <div className="flex gap-4 items-center">
-        <div className="hidden xl:flex gap-2 items-center">
-      
-          <a href="https://nextjs.org" target="_blank">
-         <Typography component={"img"} src={logos_telegram.src} width={"36px"} height={"36px"}/>
-          </a>
-          <a href="https://nextjs.org" target="_blank">
-         <Typography component={"img"} src={prime_twitter.src} width={"36px"} height={"36px"}/>
-          </a>
+          <div className="hidden xl:flex gap-2 items-center">
+
+            <a href="https://nextjs.org" target="_blank">
+              <Typography component={"img"} src={logos_telegram.src} width={"36px"} height={"36px"} />
+            </a>
+            <a href="https://nextjs.org" target="_blank">
+              <Typography component={"img"} src={prime_twitter.src} width={"36px"} height={"36px"} />
+            </a>
           </div>
-     
-        <Box sx={{
-          "& .wallet-adapter-button":{
-            backgroundColor:"#F0FF42",
-            color:"#000",
-            fontSize:"14px",
-            fontFamily:"JostBold",
-            borderRadius:"50px",
-            height:"44px",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
-            "&:hover":{
-              backgroundColor:"#F0FF42 !important",
+
+          <Box sx={{
+            "& .wallet-adapter-button": {
+              backgroundColor: "#F0FF42",
+              color: "#000",
+              fontSize: "14px",
+              fontFamily: "JostBold",
+              borderRadius: "50px",
+              height: "44px",
+              boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
+              "&:hover": {
+                backgroundColor: "#F0FF42 !important",
+              }
             }
-          }
-        }} className="flex gap-2 items-center">
-          {wallet.address !== null && (
-            <Link href={`/profile/${wallet.address}`}>
-              <UserCircleIcon className="size-8 fill-white"  style={{
-                width:"42px",
-                height:"42px"
-              }}/>
-            </Link>
-          )}
-        </Box>
+          }} className="flex gap-2 items-center"
+            onClick={
+              wallet.address
+                ? () => disconnectWallet()
+                : () => connectWallet()
+            }
+          >
+            {wallet.address !== null && (
+              <Link href={`/profile/${wallet.address}`}>
+                <UserCircleIcon className="size-8 fill-white" style={{
+                  width: "42px",
+                  height: "42px"
+                }} />
+              </Link>
+            )}
+          </Box>
         </div>
       </div>
       {lastTradeInfo !== null && (
@@ -257,12 +284,12 @@ function HowItWorksDialog({ isDialogOpen, setIsDialogOpen }) {
               leaveTo="opacity-0 transform-[scale(95%)]"
             >
               <DialogPanel className="flex flex-col gap-8 p-10 w-full max-w-xl rounded-3xl bg-[#0B1821] border-none backdrop-blur-2xl">
-                <p className='text-[32px] text-bold text-white text-center' style={{fontFamily: "JostRegular",fontSize:"20px",fontWeight:"bold"}}>How it works</p>
-                <p className='text-xl text-white text-center' style={{fontFamily: "JostRegular",}}>Pump prevents rugs by making sure that all created tokens are safe. Each coin on pump is a <span className='text-[#5FE461]'>fair-launch</span> with no presale and <span className='text-[#F0FF42]'>no team allocation.</span></p>
+                <p className='text-[32px] text-bold text-white text-center' style={{ fontFamily: "JostRegular", fontSize: "20px", fontWeight: "bold" }}>How it works</p>
+                <p className='text-xl text-white text-center' style={{ fontFamily: "JostRegular", }}>Pump prevents rugs by making sure that all created tokens are safe. Each coin on pump is a <span className='text-[#5FE461]'>fair-launch</span> with no presale and <span className='text-[#F0FF42]'>no team allocation.</span></p>
                 <Box sx={{
-                  "& p,div,button":{
+                  "& p,div,button": {
                     fontFamily: "JostRegular",
-                    fontSize:"16px"
+                    fontSize: "16px"
                   }
                 }} className="flex flex-col gap-6">
                   <div className="flex flex-col gap-2">
@@ -297,10 +324,10 @@ function HowItWorksDialog({ isDialogOpen, setIsDialogOpen }) {
                   </div>
                 </Box>
                 <button style={{
-                  background:"#F0FF42",
-                  fontFamily:"JostRegular",
-                  fontSize:"16px",
-                  fontWeight:"600"
+                  background: "#F0FF42",
+                  fontFamily: "JostRegular",
+                  fontSize: "16px",
+                  fontWeight: "600"
                 }} type="button" className="bg-white rounded-xl text-xl font-bold p-3" onClick={() => setIsDialogOpen(false)}>I&apos;m ready to pump</button>
               </DialogPanel>
             </TransitionChild>

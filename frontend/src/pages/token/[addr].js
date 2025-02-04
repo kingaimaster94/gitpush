@@ -354,7 +354,7 @@ export default function TokenPage() {
               <Typography sx={{ fontWeight: "600" }} className="text_">
                 <CopyTextWithTooltip textToCopy={""} />{" "}
                 {truncateAddress(addr || "")}{" "}
-                <a href={`https://solscan.io/account/${addr}`} target="_blank">
+                <a href={`https://omaxscan.com/address/${addr}`} target="_blank">
                   EXP <AiOutlineExport size={15} />
                 </a>
               </Typography>
