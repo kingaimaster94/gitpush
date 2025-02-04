@@ -3,9 +3,6 @@
 import { Rajdhani } from "next/font/google";
 import localFont from "next/font/local";
 import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
   Dialog,
   DialogPanel,
   Transition,
@@ -14,12 +11,10 @@ import {
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { toast } from "react-toastify";
+import { useAccount } from "wagmi";
 
-import { useContract } from "../../contexts/ContractContext";
 import { TOKEN_TOTAL_SUPPLY } from "@/engine/consts";
-import { connection, addLookupTableInfo } from "../../engine/config";
 import { createMetadata } from "../../engine/createMetadata";
-import { send } from "../../engine/utils";
 import { updateToken } from "@/api/token";
 import { Box, Button, Checkbox, Grid, Typography } from "@mui/material";
 import telegram from "../../assets/images/telegram.svg";
@@ -40,7 +35,7 @@ const EurostileMNFont = localFont({
 });
 
 export default function CreateCoin() {
-  const { connected } = useWallet();
+  const { isConnected } = useAccount();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const coinName = useRef(null);
@@ -67,7 +62,7 @@ export default function CreateCoin() {
       toast.error("No ticker!");
       return;
     }
-    if (!connected) {
+    if (!isConnected) {
       toast.error("Not connected wallet!");
       return;
     }
@@ -204,29 +199,6 @@ export default function CreateCoin() {
               </Box>
             )}
           </Box>
-          {/* <p className='text-2xl font-bold text-white'>Choose Image</p> */}
-          {/* <div className='relative'>
-            <label htmlFor="coinImage" className='absolute right-4 inset-y-3.5'>
-              <div className={`bg-white rounded-xl p-3 text-xs cursor-pointer`}>Choose File</div>
-              <input id='coinImage' type='file' className='hidden'  accept='image/*' onChange={(e) => {
-                if (e.target.files.length > 0) {
-                  const src = URL.createObjectURL(e.target.files[0])
-                  setCoinImage(src)
-                  setImageName(e.target.files[0].name)
-                  setImageFile(e.target.files[0])
- 
-                  let reader = new FileReader();
-                  reader.onload = handleFileRead;
-                  reader.readAsArrayBuffer(e.target.files[0]);
-                }
-                else {
-                  setImageName('')
-                  setImageFile(null)
-                }
-              }} />
-            </label>
-            <input type="text" className={`w-full h-[69px] rounded-xl px-6 border border-white text-[#808080] bg-[#121212] text-base ${EurostileMNFont.className}`} placeholder='Choose Image' value={imageName} disabled />
-          </div> */}
         </Grid>
 
         <Grid item md={6} xs={12}>
@@ -323,8 +295,8 @@ export default function CreateCoin() {
             borderRadius: "3px !important",
           }}
           id="terms"
-          // checked={agreed}
-          // onCheckedChange={(value) => setAgreed(value as boolean)}
+        // checked={agreed}
+        // onCheckedChange={(value) => setAgreed(value as boolean)}
         />
         <label htmlFor="terms" className="label text-white ml-1">
           I agree to the OMAX Terms and Conditions and Token Profile Policy.
@@ -332,7 +304,7 @@ export default function CreateCoin() {
       </div>
 
       <p className={`text-xl text-white mb-4`} style={{ fontSize: "16px" }}>
-        Cost to deploy: ~0.02 SOL
+        Cost to deploy: ~1000 OMAX
       </p>
 
       <button
@@ -357,7 +329,6 @@ export default function CreateCoin() {
         description={description.current?.value}
         coinImage={coinImage}
         imgFile={imageFile}
-        imgBuffer={imgBufer}
         twitterLink={twitterLink.current?.value}
         telegramLink={telegramLink.current?.value}
         websiteLink={website.current?.value}
@@ -373,15 +344,12 @@ function CreateCoinDialog({
   ticker,
   description,
   imgFile,
-  imgBuffer,
   twitterLink,
   telegramLink,
   websiteLink,
 }) {
-  const walletCtx = useWallet();
-  const { isContractInitialized, getCreatePoolTx, getBuyTx } = useContract();
-
-  const [mode, setMode] = useState("sol");
+  const walletCtx = useAccount();
+  const [mode, setMode] = useState("omax");
   const [amount, setAmount] = useState();
 
   const onChangeAmount = (e) => {
@@ -390,92 +358,79 @@ function CreateCoinDialog({
   };
 
   const handleCreateCoin = async () => {
-    if (!walletCtx.connected) {
+    if (!walletCtx.isConnected) {
       toast.error("Not connected wallet!");
       return;
     }
 
     const id = toast.loading(`Creating '${name}' token...`);
 
-    try {
-      const isInitialized = await isContractInitialized();
-      if (!isInitialized) {
-        toast.error("Contract not initialized yet!");
-        return;
-      }
+    // try {
+    //   const isInitialized = await isContractInitialized();
+    //   if (!isInitialized) {
+    //     toast.error("Contract not initialized yet!");
+    //     return;
+    //   }
 
-      const {
-        mintKeypair,
-        imageUrl,
-        createIxs: allIxs,
-      } = await createMetadata(
-        walletCtx,
-        name,
-        ticker,
-        description,
-        imgFile,
-        websiteLink,
-        twitterLink,
-        telegramLink
-      );
+    //   const { imageUrl } = await createMetadata(imgFile);
 
-      const createPoolTx = await getCreatePoolTx(
-        mintKeypair.publicKey.toBase58(),
-        TOKEN_TOTAL_SUPPLY,
-        NATIVE_MINT,
-        0
-      );
-      allIxs.push(createPoolTx);
+    //   const createPoolTx = await getCreatePoolTx(
+    //     mintKeypair.publicKey.toBase58(),
+    //     TOKEN_TOTAL_SUPPLY,
+    //     NATIVE_MINT,
+    //     0
+    //   );
+    //   allIxs.push(createPoolTx);
 
-      if (Number(amount) > 0) {
-        const buyTx = await getBuyTx(
-          mintKeypair.publicKey.toBase58(),
-          Number(amount)
-        );
-        allIxs.push(buyTx);
-      }
+    //   if (Number(amount) > 0) {
+    //     const buyTx = await getBuyTx(
+    //       mintKeypair.publicKey.toBase58(),
+    //       Number(amount)
+    //     );
+    //     allIxs.push(buyTx);
+    //   }
 
-      // console.log('allIxs:', allIxs);
+    //   // console.log('allIxs:', allIxs);
 
-      const blockhash = (await connection.getLatestBlockhash("finalized"))
-        .blockhash;
-      const message = new TransactionMessage({
-        payerKey: walletCtx.publicKey,
-        instructions: allIxs,
-        recentBlockhash: blockhash,
-      }).compileToV0Message(Object.values({ ...(addLookupTableInfo ?? {}) }));
-      const transaction = new VersionedTransaction(message);
-      transaction.sign([mintKeypair]);
+    //   const blockhash = (await connection.getLatestBlockhash("finalized"))
+    //     .blockhash;
+    //   const message = new TransactionMessage({
+    //     payerKey: walletCtx.publicKey,
+    //     instructions: allIxs,
+    //     recentBlockhash: blockhash,
+    //   }).compileToV0Message(Object.values({ ...(addLookupTableInfo ?? {}) }));
+    //   const transaction = new VersionedTransaction(message);
+    //   transaction.sign([mintKeypair]);
 
-      const txHash = await send(connection, walletCtx, transaction);
-      // console.log('txHash:', txHash);
+    //   const txHash = await send(connection, walletCtx, transaction);
+    //   // console.log('txHash:', txHash);
 
-      const result = await updateToken(
-        name,
-        ticker,
-        description,
-        imageUrl,
-        twitterLink,
-        telegramLink,
-        websiteLink,
-        mintKeypair.publicKey.toBase58()
-      );
-      if (!result) {
-        toast.dismiss(id);
-        toast.error("Failed to update token info!");
-        setIsDialogOpen(false);
-        return;
-      }
+    //   const result = await updateToken(
+    //     name,
+    //     ticker,
+    //     description,
+    //     imageUrl,
+    //     twitterLink,
+    //     telegramLink,
+    //     websiteLink,
+    //     mintKeypair.publicKey.toBase58()
+    //   );
+    //   if (!result) {
+    //     toast.dismiss(id);
+    //     toast.error("Failed to update token info!");
+    //     setIsDialogOpen(false);
+    //     return;
+    //   }
 
-      toast.dismiss(id);
-      toast.success(`Created a new bonding curve with token '${name}'`);
+    //   toast.dismiss(id);
+    //   toast.success(`Created a new bonding curve with token '${name}'`);
 
-      setIsDialogOpen(false);
-    } catch (err) {
-      console.error("handleCreateCoin err:", err);
-      toast.dismiss(id);
-      toast.error(err.message);
-    }
+    //   setIsDialogOpen(false);
+    // } catch (err) {
+    //   console.error("handleCreateCoin err:", err);
+    //   toast.dismiss(id);
+    //   toast.error(err.message);
+    // }
   };
 
   return (
@@ -508,25 +463,25 @@ function CreateCoinDialog({
                     type="button"
                     className="text-xl text-white text-bold cursor-pointer"
                     onClick={() => {
-                      if (mode === "sol") setMode("coin");
-                      else setMode("sol");
+                      if (mode === "omax") setMode("coin");
+                      else setMode("omax");
                     }}
                   >
                     Switch to {ticker}
                   </button>
                   <div className="relative w-full">
-                    {mode === "sol" ? (
+                    {mode === "omax" ? (
                       <div className="absolute right-6 inset-y-4 flex gap-1 items-center">
                         <p
                           className={`text-xl text-white ${EurostileMNFont.className}`}
                         >
-                          SOL
+                          OMAX
                         </p>
                         <Image
-                          src="/sol.png"
+                          src="/omax.png"
                           width={32}
                           height={32}
-                          alt="sol"
+                          alt="omax"
                         />
                       </div>
                     ) : (
@@ -565,7 +520,7 @@ function CreateCoinDialog({
                   <p
                     className={`text-xl text-white ${EurostileMNFont.className}`}
                   >
-                    Cost to deploy: ~0.02 SOL
+                    Cost to deploy: ~1000 OMAX
                   </p>
                 </div>
               </DialogPanel>

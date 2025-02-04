@@ -21,6 +21,7 @@ import { Box, Button, Grid, Typography } from "@mui/material";
 import crown_frame from "../../assets/images/crown_frame_.png";
 import image_bg from "../../assets/images/image_bg.png";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
+import { useAccount } from "wagmi";
 
 
 const EurostileMNFont = localFont({
@@ -46,7 +47,7 @@ const orderType = [
 ];
 
 export default function BoardPage() {
-  const wallet = useWallet();
+  const wallet = useAccount();
 
   const tokenDiv = useRef(null);
   const [currentTab, setCurrentTab] = useState("Terminal");
@@ -322,7 +323,7 @@ export default function BoardPage() {
               <p className={`text-xl text-white`}>
                 Follow some of your friends to start curating your feed
               </p>
-              {wallet.publicKey !== null && (
+              {wallet.address !== null && (
                 <div className="flex gap-6">
                   <p className={`text-xl text-white`}>People you may know</p>
                   <button

@@ -11,7 +11,7 @@ import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/re
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 
-import { useContract } from '@/contexts/ContractContext';
+import { useAccount } from 'wagmi';
 import { getProfileInfo, updateProfile } from '@/api/user';
 import { FEE_PRE_DIV } from '@/contexts/contracts/constants';
 import { getUserId } from '@/utils';
@@ -29,13 +29,7 @@ const EurostileMNFont = localFont({ src: '../../assets/font/eurostile-mn-extende
 export default function MyProfile() {
   const { query } = useRouter();
   const { addr } = query;
-  const wallet = useWallet()
-  const { isContractInitialized,
-    initializeContract,
-    getMainStateInfo,
-    updateMainStateInfo
-  } = useContract();
-
+  const wallet = useAccount()
   const [currentTab, setCurrentTab] = useState('Coins Held')
   const [walletAddress, setWalletAddress] = useState('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -48,7 +42,7 @@ export default function MyProfile() {
 
   useEffect(() => {
     const initialize = async () => {
-      if (!wallet.connected) return;
+      if (!wallet.isConnected) return;
 
       const isInitialized = await isContractInitialized();
       if (!isInitialized)
@@ -60,15 +54,15 @@ export default function MyProfile() {
 
   useEffect(() => {
     const loadMainStateInfo = async () => {
-      const mainStateInfo = await getMainStateInfo();
-      // console.log('mainStateInfo:', mainStateInfo);
-      if (mainStateInfo) {
-        setOwnerAddress(mainStateInfo?.owner.toBase58());
-        setFeeRecipient(mainStateInfo?.feeRecipient.toBase58());
-        setTradingFee(Number(mainStateInfo?.tradingFee) / FEE_PRE_DIV);
-        setDevMaxBuy(mainStateInfo?.devMaxBuy);
-        setUserMaxBuy(mainStateInfo?.userMaxBuy);
-      }
+      // const mainStateInfo = await getMainStateInfo();
+      // // console.log('mainStateInfo:', mainStateInfo);
+      // if (mainStateInfo) {
+      //   setOwnerAddress(mainStateInfo?.owner.toBase58());
+      //   setFeeRecipient(mainStateInfo?.feeRecipient.toBase58());
+      //   setTradingFee(Number(mainStateInfo?.tradingFee) / FEE_PRE_DIV);
+      //   setDevMaxBuy(mainStateInfo?.devMaxBuy);
+      //   setUserMaxBuy(mainStateInfo?.userMaxBuy);
+      // }
     };
 
     loadMainStateInfo();
@@ -87,7 +81,7 @@ export default function MyProfile() {
     let userId = null
     // console.log('wallet:', wallet);
     // console.log(addr, wallet?.publicKey?.toBase58())
-    if (addr === wallet?.publicKey?.toBase58())
+    if (addr === wallet.address)
       userId = getUserId()
     const result = await getProfileInfo(addr, userId)
     // console.log(result)
@@ -104,7 +98,7 @@ export default function MyProfile() {
 
   const refreshProfileInfo = async () => {
     let userId = null
-    if (addr === wallet.publicKey.toBase58())
+    if (addr === wallet.address)
       userId = getUserId()
     const result = await getProfileInfo(addr, userId)
     setProfileData(result);
@@ -134,28 +128,28 @@ export default function MyProfile() {
   };
 
   const handleDashboardSet = async () => {
-    if (ownerAddress === '' || feeRecipient === '' || tradingFee === '' || tradingFee === '0' || devMaxBuy === '0' || userMaxBuy === '0') {
-      toast.warning('Invalid input values!');
-      return;
-    }
+    // if (ownerAddress === '' || feeRecipient === '' || tradingFee === '' || tradingFee === '0' || devMaxBuy === '0' || userMaxBuy === '0') {
+    //   toast.warning('Invalid input values!');
+    //   return;
+    // }
 
-    const isInitialized = await isContractInitialized();
-    if (!isInitialized) {
-      toast.error('Contract not initialized yet!');
-      return;
-    }
+    // const isInitialized = await isContractInitialized();
+    // if (!isInitialized) {
+    //   toast.error('Contract not initialized yet!');
+    //   return;
+    // }
 
-    const id = toast.loading('Updaitng...');
+    // const id = toast.loading('Updaitng...');
 
-    try {
-      await updateMainStateInfo(ownerAddress, feeRecipient, tradingFee, devMaxBuy, userMaxBuy);
-      toast.dismiss(id);
-      toast.success('Updated successfully!');
-    } catch (err) {
-      console.error(err);
-      toast.dismiss(id);
-      toast.error(err.message);
-    }
+    // try {
+    //   await updateMainStateInfo(ownerAddress, feeRecipient, tradingFee, devMaxBuy, userMaxBuy);
+    //   toast.dismiss(id);
+    //   toast.success('Updated successfully!');
+    // } catch (err) {
+    //   console.error(err);
+    //   toast.dismiss(id);
+    //   toast.error(err.message);
+    // }
   }
 
   return (
@@ -187,7 +181,7 @@ export default function MyProfile() {
           <p className='text-[32px] text-white font-bold'>@{profileData?.username}</p>
           <div className='flex flex-col gap-1'>
             <p className='text-xl text-white'>{profileData?.followers} followers</p>
-            {wallet?.publicKey?.toBase58() === addr && (
+            {wallet.address === addr && (
               <button type='button' className='flex gap-[10px] items-center border border-white rounded-lg w-fit px-3 py-2' onClick={handleEditProfile}>
                 <p className='text-xl text-white'>Edit Profile</p>
                 <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -217,7 +211,7 @@ export default function MyProfile() {
                 fontSize:"16px"
             }} className='h-[50px] bg-black text-xl text-white border border-none p-3 rounded-xl' value={walletAddress} disabled />
             {addr !== undefined && (
-              <a href={`https://solscan.io/account/${addr}`} style={{opacity:"0.6",fontSize:"15px"}} target='_blank' className='text-xl text-white'>View on Solscan</a>
+              <a href={`https://omaxscan.com/address/${addr}`} style={{opacity:"0.6",fontSize:"15px"}} target='_blank' className='text-xl text-white'>View on Solscan</a>
             )}
           </div>
         </div>
@@ -226,7 +220,7 @@ export default function MyProfile() {
         <div className='flex gap-6'>
           <div className={clsx('text-base cursor-pointer', currentTab === 'Coins Held' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Coins Held')}>Coins Held</div>
           <div className={clsx('text-base cursor-pointer', currentTab === 'Coin Created' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Coin Created')}>Coin Created</div>
-          {addr === wallet?.publicKey?.toBase58() && (
+          {addr === wallet.address && (
             <div className='flex gap-6'>
               <div className={clsx('text-base cursor-pointer', currentTab === 'Replies' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Replies')}>Replies</div>
               <div className={clsx('text-base cursor-pointer', currentTab === 'Notifications' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Notifications')}>Notifications</div>
@@ -234,7 +228,7 @@ export default function MyProfile() {
           )}
           <div className={clsx('text-base cursor-pointer', currentTab === 'Followers' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Followers')}>Followers</div>
           <div className={clsx('text-base cursor-pointer', currentTab === 'Following' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Following')}>Following</div>
-          {wallet?.publicKey?.toBase58() === process.env.NEXT_PUBLIC_OWNER_ADDRESS && addr === wallet?.publicKey?.toBase58() && (
+          {wallet.address === process.env.NEXT_PUBLIC_OWNER_ADDRESS && addr === wallet.address && (
             <div className={clsx('text-base cursor-pointer', currentTab === 'Dashboard' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Dashboard')}>Dashboard</div>
           )}
         </div>
@@ -255,7 +249,7 @@ export default function MyProfile() {
                       <div className='text-xl text-white cursor-pointer'>[Refresh]</div>
                     </div>
                     <div className='flex justify-between'>
-                      <p className='text-xl text-[#97FF73]'>{item.lamports.toFixed(3)} SOL</p>
+                      <p className='text-xl text-[#97FF73]'>{item.lamports.toFixed(3)} OMAX</p>
                       <Link href={`/token/${item.mintAddr}`} className='text-xl text-[#97FF73] cursor-pointer'>[View Coin]</Link>
                     </div>
                   </div>
@@ -386,7 +380,7 @@ export default function MyProfile() {
             })}
           </div>
         )}
-        {currentTab === 'Dashboard' && wallet?.publicKey?.toBase58() === process.env.NEXT_PUBLIC_OWNER_ADDRESS && addr === wallet?.publicKey?.toBase58() && (
+        {currentTab === 'Dashboard' && wallet.address === process.env.NEXT_PUBLIC_OWNER_ADDRESS && addr === wallet.address && (
           <div className='flex flex-col gap-4 w-full max-w-xl pb-4'>
             <div className="flex flex-col gap-2 w-full">
               <p className='text-2xl font-bold text-white'>Owner Address</p>
