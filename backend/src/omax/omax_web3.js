@@ -15,10 +15,10 @@ const anchor = require('@project-serum/anchor');
 const bs58 = require("bs58");
 const dotenv = require('dotenv');
 
-const { config } = require('../config/');
+const { config } = require('../config');
 const { Token, 
     TokenPrice 
-} = require('../db/');
+} = require('../db');
 const { sleep } = require('../utils/basic');
 const Keys = require('./keys');
 const { IDL } = require('./idl');

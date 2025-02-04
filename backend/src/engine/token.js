@@ -1,10 +1,4 @@
 
-const { PublicKey, 
-    LAMPORTS_PER_SOL 
-} = require('@solana/web3.js');
-const { NATIVE_MINT } = require('@solana/spl-token');
-const { Market } = require("@project-serum/serum");
-
 const { config } = require('../config');
 const { User, 
     Token, 
@@ -13,11 +7,11 @@ const { User,
     TokenPrice, 
     TokenTrade
 } = require('../db');
-const { uploadMetadata } = require('../solana/metadata');
-const { getTokenHolderDistribution, getTokenBalance } = require('../solana/engine');
+const { uploadMetadata } = require('../omax/metadata');
+const { getTokenHolderDistribution, getTokenBalance } = require('../omax/engine');
 const { PROGRAMIDS, 
     connection
-} = require('../solana/utils');
+} = require('../omax/utils');
 const { generateSHA } = require('../utils/basic');
 const fetchOMAXPrice = require('../utils/omax_price');
 const { broadcastMessage } = require('../utils/socket');
@@ -33,7 +27,7 @@ const upload_metadata = async (req, resp) => {
     }
 
     try {
-        const { imageUrl, metadataUri } = await uploadMetadata(req.files.logo.mimetype, req.files.logo.data, query.metadata);
+        const { imageUrl, metadataUri } = await uploadMetadata(req.files.logo.mimetype, req.files.logo.data);
         // console.log('  imageUrl:', imageUrl);
         // console.log('  metadataUri:', metadataUri);
         return resp.status(200).json({ imageUrl, metadataUri });

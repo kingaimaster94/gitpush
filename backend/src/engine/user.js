@@ -12,7 +12,7 @@ const { User,
 const { config } = require('../config');
 const { generateSHA } = require('../utils/basic');
 const fetchOMAXPrice = require('../utils/omax_price');
-const { getTokensHeld } = require('../solana/engine');
+const { getTokensHeld } = require('../omax/engine');
 
 
 const getUserProfile = async (req, resp) => {
