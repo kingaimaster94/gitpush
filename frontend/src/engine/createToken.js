@@ -2,23 +2,7 @@ import { TOKEN_DECIMALS,
     TOKEN_TOTAL_SUPPLY 
 } from "./consts";
 import { connection } from "./config";
-import { Keypair, 
-    SystemProgram, 
-    PublicKey, 
-} from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, 
-    MINT_SIZE, 
-    AuthorityType, 
-    getMinimumBalanceForRentExemptMint, 
-    createInitializeMintInstruction, 
-    getAssociatedTokenAddress, 
-    createAssociatedTokenAccountInstruction, 
-    createMintToInstruction, 
-    createSetAuthorityInstruction
-} from "@solana/spl-token";
-import { createCreateMetadataAccountV3Instruction, 
-    PROGRAM_ID, 
-} from "@metaplex-foundation/mpl-token-metadata";
+
 import { uploadMetadata } from "@/api/token";
 
 

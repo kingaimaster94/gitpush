@@ -2,14 +2,11 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Rajdhani } from 'next/font/google'
 import localFont from 'next/font/local'
-import "@solana/wallet-adapter-react-ui/styles.css";
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
 import { useRef, useState, useEffect } from "react"
 import { UserCircleIcon } from '@heroicons/react/20/solid'
-import { useWallet } from "@solana/wallet-adapter-react"
 import { useLogin } from "@/hooks/auth/useLogin"
 import { format } from "date-fns";
 import { useLogout } from "@/hooks/auth/useLogout";

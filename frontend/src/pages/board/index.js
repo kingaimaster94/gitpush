@@ -15,7 +15,6 @@ import {
 } from "@headlessui/react";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { getFollowings, setFollow, setUnFollow } from "@/api/user";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { findTokens, getKing } from "@/api/token";
 import { getUserId } from "@/utils";
 import { Box, Button, Grid, Typography } from "@mui/material";

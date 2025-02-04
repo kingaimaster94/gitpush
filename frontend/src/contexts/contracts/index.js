@@ -1,17 +1,4 @@
 
-import { WalletNotConnectedError } from "@solana/wallet-adapter-base";
-// import { web3 } from '@coral-xyz/anchor'
-import * as anchor from '@project-serum/anchor';
-import { PublicKey, 
-    SystemProgram, 
-    Transaction
-} from '@solana/web3.js';
-import { NATIVE_MINT, 
-    TOKEN_PROGRAM_ID, 
-    ASSOCIATED_TOKEN_PROGRAM_ID, 
-    getMint, 
-    getAssociatedTokenAddressSync
-} from '@solana/spl-token';
 import BN from 'bn.js';
 
 import { PUMPFUN_PROGRAM_ID, 

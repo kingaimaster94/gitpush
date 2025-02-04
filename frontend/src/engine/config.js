@@ -1,13 +1,4 @@
 
-import { Connection, 
-    clusterApiUrl
-} from "@solana/web3.js";
-import { 
-    TxVersion, 
-    MAINNET_PROGRAM_ID,
-    DEVNET_PROGRAM_ID, 
-    LOOKUP_TABLE_CACHE,
-} from "@raydium-io/raydium-sdk";
 import * as dotenv from "dotenv";
 
 

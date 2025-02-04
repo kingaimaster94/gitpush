@@ -1,7 +1,6 @@
 "use client"
 
 import React, { createContext, useEffect, useState, useContext } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
 
 import { contract_getMainStateInfo, 
     contract_isInitialized, 

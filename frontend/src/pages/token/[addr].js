@@ -15,7 +15,6 @@ import {
 } from "@headlessui/react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
-import { useWallet } from "@solana/wallet-adapter-react";
 import Chart from "@/components/tradingview";
 import { useMedia } from "react-use";
 import { format } from "date-fns";
@@ -24,9 +23,6 @@ import logos_telegram from "../../assets/images/logos_telegram.png";
 import logo_ from "../../assets/images/logo_.svg";
 import prime_twitter from "../../assets/images/prime_twitter.png";
 import web from "../../assets/images/web.svg";
-import { LAMPORTS_PER_SOL, Transaction, PublicKey } from "@solana/web3.js";
-import { NATIVE_MINT } from "@solana/spl-token";
-import { Token, TokenAmount, TOKEN_PROGRAM_ID } from "@raydium-io/raydium-sdk";
 
 import { useContract } from "@/contexts/ContractContext";
 import { TOKEN_DECIMALS } from "@/engine/consts";

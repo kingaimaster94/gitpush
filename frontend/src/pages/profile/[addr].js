@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { Rajdhani } from 'next/font/google'
 import localFont from 'next/font/local'
-import { useWallet } from "@solana/wallet-adapter-react";
+
 import { useRef, useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { toast } from "react-toastify"

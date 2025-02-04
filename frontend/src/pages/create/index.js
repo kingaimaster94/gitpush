@@ -14,10 +14,7 @@ import {
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { toast } from "react-toastify";
-import { useWallet } from "@solana/wallet-adapter-react";
 
-import { VersionedTransaction, TransactionMessage } from "@solana/web3.js";
-import { NATIVE_MINT } from "@solana/spl-token";
 import { useContract } from "../../contexts/ContractContext";
 import { TOKEN_TOTAL_SUPPLY } from "@/engine/consts";
 import { connection, addLookupTableInfo } from "../../engine/config";
