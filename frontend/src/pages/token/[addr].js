@@ -24,7 +24,8 @@ import logo_ from "../../assets/images/logo_.svg";
 import prime_twitter from "../../assets/images/prime_twitter.png";
 import web from "../../assets/images/web.svg";
 
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
+import { EXPLORER_URL, EXPLORER_URL_TESTNET, PUMPFUN_ADDRESS, PUMPFUN_ADDRESS_TESTNET } from "@/contexts/contracts/constants";
 
 import { TOKEN_DECIMALS } from "@/engine/consts";
 import {
@@ -68,6 +69,7 @@ export default function TokenPage() {
 
   const { isConnected } = useAccount();
   const walletCtx = useWallet();
+  const chainID = useChainId();
 
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const [isTradeDialogOpen, setIsTradeDialogOpen] = useState(false);
@@ -88,6 +90,9 @@ export default function TokenPage() {
   const below800 = useMedia("(max-width: 800px)");
   const [isPoolComplete, setIsPoolComplete] = useState(false);
 
+  const [scanAddress, setScanAddress] = useState(EXPLORER_URL);
+  const [pumpfunAddress, setPumpfunAddress] = useState(PUMPFUN_ADDRESS);
+
   const chartHeight = isMobile ? 400 : 600;
 
   useEffect(() => {
@@ -100,6 +105,22 @@ export default function TokenPage() {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+
+  useEffect(() => {
+    if (chainID == 311) {
+      setPumpfunAddress(PUMPFUN_ADDRESS);
+      setScanAddress(EXPLORER_URL);
+    }
+    else if (chainID == 332) {
+      setPumpfunAddress(PUMPFUN_ADDRESS_TESTNET);
+      setScanAddress(EXPLORER_URL_TESTNET);
+    }
+    else {
+      setPumpfunAddress('');
+      setScanAddress("");
+    }
+  }, [chainID]);
 
   useEffect(() => {
     if (walletCtx.publicKey !== null) checkCompleted();
@@ -330,7 +351,7 @@ export default function TokenPage() {
                 <CopyTextWithTooltip textToCopy={""} />{" "}
                 {truncateAddress(tokenInfo?.walletAddr || "")}
                 <a
-                  href={`https://omaxscan.com/address/${tokenInfo?.walletAddr}`}
+                  href={`${scanAddress}/address/${tokenInfo?.walletAddr}`}
                   target="_blank"
                 >
                   EXP <AiOutlineExport size={15} />
@@ -354,7 +375,7 @@ export default function TokenPage() {
               <Typography sx={{ fontWeight: "600" }} className="text_">
                 <CopyTextWithTooltip textToCopy={""} />{" "}
                 {truncateAddress(addr || "")}{" "}
-                <a href={`https://omaxscan.com/address/${addr}`} target="_blank">
+                <a href={`${scanAddress}/address/${addr}`} target="_blank">
                   EXP <AiOutlineExport size={15} />
                 </a>
               </Typography>
@@ -375,7 +396,7 @@ export default function TokenPage() {
               <Typography sx={{ fontWeight: "600" }} className="text_">
                 <CopyTextWithTooltip textToCopy={""} />{" "}
                 {truncateAddress(addr || "")}{" "}
-                <a href={`https://omaxscan.com/address/${addr}`} target="_blank">
+                <a href={`${scanAddress}/address/${addr}`} target="_blank">
                   EXP <AiOutlineExport size={15} />
                 </a>
               </Typography>
@@ -472,7 +493,7 @@ export default function TokenPage() {
                     <Image
                       src={
                         tokenInfo?.avatar !== null &&
-                        tokenInfo?.avatar !== undefined
+                          tokenInfo?.avatar !== undefined
                           ? `${process.env.NEXT_PUBLIC_AVATAR_URL}/${tokenInfo?.avatar}`
                           : "/img6.png"
                       }
@@ -682,7 +703,7 @@ export default function TokenPage() {
                         <div className="flex w-[80%]">
                           <div className="flex items-center gap-1 w-[30%]">
                             {item.avatar !== null &&
-                            item.avatar !== undefined ? (
+                              item.avatar !== undefined ? (
                               <Image
                                 src={
                                   item.avatar === null
@@ -732,7 +753,7 @@ export default function TokenPage() {
                           </p>
                         </div>
                         <a
-                          href={`https://omaxscan.com/tx/${item.txhash}`}
+                          href={`${scanAddress}/tx/${item.txhash}`}
                           target="_blank"
                           className="text-sm font-medium text-[#9F9F9F] hover:underline"
                         >
@@ -914,7 +935,7 @@ export default function TokenPage() {
                       }
                       width={20}
                       height={20}
-                      style={{borderRadius:"50%"}}
+                      style={{ borderRadius: "50%" }}
                       alt="omax"
                     />
                     <p
@@ -1060,32 +1081,32 @@ export default function TokenPage() {
             </div>
           </Box>
           <div className="flex flex-col gap-4 mt-4" style={{
-              border: "1px solid #353535",
-              borderRadius: "10px",
+            border: "1px solid #353535",
+            borderRadius: "10px",
           }}>
             <div className="flex gap-[22px] items-center p-4" style={{
-              background:"rgba(255, 255, 255, 0.04)"
+              background: "rgba(255, 255, 255, 0.04)"
             }}>
-            <Box position={"relative"} lineHeight={0}>
-            <Typography component={"img"} src={img_bg.src} sx={{
-              width:"90px",
-              height:"90px",
-            }}/>
-            <Typography component={"img"} src={tokenInfo?.logo} sx={{
-              width:"77px",
-              height:"77px",
-              borderRadius:"50%",
-              position:"absolute",
-              left:"50%",
-              top:"50%",
-              transform:"translate(-50%,-50%)"
-            }}/>
-         
-            </Box>
+              <Box position={"relative"} lineHeight={0}>
+                <Typography component={"img"} src={img_bg.src} sx={{
+                  width: "90px",
+                  height: "90px",
+                }} />
+                <Typography component={"img"} src={tokenInfo?.logo} sx={{
+                  width: "77px",
+                  height: "77px",
+                  borderRadius: "50%",
+                  position: "absolute",
+                  left: "50%",
+                  top: "50%",
+                  transform: "translate(-50%,-50%)"
+                }} />
+
+              </Box>
               <Box sx={{
-                "& p":{
-                  fontFamily:"JostRegular",
-                  fontSize:"14px"
+                "& p": {
+                  fontFamily: "JostRegular",
+                  fontSize: "14px"
                 }
               }} className="flex flex-col gap-2">
                 <div className="flex flex-col gap-2">
@@ -1114,84 +1135,84 @@ export default function TokenPage() {
                 </div>
               </Box>
             </div>
-          <Box sx={{
-            "& p":{
-              fontFamily:"JostRegular !important"
-            }
-          }}
-          className="px-4 pb-4">
-          <div className="flex flex-col gap-2">
-              <p className="text-sm text-white font-medium">
-                bonding curve progress:{" "}
-                {tokenInfo?.bondingCurveProgress.toFixed(1)}%
-              </p>
-              <Progress
-                progress={tokenInfo?.bondingCurveProgress}
-                size="sm"
-                color="white"
-                theme={ProgressTheme}
-              />
-            </div>
-            <p className="text-sm font-medium text-[#9F9F9F] pt-4">
-              when the market cap reaches $50,000 all the liquidity from the
-              bonding curve will be deposited into Omax protocol and burned.
-              progression increases as the price goes up.
-              <br />
-              <br />
-              there are{" "}
-              {tokenInfo?.tokensAvailableForSale !== null
-                ? tokenInfo?.tokensAvailableForSale.toFixed(0)
-                : "751,404,142"}{" "}
-              tokens still available for sale in the bonding curve and there is{" "}
-              {tokenInfo?.realQuoteReserve !== null
-                ? tokenInfo?.realQuoteReserve.toFixed(2)
-                : "1,213"}{" "}
-              OMAX in the bonding curve.
-            </p>
-            <div className="flex flex-col gap-2 pt-2">
-              {tokenInfo?.crownDate ? (
-                <p className="text-sm text-[#ffff00] font-medium">
-                  Crowned king of the hill on {tokenInfo?.crownDate}
+            <Box sx={{
+              "& p": {
+                fontFamily: "JostRegular !important"
+              }
+            }}
+              className="px-4 pb-4">
+              <div className="flex flex-col gap-2">
+                <p className="text-sm text-white font-medium">
+                  bonding curve progress:{" "}
+                  {tokenInfo?.bondingCurveProgress.toFixed(1)}%
                 </p>
-              ) : (
-                <>
-                  <p className="text-sm text-white font-medium">
-                    king of the hill progress:{" "}
-                    {tokenInfo?.kingOfTheHillProgress.toFixed(1)}%
-                  </p>
-                  <Progress
-                    progress={tokenInfo?.kingOfTheHillProgress}
-                    size="sm"
-                    color="white"
-                    theme={ProgressTheme}
-                  />
-                </>
-              )}
-            </div>
-            {/* <div className='text-base font-bold text-white border-b border-dotted border-[#282828] w-fit'>Crowned king of the hill on 17:19:57 15/05/2024</div> */}
-            <div className="flex flex-col gap-3 pt-3">
-              <p className="text-base font-semibold text-white">
-                Holder distribution
-              </p>
-              <div className="flex flex-col gap-2 text-sm text-white/[.80]">
-                {tokenInfo?.tokenHolderDistribution.map((item, index) => {
-                  return (
-                    <div key={index} className="flex justify-between">
-                      <a
-                        href={`https://omaxscacn.com/address/${item.walletAddr}`}
-                        target="_blank"
-                        className="hover:underline"
-                      >
-                        {index + 1}. {item.username}{" "}
-                        {item.bio === null ? "" : `(${item.bio})`}
-                      </a>
-                      <p>{item.holdPercent.toFixed(2)}%</p>
-                    </div>
-                  );
-                })}
+                <Progress
+                  progress={tokenInfo?.bondingCurveProgress}
+                  size="sm"
+                  color="white"
+                  theme={ProgressTheme}
+                />
               </div>
-            </div>
-          </Box>
+              <p className="text-sm font-medium text-[#9F9F9F] pt-4">
+                when the market cap reaches $50,000 all the liquidity from the
+                bonding curve will be deposited into Omax protocol and burned.
+                progression increases as the price goes up.
+                <br />
+                <br />
+                there are{" "}
+                {tokenInfo?.tokensAvailableForSale !== null
+                  ? tokenInfo?.tokensAvailableForSale.toFixed(0)
+                  : "751,404,142"}{" "}
+                tokens still available for sale in the bonding curve and there is{" "}
+                {tokenInfo?.realQuoteReserve !== null
+                  ? tokenInfo?.realQuoteReserve.toFixed(2)
+                  : "1,213"}{" "}
+                OMAX in the bonding curve.
+              </p>
+              <div className="flex flex-col gap-2 pt-2">
+                {tokenInfo?.crownDate ? (
+                  <p className="text-sm text-[#ffff00] font-medium">
+                    Crowned king of the hill on {tokenInfo?.crownDate}
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-sm text-white font-medium">
+                      king of the hill progress:{" "}
+                      {tokenInfo?.kingOfTheHillProgress.toFixed(1)}%
+                    </p>
+                    <Progress
+                      progress={tokenInfo?.kingOfTheHillProgress}
+                      size="sm"
+                      color="white"
+                      theme={ProgressTheme}
+                    />
+                  </>
+                )}
+              </div>
+              {/* <div className='text-base font-bold text-white border-b border-dotted border-[#282828] w-fit'>Crowned king of the hill on 17:19:57 15/05/2024</div> */}
+              <div className="flex flex-col gap-3 pt-3">
+                <p className="text-base font-semibold text-white">
+                  Holder distribution
+                </p>
+                <div className="flex flex-col gap-2 text-sm text-white/[.80]">
+                  {tokenInfo?.tokenHolderDistribution.map((item, index) => {
+                    return (
+                      <div key={index} className="flex justify-between">
+                        <a
+                          href={`https://omaxscacn.com/address/${item.walletAddr}`}
+                          target="_blank"
+                          className="hover:underline"
+                        >
+                          {index + 1}. {item.username}{" "}
+                          {item.bio === null ? "" : `(${item.bio})`}
+                        </a>
+                        <p>{item.holdPercent.toFixed(2)}%</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </Box>
           </div>
         </div>
       </Grid>

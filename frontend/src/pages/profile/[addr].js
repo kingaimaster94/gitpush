@@ -4,16 +4,20 @@ import Image from 'next/image'
 import { Rajdhani } from 'next/font/google'
 import localFont from 'next/font/local'
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useContext } from 'react';
 import clsx from 'clsx';
 import { toast } from "react-toastify"
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 
-import { useAccount } from 'wagmi';
+import { useAccount, useChainId, WagmiContext } from 'wagmi';
+import { writeContract, waitForTransactionReceipt } from '@wagmi/core';
+import { ethers } from 'ethers';
+
 import { getProfileInfo, updateProfile } from '@/api/user';
-import { FEE_PRE_DIV } from '@/contexts/contracts/constants';
+import { FEE_PRE_DIV, PUMPFUN_ADDRESS_TESTNET, PUMPFUN_ADDRESS, EXPLORER_URL, EXPLORER_URL_TESTNET } from '@/contexts/contracts/constants';
+import { pumpfunabi } from '@/contexts/contracts/pumpfun';
 import { getUserId } from '@/utils';
 import { format } from 'date-fns';
 import { Box } from '@mui/material';
@@ -29,48 +33,41 @@ const EurostileMNFont = localFont({ src: '../../assets/font/eurostile-mn-extende
 export default function MyProfile() {
   const { query } = useRouter();
   const { addr } = query;
-  const wallet = useAccount()
+  const wallet = useAccount();
+  const chainID = useChainId();
+  const config = useContext(WagmiContext);
+
+
   const [currentTab, setCurrentTab] = useState('Coins Held')
   const [walletAddress, setWalletAddress] = useState('')
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [profileData, setProfileData] = useState(null)
-  const [ownerAddress, setOwnerAddress] = useState(null)
-  const [feeRecipient, setFeeRecipient] = useState(null)
-  const [tradingFee, setTradingFee] = useState(null)
-  const [devMaxBuy, setDevMaxBuy] = useState(null)
-  const [userMaxBuy, setUserMaxBuy] = useState(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [ownerAddress, setOwnerAddress] = useState(null);
+  const [scanAddress, setScanAddress] = useState(EXPLORER_URL)
+  // const [feeRecipient, setFeeRecipient] = useState(null)
+  // const [tradingFee, setTradingFee] = useState(null)
+  // const [devMaxBuy, setDevMaxBuy] = useState(null)
+  // const [userMaxBuy, setUserMaxBuy] = useState(null)
+
+  const [pumpfunAddress, setPumpfunAddress] = useState(PUMPFUN_ADDRESS);
 
   useEffect(() => {
-    const initialize = async () => {
-      if (!wallet.isConnected) return;
-
-      // const isInitialized = await isContractInitialized();
-      // if (!isInitialized)
-      //   await initializeContract();
-    };
-
-    initialize();
-  }, [wallet]);
-
-  useEffect(() => {
-    const loadMainStateInfo = async () => {
-      // const mainStateInfo = await getMainStateInfo();
-      // // console.log('mainStateInfo:', mainStateInfo);
-      // if (mainStateInfo) {
-      //   setOwnerAddress(mainStateInfo?.owner.toBase58());
-      //   setFeeRecipient(mainStateInfo?.feeRecipient.toBase58());
-      //   setTradingFee(Number(mainStateInfo?.tradingFee) / FEE_PRE_DIV);
-      //   setDevMaxBuy(mainStateInfo?.devMaxBuy);
-      //   setUserMaxBuy(mainStateInfo?.userMaxBuy);
-      // }
-    };
-
-    loadMainStateInfo();
-  }, [wallet]);
+    if (chainID == 311) {
+      setPumpfunAddress(PUMPFUN_ADDRESS);
+      setScanAddress(EXPLORER_URL);
+    }
+    else if (chainID == 332) {
+      setPumpfunAddress(PUMPFUN_ADDRESS_TESTNET);
+      setScanAddress(EXPLORER_URL_TESTNET);
+    }
+    else {
+      setPumpfunAddress('');
+      setScanAddress("");
+    }
+  }, [chainID]);
 
   useEffect(() => {
-    console.log("------- addr ", addr)
-    if (addr !== undefined && addr!== null)
+    if (addr !== undefined && addr !== null)
       setProfileInfo()
     else
       setWalletAddress('')
@@ -79,12 +76,9 @@ export default function MyProfile() {
   const setProfileInfo = async () => {
     setWalletAddress(addr)
     let userId = null
-    // console.log('wallet:', wallet);
-    // console.log(addr, wallet?.publicKey?.toBase58())
     if (addr === wallet.address)
       userId = getUserId()
-    const result = await getProfileInfo(addr, userId)
-    // console.log(result)
+    const result = await getProfileInfo(addr, userId);
     setProfileData(result);
   }
 
@@ -108,48 +102,48 @@ export default function MyProfile() {
     setOwnerAddress(e.target.value);
   };
 
-  const onChangeFeeRecipient = async (e) => {
-    setFeeRecipient(e.target.value);
-  };
+  // const onChangeFeeRecipient = async (e) => {
+  //   setFeeRecipient(e.target.value);
+  // };
 
-  const onChangeTradingFee = async (e) => {
-    if (Number(e.target.value) < 0) return;
-    setTradingFee(e.target.value);
-  };
+  // const onChangeTradingFee = async (e) => {
+  //   if (Number(e.target.value) < 0) return;
+  //   setTradingFee(e.target.value);
+  // };
 
-  const onChangeDevMaxBuy = async (e) => {
-    if (Number(e.target.value) < 0) return;
-    setDevMaxBuy(e.target.value);
-  };
+  // const onChangeDevMaxBuy = async (e) => {
+  //   if (Number(e.target.value) < 0) return;
+  //   setDevMaxBuy(e.target.value);
+  // };
 
-  const onChangeUserMaxBuy = async (e) => {
-    if (Number(e.target.value) < 0) return;
-    setUserMaxBuy(e.target.value);
-  };
+  // const onChangeUserMaxBuy = async (e) => {
+  //   if (Number(e.target.value) < 0) return;
+  //   setUserMaxBuy(e.target.value);
+  // };
 
   const handleDashboardSet = async () => {
-    // if (ownerAddress === '' || feeRecipient === '' || tradingFee === '' || tradingFee === '0' || devMaxBuy === '0' || userMaxBuy === '0') {
-    //   toast.warning('Invalid input values!');
-    //   return;
-    // }
+    if (ownerAddress === '') {
+      toast.warning('Invalid input values!');
+      return;
+    }
 
-    // const isInitialized = await isContractInitialized();
-    // if (!isInitialized) {
-    //   toast.error('Contract not initialized yet!');
-    //   return;
-    // }
+    const id = toast.loading('Updaitng...');
 
-    // const id = toast.loading('Updaitng...');
-
-    // try {
-    //   await updateMainStateInfo(ownerAddress, feeRecipient, tradingFee, devMaxBuy, userMaxBuy);
-    //   toast.dismiss(id);
-    //   toast.success('Updated successfully!');
-    // } catch (err) {
-    //   console.error(err);
-    //   toast.dismiss(id);
-    //   toast.error(err.message);
-    // }
+    try {
+      const tx = await writeContract(config, {
+        abi: pumpfunabi,
+        address: pumpfunAddress,
+        functionName: "transferOwnership",
+        args: [ownerAddress]
+      });
+      const recipt = await waitForTransactionReceipt(config, { hash: tx });
+      toast.dismiss(id);
+      toast.success('Updated successfully!');
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(id);
+      toast.error(err.message);
+    }
   }
 
   return (
@@ -217,7 +211,7 @@ export default function MyProfile() {
               fontSize: "16px"
             }} className='h-[50px] bg-black text-xl text-white border border-none p-3 rounded-xl' value={walletAddress} disabled />
             {addr !== undefined && (
-              <a href={`https://omaxscan.com/address/${addr}`} style={{ opacity: "0.6", fontSize: "15px" }} target='_blank' className='text-xl text-white'>View on Omaxscan</a>
+              <a href={`${scanAddress}/address/${addr}`} style={{ opacity: "0.6", fontSize: "15px" }} target='_blank' className='text-xl text-white'>View on Omaxscan</a>
             )}
           </div>
         </div>
@@ -392,7 +386,7 @@ export default function MyProfile() {
               <p className='text-2xl font-bold text-white'>Owner Address</p>
               <input value={ownerAddress} onChange={onChangeOwner} type="text" className={`w-full h-[69px] rounded-xl px-6 border border-white text-[#808080] bg-[#121212] text-base ${EurostileMNFont.className}`} />
             </div>
-            <div className="flex flex-col gap-2 w-full">
+            {/* <div className="flex flex-col gap-2 w-full">
               <p className='text-2xl font-bold text-white'>Fee Recipent</p>
               <input value={feeRecipient} onChange={onChangeFeeRecipient} type="text" className={`w-full h-[69px] rounded-xl px-6 border border-white text-[#808080] bg-[#121212] text-base ${EurostileMNFont.className}`} />
             </div>
@@ -407,7 +401,7 @@ export default function MyProfile() {
             <div className="flex flex-col gap-2 w-full">
               <p className='text-2xl font-bold text-white'>User Max Buy (%)</p>
               <input value={userMaxBuy} onChange={onChangeUserMaxBuy} type="number" className={`w-full h-[69px] rounded-xl px-6 border border-white text-[#808080] bg-[#121212] text-base ${EurostileMNFont.className}`} />
-            </div>
+            </div> */}
             <button type="button" className={`bg-white rounded-full w-full h-14 text-base ${EurostileMNFont.className}`} onClick={handleDashboardSet}>Set</button>
           </div>
         )}
