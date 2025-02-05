@@ -80,7 +80,7 @@ export default function CreateCoin() {
     <Box
       component={"section"}
       sx={{
-        "& p,input,div,button,span,label": {
+        "& p,input,div,button,span,label,textarea": {
           fontFamily: "JostRegular",
         },
         "& input,textarea": {

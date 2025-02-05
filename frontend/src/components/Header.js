@@ -28,6 +28,7 @@ import {
   DATATYPE_LASTTRADE
 } from "../engine/consts";
 import { Box, Typography } from "@mui/material";
+import { usePathname } from "next/navigation";
 
 
 const EurostileMNFont = localFont({ src: '../assets/font/eurostile-mn-extended-bold.ttf' })
@@ -46,6 +47,7 @@ export default function Header() {
 
   const { login } = useLogin();
   const { logout } = useLogout();
+  const pathname = usePathname();
 
   const mounted = useIsMounted();
 
@@ -108,9 +110,10 @@ export default function Header() {
   }
 
   return (
-    <header className="z-20 flex flex-col gap-2 items-center px-5 py-7" style={{
+    <header className="z-20 flex flex-col gap-2 items-center px-5 py-2" style={{
       background: "#4FCB4F",
-      borderRadius: "50px"
+      borderRadius: "50px",
+      marginTop: "20px"
     }}>
       <div className="flex justify-between items-center w-full">
         <div className="flex gap-2 items-center">
@@ -187,10 +190,10 @@ export default function Header() {
             cursor: "pointer"
           }
         }}>
-          <Link href={"/"}>
+          <Link style={{ color: pathname == "/" ? "#1005cf" : "#ffffff", textDecoration: pathname == "/" ? "underline" : "none", textUnderlineOffset: "5px" }} href={"/"}>
             Home
           </Link>
-          <Link href={"/create"}>
+          <Link style={{ color: pathname == "/create" ? "#1005cf" : "#ffffff", textDecoration: pathname == "/create" ? "underline" : "none", textUnderlineOffset: "5px" }} href={"/create"}>
             Launch
           </Link>
           <Typography onClick={() => setIsDialogOpen(true)}>

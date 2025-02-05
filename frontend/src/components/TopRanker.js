@@ -9,7 +9,7 @@ const TopRanker = () => {
         background: "#000000",
         width: { lg: "930px", xs: "100%" },
         m: "2rem auto 0",
-        borderRadius: "100px",
+        borderRadius: {md:"100px",xs:"10px"},
         padding: "15px 25px",
         display: "flex",
         justifyContent: { sm: "space-between", xs: "center" },
