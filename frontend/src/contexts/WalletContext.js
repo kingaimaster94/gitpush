@@ -6,6 +6,19 @@ import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import { WagmiProvider } from "wagmi";
 import { omax } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { defineChain } from 'viem';
+
+export const omaxtestnet = defineChain({
+  id: 332,
+  name: 'Omax Testnet',
+  nativeCurrency: { name: 'OmaxT', symbol: 'OMAXT', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://testapi.omaxray.com'] },
+  },
+  blockExplorers: {
+    default: { name: 'Omaxscan', url: 'https://testnet.omaxscan.com' },
+  },
+});
 
 const queryClient = new QueryClient();
 const projectId = "704b7193f8f27869e0a1782d7fdf9d21";
@@ -16,7 +29,7 @@ const metadata = {
   icons: ["https://avatars.githubusercontent.com/u/37784886"],
 };
 
-const chains = [omax];
+const chains = [omax, omaxtestnet];
 
 const config = defaultWagmiConfig({
   chains,

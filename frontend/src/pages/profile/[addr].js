@@ -154,8 +154,8 @@ export default function MyProfile() {
 
   return (
     <Box sx={{
-      "& p,a,input,div":{
-        fontFamily:"JostRegular",
+      "& p,a,input,div": {
+        fontFamily: "JostRegular",
 
       }
     }} className={`z-10 flex flex-col items-center gap-20 mx-auto pt-[80px] pb-20 ${rajdhani.className}`}>
@@ -182,7 +182,13 @@ export default function MyProfile() {
           <div className='flex flex-col gap-1'>
             <p className='text-xl text-white'>{profileData?.followers} followers</p>
             {wallet.address === addr && (
-              <button type='button' className='flex gap-[10px] items-center border border-white rounded-lg w-fit px-3 py-2' onClick={handleEditProfile}>
+              <button type='button' className='flex gap-[10px] items-center border border-white rounded-lg w-fit px-3 py-2' onClick={handleEditProfile} style={{
+                background: "rgb(163 191 86 / 49%)",
+                border: "2px solid rgb(240 255 66 / 64%)",
+                fontSize: "16px",
+                textTransform: "capitalize",
+                fontFamily: "JostRegular",
+              }}>
                 <p className='text-xl text-white'>Edit Profile</p>
                 <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M6.46001 21.74L21.25 6.95L17.55 3.25L2.75999 18.04L2.75 21.75L6.46001 21.74Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -207,11 +213,11 @@ export default function MyProfile() {
               </div>
             </div>
             <input type="text" style={{
-                background: "rgba(0, 0, 0, 0.22)",
-                fontSize:"16px"
+              background: "rgba(0, 0, 0, 0.22)",
+              fontSize: "16px"
             }} className='h-[50px] bg-black text-xl text-white border border-none p-3 rounded-xl' value={walletAddress} disabled />
             {addr !== undefined && (
-              <a href={`https://omaxscan.com/address/${addr}`} style={{opacity:"0.6",fontSize:"15px"}} target='_blank' className='text-xl text-white'>View on Omaxscan</a>
+              <a href={`https://omaxscan.com/address/${addr}`} style={{ opacity: "0.6", fontSize: "15px" }} target='_blank' className='text-xl text-white'>View on Omaxscan</a>
             )}
           </div>
         </div>
@@ -448,7 +454,20 @@ function EditProfileDialog({ isDialogOpen, setIsDialogOpen, profileData, refresh
     <Transition appear show={isDialogOpen}>
       <Dialog as="div" className={`relative z-30 focus:outline-none ${rajdhani.className}`} onClose={() => setIsDialogOpen(false)}>
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 bg-black/80">
+          <Box
+            sx={{
+              "& p,textarea,input,button,div": {
+                fontFamily: "JostRegular",
+              },
+              "& textarea, & input": {
+                "&:focus": {
+                  border: "none",
+                  boxShadow: "none",
+                },
+              },
+            }}
+            className="flex min-h-full items-center justify-center p-4 bg-black/80"
+          >
             <TransitionChild
               enter="ease-out duration-300"
               enterFrom="opacity-0 transform-[scale(95%)]"
@@ -457,15 +476,21 @@ function EditProfileDialog({ isDialogOpen, setIsDialogOpen, profileData, refresh
               leaveFrom="opacity-100 transform-[scale(100%)]"
               leaveTo="opacity-0 transform-[scale(95%)]"
             >
-              <DialogPanel className="flex flex-col gap-10 p-10 w-full max-w-xl rounded-3xl bg-[#030303] border border-white backdrop-blur-2xl">
-                <p className='text-[32px] text-bold text-white'>Edit Profile</p>
-                <div className='flex flex-col gap-6 justify-center items-center'>
-                  <p className='text-2xl text-white font-bold text-left w-full'>Profile photo</p>
-                  <div className='relative'>
-                    {(profileData?.avatar !== null && profileImage === null) && (
+              <DialogPanel className="flex flex-col gap-10 p-10 w-full max-w-xl rounded-3xl bg-[#0B1821] border border-none backdrop-blur-2xl">
+                <p className="text-[28px] text-bold text-white">Edit Profile</p>
+                <div className="flex flex-col gap-6 justify-center items-center">
+                  <p className="text-xl text-white font-bold text-left w-full">
+                    Profile photo
+                  </p>
+                  <div className="relative">
+                    {profileData?.avatar !== null && profileImage === null && (
                       <Image
-                        className='rounded-full'
-                        src={profileData?.avatar === null ? "/img3.png" : `${process.env.NEXT_PUBLIC_AVATAR_URL}/${profileData?.avatar}`}
+                        className="rounded-full"
+                        src={
+                          profileData?.avatar === null
+                            ? "/img3.png"
+                            : `${process.env.NEXT_PUBLIC_AVATAR_URL}/${profileData?.avatar}`
+                        }
                         width={120}
                         height={120}
                         alt=""
@@ -513,16 +538,42 @@ function EditProfileDialog({ isDialogOpen, setIsDialogOpen, profileData, refresh
                   <input type="text" className={`w-full h-[69px] bg-[#121212] pl-6 rounded-xl border border-white text-[#808080] text-base ${EurostileMNFont.className}`} placeholder='Your Name' onChange={(e) => setUsername(e.target.value)} value={username} />
                 </div>
                 <div className="flex flex-col gap-2 w-full">
-                  <p className='text-2xl font-bold text-white'>Bio</p>
-                  <textarea className={`w-full h-[146px] rounded-xl px-6 py-4 border border-white text-[#808080] bg-[#121212] text-base resize-none ${EurostileMNFont.className}`} placeholder='Bio' onChange={(e) => setBio(e.target.value)} value={bio}></textarea>
+                  <p className='text-xl font-bold text-white'>Bio</p>
+                  <textarea
+                    className={`w-full h-[146px] rounded-xl px-6 py-4 border border-none text-[#808080] bg-[#121212] text-base resize-none`}
+                    style={{
+                      background: "rgba(0, 0, 0, 0.22)",
+                    }}
+                    placeholder="Bio"
+                    onChange={(e) => setBio(e.target.value)}
+                    value={bio}
+                  ></textarea>
                 </div>
                 <div className='flex flex-col gap-3 items-center'>
-                  <button type='button' className='bg-white rounded-xl w-full h-[50px] text-xl font-bold' onClick={handleUpdateProfile}>Save</button>
-                  <button type='button' className='rounded-xl w-full h-[50px] text-xl text-white underline' onClick={() => setIsDialogOpen(false)}>Close</button>
+                  <button
+                    style={{
+                      background: "#F0FF42",
+                      color: "#000",
+                      fontFamily: "JostBold",
+                      height: "45px",
+                    }}
+                    type="button"
+                    className="bg-white rounded-xl w-full h-[50px] text-xl font-bold"
+                    onClick={handleUpdateProfile}
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-xl w-full h-[50px] text-xl text-white underline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Close
+                  </button>
                 </div>
               </DialogPanel>
             </TransitionChild>
-          </div>
+          </Box>
         </div>
       </Dialog>
     </Transition>
