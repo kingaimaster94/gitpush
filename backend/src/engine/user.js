@@ -107,7 +107,7 @@ const getUserProfile = async (req, resp) => {
                 { $limit: 1 },
                 { $project: {price: 1} }
             ]))[0]?.price;
-            let solPrice = fetchOMAXPrice();
+            let omaxPrice = fetchOMAXPrice();
 
             coinsCreated.push({
                 walletAddr: tokenInfo.creatorId.walletAddr, 
@@ -118,7 +118,7 @@ const getUserProfile = async (req, resp) => {
                 tokenName: tokenInfo.name, 
                 ticker: tokenInfo.ticker, 
                 desc: tokenInfo.desc, 
-                marketCap: (lastPrice * solPrice * config.tokenTotalSupply) / 1000, // unit: K$
+                marketCap: (lastPrice * omaxPrice * config.tokenTotalSupply) / 1000, // unit: K$
                 replies: await TokenReplyMention.find({ tokenId: tokenInfo._id, mentionerId: null }).countDocuments()
             });
         }

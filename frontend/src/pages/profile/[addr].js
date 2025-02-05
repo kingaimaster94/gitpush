@@ -44,9 +44,9 @@ export default function MyProfile() {
     const initialize = async () => {
       if (!wallet.isConnected) return;
 
-      const isInitialized = await isContractInitialized();
-      if (!isInitialized)
-        await initializeContract();
+      // const isInitialized = await isContractInitialized();
+      // if (!isInitialized)
+      //   await initializeContract();
     };
 
     initialize();
@@ -69,8 +69,8 @@ export default function MyProfile() {
   }, [wallet]);
 
   useEffect(() => {
-    // console.log(addr)
-    if (addr !== undefined)
+    console.log("------- addr ", addr)
+    if (addr !== undefined && addr!== null)
       setProfileInfo()
     else
       setWalletAddress('')

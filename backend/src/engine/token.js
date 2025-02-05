@@ -27,10 +27,9 @@ const upload_metadata = async (req, resp) => {
     }
 
     try {
-        const { imageUrl, metadataUri } = await uploadMetadata(req.files.logo.mimetype, req.files.logo.data);
-        // console.log('  imageUrl:', imageUrl);
-        // console.log('  metadataUri:', metadataUri);
-        return resp.status(200).json({ imageUrl, metadataUri });
+        const { imageUrl } = await uploadMetadata(req.files.logo.mimetype, req.files.logo.data);
+        console.log('  imageUrl:', imageUrl);
+        return resp.status(200).json({ imageUrl });
     } catch (err) {
         console.error('upload_metadata error: ', err);
         return resp.status(400).json({ error: err.message });
@@ -103,7 +102,7 @@ const findTokens = async (req, resp) => {
         const tokens = await Token.find(options).populate('creatorId');
         // console.log('tokens:', tokens);
         // console.log('token count:', tokens.length);
-        let solPrice = fetchOMAXPrice();
+        let omaxPrice = fetchOMAXPrice();
         let temp = [];
         let ret = [];
         
@@ -211,7 +210,7 @@ const findTokens = async (req, resp) => {
                 avatar: token.creatorId.avatar, 
                 username: token.creatorId.username, 
                 walletAddr: token.creatorId.walletAddr, 
-                marketCap: (price * config.tokenTotalSupply * solPrice) / 1000, 
+                marketCap: (price * config.tokenTotalSupply * omaxPrice) / 1000, 
                 replies: await TokenReplyMention.countDocuments({ tokenId: token._id, mentionerId: null })
             });
         }
@@ -240,14 +239,14 @@ const getKingOfTheHill = async (req, resp) => {
             { $project: {price: 1} }
         ]))[0];
 
-        let solPrice = fetchOMAXPrice();
+        let omaxPrice = fetchOMAXPrice();
         kingOfTheHill = {
             tokenAddr: kingOfTheHill?.tokenAddr, 
             name: kingOfTheHill?.name, 
             ticker: kingOfTheHill?.ticker, 
             logo: kingOfTheHill?.logo, 
             username: kingOfTheHill?.creatorId?.username, 
-            marketCap: (token.price * config.tokenTotalSupply * solPrice) / 1000, 
+            marketCap: (token.price * config.tokenTotalSupply * omaxPrice) / 1000, 
             replies: await TokenReplyMention.countDocuments({ tokenId: token.tokenId, mentionerId: null }), 
         };
         // console.log('kingOfTheHill:', kingOfTheHill);
@@ -278,7 +277,7 @@ const getTokenInfo = async (req, resp) => {
             { $project: {price: 1, baseReserve: 1, quoteReserve: 1} }
         ]))[0];
         // console.log('lastPrice:', lastPrice);
-        let solPrice = fetchOMAXPrice();
+        let omaxPrice = fetchOMAXPrice();
 
         let tokenBalance = 0;
         let solBalance = 0;
@@ -300,8 +299,8 @@ const getTokenInfo = async (req, resp) => {
             telegram: token.telegram, 
             website: token.website, 
             cdate: token.cdate, 
-            marketCap: lastPrice.price * config.tokenTotalSupply * solPrice, 
-            virtLiq: lastPrice.quoteReserve / LAMPORTS_PER_SOL * solPrice * 2, 
+            marketCap: lastPrice.price * config.tokenTotalSupply * omaxPrice, 
+            virtLiq: lastPrice.quoteReserve / LAMPORTS_PER_SOL * omaxPrice * 2, 
             
             walletAddr: token.creatorId.walletAddr, 
             username: token.creatorId.username, 

@@ -63,14 +63,10 @@ export default function Header() {
     modal.open();
   }
 
-  async function disconnectWallet() {
-    modal.open();
-  }
-
   useEffect(() => {
-    if (wallet.address !== null && wallet.isConnected === false)
+    if (wallet.status == "connected")
       login(wallet.address);
-    if (wallet.isDisconnected === true)
+    if (wallet.status === "disconnected")
       logout();
   }, [wallet])
 
@@ -128,7 +124,7 @@ export default function Header() {
             />
           </Link>
 
-          <div className="flex gap-4 items-center">
+          {/* <div className="flex gap-4 items-center">
             {lastTradeInfo !== null && (
               <div ref={div1Ref} className="hidden sm:flex gap-1 p-4 items-center bg-[#FF3131] rounded-xl h-[58px]">
                 <Link href={`/profile/${lastTradeInfo.walletAddr}`} className="flex items-center gap-1 hover:underline">
@@ -180,7 +176,7 @@ export default function Header() {
                 <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>on {format(new Date(lastTokenInfo.cdate || null), "MM/dd/yyyy")}</p>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
         <Box className="hidden xl:flex gap-5" sx={{
           "& a,p": {
@@ -224,19 +220,22 @@ export default function Header() {
                 backgroundColor: "#F0FF42 !important",
               }
             }
-          }} className="flex gap-2 items-center"
-            onClick={
-              wallet.address
-                ? () => disconnectWallet()
-                : () => connectWallet()
-            }
-          >
-            {wallet.address !== null && (
-              <Link href={`/profile/${wallet.address}`}>
+          }} className="flex gap-2 items-center">
+            {(wallet.status == "disconnected" || wallet.status == "connecting" || wallet.status == "reconnecting") && (
+              <div className="text-sm border border-white px-4 py-2 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-white hover:bg-white/10 transition"
+                onClick={() => connectWallet()}
+              >
+                Connect Wallet
+              </div>
+            )}
+            {(wallet.status == "connected") && (
+              <Link href={wallet.isDisconnected ? "/#" : `/profile/${wallet.address}`}>
                 <UserCircleIcon className="size-8 fill-white" style={{
                   width: "42px",
                   height: "42px"
-                }} />
+                }}
+                  onClick={() => connectWallet()}
+                />
               </Link>
             )}
           </Box>

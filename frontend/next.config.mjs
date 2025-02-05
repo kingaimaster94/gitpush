@@ -5,11 +5,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "bvb-webapp.com",
+        hostname: "omaxpump.suihub.net",
       },
       {
         protocol: "https",
-        hostname: "arweave.net",
+        hostname: "ipfs.io",
       },
     ],
   },
