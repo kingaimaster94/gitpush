@@ -11,7 +11,7 @@ const createPool = async (connection, payer, baseMint, baseTokenAmount, omaxAmou
 	// const baseToken = new Token(TOKEN_PROGRAM_ID, baseMint, baseMintInfo.decimals);
 	// const quoteToken = Token.WSOL;
 
-	// const accounts = await Market.findAccountsByMints(connection, baseToken.mint, quoteToken.mint, PROGRAMIDS.OPENBOOK_MARKET);
+	// const accounts = await Market.findAccountsByMints(connection, baseToken.tokenAddr, quoteToken.tokenAddr, PROGRAMIDS.OPENBOOK_MARKET);
 	// if (accounts.length === 0) {
 	// 	console.error("  Failed to find OpenBook market");
 	// 	return;

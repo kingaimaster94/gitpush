@@ -15,7 +15,7 @@ const getOMAXPPrice = async () => {
         omaxPrice = newOmaxPrice;
         // console.log('OMAX Price in USD:', omaxPrice, Date.now() / 1000);
     } catch (err) {
-        console.error('Error fetching SOL price:', err.message);
+        console.error('Error fetching OMAX price:', err.message);
     } finally {
         setTimeout(getOMAXPPrice, requestInterval);
     }

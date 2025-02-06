@@ -1,14 +1,14 @@
-import { axiosPrivate } from "../axiosPrivate"
-import { axiosPublic } from "../axiosPublic"
+import axios from "axios";
+import { axiosPrivate } from "../axiosPrivate";
+import { axiosPublic } from "../axiosPublic";
 
-export async function uploadMetadata(logoFile, metadata) {
-  const formData = new FormData()
-  formData.append('logo', logoFile)
-  formData.append('metadata', metadata)
+// export async function uploadMetadata(logoFile) {
+//   const formData = new FormData()
+//   formData.append('logo', logoFile);
 
-  const response = await axiosPublic.post('/token/upload_metadata', formData);
-  return await response.data;
-}
+//   const response = await axiosPublic.post('/token/upload_metadata', formData);
+//   return await response.data;
+// }
 
 export async function updateToken(name, ticker, desc, logo, twitter, telegram, website, tokenAddr) {
   const result = await axiosPrivate.post(`/token/update_token`, {

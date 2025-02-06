@@ -40,3 +40,17 @@ export async function getWalletTokens(address) {
     }
     return tokens;
 };
+
+export const decimalToEth = (amount) => {
+    if (Number(amount) > 0) {
+        return Number(amount) / Number(10 ** 18);
+    }
+    return 0;
+}
+
+export const decimalFromEth = (amount) => {
+    if (amount > 0) {
+        return BigInt(Math.floor(amount * (10 ** 18)));
+    }
+    return BigInt(0);
+}

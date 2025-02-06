@@ -8,10 +8,15 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { useRef, useState } from "react";
+import { useRef, useState, useContext, useEffect } from "react";
 import Image from "next/image";
 import { toast } from "react-toastify";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId, WagmiContext } from "wagmi";
+import { writeContract, readContracts, waitForTransactionReceipt, watchContractEvent } from "@wagmi/core";
+import { parseEther, parseUnits } from "viem";
+import { pumpfunabi } from "@/contexts/contracts/pumpfun";
+import { PUMPFUN_ADDRESS, PUMPFUN_ADDRESS_TESTNET, EXPLORER_URL, EXPLORER_URL_TESTNET } from "@/contexts/contracts/constants";
+import { decimalToEth } from "@/engine/utils";
 
 import { TOKEN_TOTAL_SUPPLY } from "@/engine/consts";
 import { createMetadata } from "../../engine/createMetadata";
@@ -35,7 +40,7 @@ const EurostileMNFont = localFont({
 });
 
 export default function CreateCoin() {
-  const { isConnected } = useAccount();
+  const wallet = useAccount();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const coinName = useRef(null);
@@ -44,7 +49,7 @@ export default function CreateCoin() {
   const [coinImage, setCoinImage] = useState(null);
   const [imageName, setImageName] = useState("");
   const [imageFile, setImageFile] = useState(null);
-  const [imgBufer, setImageBuffer] = useState();
+  const [imgBuffer, setImageBuffer] = useState();
   const twitterLink = useRef(null);
   const telegramLink = useRef(null);
   const website = useRef(null);
@@ -62,7 +67,7 @@ export default function CreateCoin() {
       toast.error("No ticker!");
       return;
     }
-    if (!isConnected) {
+    if (wallet.status == "disconnected") {
       toast.error("Not connected wallet!");
       return;
     }
@@ -329,6 +334,7 @@ export default function CreateCoin() {
         description={description.current?.value}
         coinImage={coinImage}
         imgFile={imageFile}
+        imgBuffer={imgBuffer}
         twitterLink={twitterLink.current?.value}
         telegramLink={telegramLink.current?.value}
         websiteLink={website.current?.value}
@@ -344,13 +350,71 @@ function CreateCoinDialog({
   ticker,
   description,
   imgFile,
+  imgBuffer,
   twitterLink,
   telegramLink,
   websiteLink,
 }) {
-  const walletCtx = useAccount();
+  const wallet = useAccount();
+  const chainID = useChainId();
+  const config = useContext(WagmiContext);
+
   const [mode, setMode] = useState("omax");
-  const [amount, setAmount] = useState();
+  const [amount, setAmount] = useState('0');
+  const [scanAddress, setScanAddress] = useState(EXPLORER_URL)
+  const [pumpfunAddress, setPumpfunAddress] = useState(PUMPFUN_ADDRESS);
+  const [createFee, setCreateFee] = useState('0');
+  const [vx, setVx] = useState('0');
+  const [vy, setVy] = useState('0');
+
+  useEffect(() => {
+    async function fetchData() {
+      const results = await readContracts(config, {
+        contracts: [
+          {
+            abi: pumpfunabi,
+            address: pumpfunAddress,
+            functionName: "CREATE_FEE",
+            args: []
+          },
+          {
+            abi: pumpfunabi,
+            address: pumpfunAddress,
+            functionName: "vX",
+            args: []
+          },
+          {
+            abi: pumpfunabi,
+            address: pumpfunAddress,
+            functionName: "vY",
+            args: []
+          }
+        ]
+      });
+      if (results[0].status == "success") {
+        setCreateFee(decimalToEth(results[0].result.toString()));
+        setVx(decimalToEth(results[1].result.toString()));
+        setVy(decimalToEth(results[2].result.toString()));
+      } else {
+        console.error("read contract error");
+      }
+    }
+    if (chainID == 311) {
+      setPumpfunAddress(PUMPFUN_ADDRESS);
+      setScanAddress(EXPLORER_URL);
+    }
+    else if (chainID == 332) {
+      setPumpfunAddress(PUMPFUN_ADDRESS_TESTNET);
+      setScanAddress(EXPLORER_URL_TESTNET);
+    }
+    else {
+      setPumpfunAddress('');
+      setScanAddress("");
+    }
+    if (pumpfunAddress != '') {
+      fetchData();      
+    }
+  }, [chainID]);
 
   const onChangeAmount = (e) => {
     if (Number(e.target.value) < 0) return;
@@ -358,79 +422,69 @@ function CreateCoinDialog({
   };
 
   const handleCreateCoin = async () => {
-    if (!walletCtx.isConnected) {
+    if (wallet.status == "disconnected") {
       toast.error("Not connected wallet!");
       return;
     }
 
     const id = toast.loading(`Creating '${name}' token...`);
 
-    // try {
-    //   const isInitialized = await isContractInitialized();
-    //   if (!isInitialized) {
-    //     toast.error("Contract not initialized yet!");
-    //     return;
-    //   }
+    try {
+      const { imageUrl } = await createMetadata(imgFile);
+      let value;
 
-    //   const { imageUrl } = await createMetadata(imgFile);
+      if (mode == 'omax') {
+        value = Number(createFee) + Number(amount);
+      } else {
+        value = (Number(vx) * Number(amount) / (Number(vy) - Number(amount))) + Number(createFee);
+      }
 
-    //   const createPoolTx = await getCreatePoolTx(
-    //     mintKeypair.publicKey.toBase58(),
-    //     TOKEN_TOTAL_SUPPLY,
-    //     NATIVE_MINT,
-    //     0
-    //   );
-    //   allIxs.push(createPoolTx);
+      const tx = await writeContract(config, {
+        abi: pumpfunabi,
+        address: pumpfunAddress,
+        functionName: "createCurve",
+        args: [
+          name,
+          ticker,
+          imageUrl,
+          0,
+          description,
+          twitterLink,
+          telegramLink,
+          websiteLink,
+        ],
+        chainId: chainID,
+        value: parseEther(value.toString())
+      });
 
-    //   if (Number(amount) > 0) {
-    //     const buyTx = await getBuyTx(
-    //       mintKeypair.publicKey.toBase58(),
-    //       Number(amount)
-    //     );
-    //     allIxs.push(buyTx);
-    //   }
+      const recipt = await waitForTransactionReceipt(config, { hash: tx });
+      console.log('txHash:', recipt);
+      const result = await updateToken(
+        name,
+        ticker,
+        description,
+        imageUrl,
+        twitterLink,
+        telegramLink,
+        websiteLink,
+        recipt.logs[0].address
+      );
+      if (!result) {
+        toast.dismiss(id);
+        toast.error("Failed to update token info!");
+        setIsDialogOpen(false);
+        return;
+      }
 
-    //   // console.log('allIxs:', allIxs);
+      toast.dismiss(id);
+      toast.success(`Created a new bonding curve with token '${name}'`);
 
-    //   const blockhash = (await connection.getLatestBlockhash("finalized"))
-    //     .blockhash;
-    //   const message = new TransactionMessage({
-    //     payerKey: walletCtx.publicKey,
-    //     instructions: allIxs,
-    //     recentBlockhash: blockhash,
-    //   }).compileToV0Message(Object.values({ ...(addLookupTableInfo ?? {}) }));
-    //   const transaction = new VersionedTransaction(message);
-    //   transaction.sign([mintKeypair]);
-
-    //   const txHash = await send(connection, walletCtx, transaction);
-    //   // console.log('txHash:', txHash);
-
-    //   const result = await updateToken(
-    //     name,
-    //     ticker,
-    //     description,
-    //     imageUrl,
-    //     twitterLink,
-    //     telegramLink,
-    //     websiteLink,
-    //     mintKeypair.publicKey.toBase58()
-    //   );
-    //   if (!result) {
-    //     toast.dismiss(id);
-    //     toast.error("Failed to update token info!");
-    //     setIsDialogOpen(false);
-    //     return;
-    //   }
-
-    //   toast.dismiss(id);
-    //   toast.success(`Created a new bonding curve with token '${name}'`);
-
-    //   setIsDialogOpen(false);
-    // } catch (err) {
-    //   console.error("handleCreateCoin err:", err);
-    //   toast.dismiss(id);
-    //   toast.error(err.message);
-    // }
+      setIsDialogOpen(false);
+    } catch (err) {
+      console.error("handleCreateCoin err:", err);
+      toast.dismiss(id);
+      toast.error(err.message);
+    }
   };
 
   return (

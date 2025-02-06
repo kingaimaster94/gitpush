@@ -13,7 +13,6 @@ import Link from 'next/link';
 
 import { useAccount, useChainId, WagmiContext } from 'wagmi';
 import { writeContract, waitForTransactionReceipt } from '@wagmi/core';
-import { ethers } from 'ethers';
 
 import { getProfileInfo, updateProfile } from '@/api/user';
 import { FEE_PRE_DIV, PUMPFUN_ADDRESS_TESTNET, PUMPFUN_ADDRESS, EXPLORER_URL, EXPLORER_URL_TESTNET } from '@/contexts/contracts/constants';
@@ -43,12 +42,12 @@ export default function MyProfile() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [ownerAddress, setOwnerAddress] = useState(null);
-  const [scanAddress, setScanAddress] = useState(EXPLORER_URL)
   // const [feeRecipient, setFeeRecipient] = useState(null)
   // const [tradingFee, setTradingFee] = useState(null)
   // const [devMaxBuy, setDevMaxBuy] = useState(null)
   // const [userMaxBuy, setUserMaxBuy] = useState(null)
-
+  
+  const [scanAddress, setScanAddress] = useState(EXPLORER_URL)
   const [pumpfunAddress, setPumpfunAddress] = useState(PUMPFUN_ADDRESS);
 
   useEffect(() => {

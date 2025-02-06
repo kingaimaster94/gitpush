@@ -1,8 +1,8 @@
 const axios = require("axios");
 
-const uploadMetadata = async (fileType, fileBuffer) => {
-        const formData = new FormData();
-    formData.append("file", fileBuffer);
+const uploadMetadata = async (fileBuffer) => {
+    const formData = new FormData();
+    formData.append("file", fileBuffer.data);
 
     const metadata = JSON.stringify({
         name: `omax-${Date.now()}`,
@@ -26,7 +26,7 @@ const uploadMetadata = async (fileType, fileBuffer) => {
         }
     );
     imageUrl = `https://ipfs.io/ipfs/${res.data.IpfsHash}`;
-    return {imageUrl};
+    return { imageUrl };
 };
 
 module.exports = { uploadMetadata };

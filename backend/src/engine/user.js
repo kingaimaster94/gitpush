@@ -36,7 +36,7 @@ const getUserProfile = async (req, resp) => {
             // console.log('tokenInfo:', tokenInfo);
             if (Number(tokenInfo.balance) === 0) continue;
 
-            const token = await Token.findOne({ tokenAddr: tokenInfo.mint });
+            const token = await Token.findOne({ tokenAddr: tokenInfo.tokenAddr });
             if (!token) continue;
             // console.log('token:', token);
             
@@ -49,7 +49,7 @@ const getUserProfile = async (req, resp) => {
             // console.log('lastPrice:', lastPrice);
 
             coinsHeld.push({
-                tokenAddr: tokenInfo.mint, 
+                tokenAddr: tokenInfo.tokenAddr, 
                 ticker: token.ticker, 
                 balance: Number(tokenInfo.balance), 
                 logo: token.logo, 

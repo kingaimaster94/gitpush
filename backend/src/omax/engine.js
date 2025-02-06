@@ -1,106 +1,76 @@
 
 const { config } = require('../config/');
+const axios = require('axios');
 const { User,
     Token: TokenModel
 } = require('../db/');
-const { connection, 
-    mySendAndConfirmTransaction 
+const { connection,
+    mySendAndConfirmTransaction
 } = require("./utils");
+const { ethers } = require('ethers');
+const { erc20abi } = require('./erc20');
 
+const fetchAPI = async (url, method, data = {}) => {
+    return new Promise(resolve => {
+        if (method === "POST") {
+            axios.post(url, data).then(response => {
+                let json = response.data;
+                resolve(json);
+            }).catch(error => {
+                resolve(null);
+            });
+        } else {
+            axios.get(url).then(response => {
+                let json = response.data;
+                resolve(json);
+            }).catch(error => {
+                resolve(null);
+            });
+        }
+    });
+};
 
 const getTokensHeld = async (walletAddr) => {
-    // // Convert the wallet address to a publicKey
-    // const publicKey = new PublicKey(walletAddr);
-
-    // // Get the token accounts by owner
-    // const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, 
-    //     { programId: TOKEN_PROGRAM_ID }
-    // );
-
-    // // Process and display the results
-    // const tokens = tokenAccounts.value.map((accountInfo) => {
-    //     const accountData = accountInfo.account.data.parsed.info;
-    //     return { mint: accountData.mint, 
-    //         balance: accountData.tokenAmount.uiAmountString
-    //     };
-    // });
-
-    // return tokens;
-    return [];
+    const url = `${config.scanUrl}/api/v2/addresses/${address}/tokens?type=ERC20`;
+    const tokenlist = await fetchAPI(url, 'GET');
+    let tokens = [];
+    if (tokenlist != null && tokenlist.items != null && tokenlist.items.length > 0) {
+        for (let i = 0; i < tokenlist.items.length; i++) {
+            const tokenInfo = {
+                tokenAddr: tokenlist.items[i].token.address,
+                balance: tokenlist.items[i].value
+            };
+            tokens.push(tokenInfo);
+        }
+    }
+    return tokens;
 };
 
 const getTokenHolderDistribution = async (tokenAddr) => {
-    // let holderDistrib = [];
-    // console.log('getTokenHolderDistribution - tokenAddr:', tokenAddr);
+    console.log('getTokenHolderDistribution - tokenAddr:', tokenAddr);
+    const url = `${config.scanUrl}/api/v2/tokens/${tokenAddr}/holders`;
+    const tokenHolderlist = await fetchAPI(url, 'GET');
+    let holderDistrib = [];
+    const token = await TokenModel.findOne({ tokenAddr })?.populate('creatorId');
+    const devWallet = token?.creatorId?.walletAddr;
+    console.log('  devWallet:', devWallet);
+    if (tokenHolderlist != null && tokenHolderlist.items != null && tokenHolderlist.items.length > 0) {
+        for (let i = 0; i < tokenHolderlist.items.length; i++) {
+            const owner = tokenHolderlist.items[i].address.hash;
+            const user = await User.findOne({ walletAddr: owner });
+            const balance = tokenHolderlist.items[i].value;
+            const totalSupply = tokenHolderlist.items[i].token.total_supply;
 
-    // try {
-    //     const token = await TokenModel.findOne({ tokenAddr })?.populate('creatorId');
-    //     const devWallet = token?.creatorId?.walletAddr;
-    //     // console.log('  devWallet:', devWallet);
-
-    //     /* Get totalSupply */
-    //     const mintInfo = await getMint(
-    //         connection, 
-    //         new PublicKey(tokenAddr)
-    //     );
-    //     const totalSupply = mintInfo.supply;
-    //     // console.log('  totalSupply:', totalSupply);
-    //     if (totalSupply === BigInt(0))
-    //         return [];
-
-    //     /* Fetch Token holders */
-    //     const tokenHolders = await connection.getParsedProgramAccounts(
-    //         TOKEN_PROGRAM_ID,
-    //         {
-    //             commitment: "confirmed",
-    //             filters: [
-    //                 {
-    //                     dataSize: 165
-    //                 },
-    //                 {
-    //                     memcmp: {
-    //                         offset: 0,
-    //                         bytes: tokenAddr
-    //                     },
-    //                 },
-    //             ],
-    //         }
-    //     );
-    //     // console.log("  Token holders:", tokenHolders);
-
-    //     for (const accountInfo of tokenHolders) {
-    //         const accountData = accountInfo.account.data;
-    //         const owner = new PublicKey(accountData.parsed.info.owner);
-    //         // console.log('  owner:', owner);
-
-    //         const user = await User.findOne({ walletAddr: owner?.toBase58() });
-    //         const accountBalance = BigInt(accountData?.parsed.info.tokenAmount.amount);
-    //         // console.log('  accountBalance:', accountBalance);
-
-    //         const accountInfo2 = await connection.getParsedAccountInfo(owner);
-    //         const owner2 = accountInfo2.value?.owner;
-    //         // console.log('  owner2:', owner2);
-
-    //         if (accountBalance > BigInt(0)) {
-    //             holderDistrib.push({
-    //                 walletAddr: (owner2 == config.PROGRAM_ID) ? owner.toBase58() : user?.walletAddr, 
-    //                 username: (owner2 == config.PROGRAM_ID) ? owner.toBase58().substr(0, 6) : user?.username, 
-    //                 bio: (owner2 == config.PROGRAM_ID) ? 'bonding curve' : (user?.walletAddr === devWallet ? 'dev' : null), 
-    //                 holdPercent: Number(accountBalance) / Number(totalSupply) * 100
-    //             });
-    //         }
-    //     }
-    //     // console.log('holderDistrib:', holderDistrib);
-
-    //     ret = holderDistrib.sort((a, b) => (b.holdPercent - a.holdPercent));
-    //     // console.log('ret:', ret);
-
-    //     return ret;
-    // } catch (err) {
-    //     console.error(err);
-    //     return [];
-    // }
-    return [];
+            holderDistrib.push({
+                walletAddr: owner,
+                username: (owner == config.pumpfunAddress) ? owner.substr(0, 6) : user?.username,
+                bio: (owner == config.pumpfunAddress) ? 'bonding curve' : (user?.walletAddr === devWallet ? 'dev' : null),
+                holdPercent: Number(balance) / Number(totalSupply) * 100
+            });
+        }
+    }
+    ret = holderDistrib.sort((a, b) => (b.holdPercent - a.holdPercent));
+    return ret;
 };
 
 async function getWalletTokenAccounts(wallet) {
@@ -115,36 +85,34 @@ async function getWalletTokenAccounts(wallet) {
     return [];
 };
 
-async function getTokenBalance(owner, mint) {
-    // try {
-    //     if (mint.equals(Token.WSOL.mint)) {
-    //         const amount = await connection.getBalance(owner);
-    //         return BigInt(amount);
-    //     } else {
-    //         const ataAddress = getAssociatedTokenAddressSync(
-    //             mint,
-    //             owner,
-    //             false,
-    //             TOKEN_PROGRAM_ID,
-    //             ASSOCIATED_TOKEN_PROGRAM_ID
-    //         );
-    //         // console.log("  ataAddress:", ataAddress);
-    //         if (!ataAddress) return 0;
-            
-    //         const tokenAccountInfo = await getAccount(
-    //             connection,
-    //             ataAddress
-    //         );
-    //         if (!tokenAccountInfo) return 0;
-            
-    //         // console.log("  tokenAccountInfo:", tokenAccountInfo);
-    //         return tokenAccountInfo.amount;
-    //     }
-    // } catch (err) {
-    //     console.error(err.message);
-    //     return 0;
-    // }
-    return 0;
+async function getTokenBalance(owner, tokenAddr = '') {
+    if (tokenAddr === '') {
+        return Number(await config.web3.eth.getBalance(owner)) / (10 ** config.tokenDecimals);
+    }
+
+    let tokenContract = null;
+    try {
+        tokenContract = new ethers.Contract(tokenAddr, erc20abi, config.provider);
+    } catch (error) {
+        afx.errorLog('getWalletTokenBalance', error)
+        return -1
+    }
+
+    if (!tokenContract) {
+        return -1;
+    }
+
+    try {
+        const balance = await tokenContract.balanceOf(owner);
+        const tokenBalance = Number(balance) / (10 ** Number(config.tokenDecimals));
+
+        return tokenBalance;
+
+    } catch (error) {
+        console.log('getWalletTokenBalance 2', error)
+    }
+
+    return -1;
 }
 
 async function burnTokens(keypair, mint, amount) {
@@ -164,7 +132,7 @@ async function burnTokens(keypair, mint, amount) {
     // .add(
     //     createBurnInstruction(tokenAccount.address, mint, keypair.publicKey, amount)
     // );
-    
+
     // const burnSig = await mySendAndConfirmTransaction(connection, keypair, transaction, {
     //     // skipPreflight: true,
     //     maxRetries: 0
@@ -174,9 +142,9 @@ async function burnTokens(keypair, mint, amount) {
 
 
 module.exports = {
-    getTokensHeld, 
-    getTokenHolderDistribution, 
-    getWalletTokenAccounts, 
-    getTokenBalance, 
+    getTokensHeld,
+    getTokenHolderDistribution,
+    getWalletTokenAccounts,
+    getTokenBalance,
     burnTokens
 };
