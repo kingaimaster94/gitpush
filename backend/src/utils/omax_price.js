@@ -1,13 +1,6 @@
-
 const axios = require('axios');
-
-
 const requestInterval = 0;
-
-
 let omaxPrice;
-
-
 const getOMAXPPrice = async () => {
     try {
         const response = await axios.get('https://api.coinbase.com/v2/prices/OMAX-USD/spot');

@@ -6,6 +6,7 @@ const { User,
 } = require('../db/');
 const { ethers } = require('ethers');
 const { erc20abi } = require('./erc20');
+const { pumpfunabi } = require('./pumpfun');
 
 const fetchAPI = async (url, method, data = {}) => {
     return new Promise(resolve => {
@@ -112,9 +113,23 @@ async function getTokenBalance(owner, tokenAddr = '') {
     return -1;
 }
 
+const getCurvInfo = async (tokenAddr) => {
+    let pumpfunContract = null;
+    try {
+        pumpfunContract = new ethers.Contract(config.pumpfunAddress, pumpfunabi, config.provider);
+    } catch (error) {
+        console.log('contract error', error);
+        return null;
+    }
+
+    const curveInfo = await pumpfunContract.curveInfo(tokenAddr);
+    return curveInfo;
+};
+
 module.exports = {
     getTokensHeld,
     getTokenHolderDistribution,
     getWalletTokenAccounts,
-    getTokenBalance
+    getTokenBalance,
+    getCurvInfo
 };

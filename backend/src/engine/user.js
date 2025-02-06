@@ -216,7 +216,6 @@ const updateUserProfile = async (req, resp) => {
     }
 };
 
-
 const getPopularUsers = async (userId) => {
     let ret = [];
 
@@ -307,7 +306,6 @@ const unfollowUser = async (req, resp) => {
         return resp.status(400).json({ error: err.message });
     }
 };
-
 
 module.exports = { getUserProfile, 
     updateUserProfile, 

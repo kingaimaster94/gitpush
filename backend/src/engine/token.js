@@ -8,7 +8,7 @@ const { User,
     TokenTrade
 } = require('../db');
 const { uploadMetadata } = require('../omax/metadata');
-const { getTokenHolderDistribution, getTokenBalance } = require('../omax/engine');
+const { getTokenHolderDistribution, getTokenBalance, getCurvInfo } = require('../omax/engine');
 const { PROGRAMIDS, 
     connection
 } = require('../omax/utils');
@@ -100,8 +100,6 @@ const findTokens = async (req, resp) => {
             name: {$regex: regex}
         };
         const tokens = await Token.find(options).populate('creatorId');
-        // console.log('tokens:', tokens);
-        // console.log('token count:', tokens.length);
         let omaxPrice = fetchOMAXPrice();
         let temp = [];
         let ret = [];
@@ -270,6 +268,8 @@ const getTokenInfo = async (req, resp) => {
         }
         // console.log('token:', token);
 
+        const curveInfo = await getCurvInfo(query.tokenAddr);
+
         const lastPrice = (await TokenPrice.aggregate([
             { $match: {tokenId: token._id} },
             { $sort: {timestamp: -1} },
@@ -285,8 +285,8 @@ const getTokenInfo = async (req, resp) => {
         if (parsedUserId) {
             const selfUser = await User.findOne({ _id: parsedUserId });
             if (selfUser) {
-                tokenBalance = await getTokenBalance(new PublicKey(selfUser.walletAddr), new PublicKey(query.tokenAddr));
-                omaxBalance = await getTokenBalance(new PublicKey(selfUser.walletAddr));
+                tokenBalance = await getTokenBalance(selfUser.walletAddr, query.tokenAddr);
+                omaxBalance = await getTokenBalance(selfUser.walletAddr);
             }
         }
 
@@ -300,20 +300,20 @@ const getTokenInfo = async (req, resp) => {
             website: token.website, 
             cdate: token.cdate, 
             marketCap: lastPrice.price * config.tokenTotalSupply * omaxPrice, 
-            virtLiq: lastPrice.quoteReserve / LAMPORTS_PER_SOL * omaxPrice * 2, 
+            virtLiq: (Number(curveInfo.vX) + Number(curveInfo.funds)) / (10 ** config.tokenDecimals) * omaxPrice * 2, 
             
             walletAddr: token.creatorId.walletAddr, 
             username: token.creatorId.username, 
             avatar: token.creatorId.avatar, 
             
             tokenBalance: Number(tokenBalance) / (10 ** config.tokenDecimals), 
-            omaxBalance: Number(omaxBalance) / LAMPORTS_PER_SOL, 
+            omaxBalance: Number(omaxBalance) / (10 ** config.tokenDecimals), 
             replies: await TokenReplyMention.countDocuments({ tokenId: token._id, mentionerId: null }), 
-            bondingCurveProgress: Math.min((lastPrice.quoteReserve - config.initVirtQuote) / config.completeQuoteReserve, 1) * 100, 
-            kingOfTheHillProgress: Math.min((lastPrice.quoteReserve - config.initVirtQuote) / config.kothQuoteReserve, 1) * 100, 
+            bondingCurveProgress: Math.min(Number(curveInfo.funds) / (10 ** config.tokenDecimals) / config.completeQuoteReserve, 1) * 100, 
+            kingOfTheHillProgress: Math.min(Number(curveInfo.funds) / (10 ** config.tokenDecimals) / config.kothQuoteReserve, 1) * 100, 
             crownDate: token.crownDate, 
-            tokensAvailableForSale: lastPrice.baseReserve / (10 ** config.tokenDecimals) - config.initVirtBase, 
-            realQuoteReserve: (lastPrice.quoteReserve - config.initVirtQuote) / LAMPORTS_PER_SOL, 
+            tokensAvailableForSale: (Number(curveInfo.vY) - Number(curveInfo.supply)) / (10 ** config.tokenDecimals), 
+            realQuoteReserve: Number(curveInfo.funds) / (10 ** config.tokenDecimals), 
             tokenHolderDistribution: await getTokenHolderDistribution(query.tokenAddr)
         };
         // console.log('ret:', ret);

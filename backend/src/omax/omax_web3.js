@@ -20,19 +20,6 @@ async function getTimestampFromBlock(blockNumber) {
     return block.timestamp;
 }
 
-const contrct_curvInfo = async (tokenAddr) => {
-    let pumpfunContract = null;
-    try {
-        pumpfunContract = new ethers.Contract(config.pumpfunAddress, pumpfunabi, config.provider);
-    } catch (error) {
-        console.log('contract error', error);
-        return null;
-    }
-
-    const curveInfo = await pumpfunContract.curveInfo(tokenAddr);
-    return curveInfo;
-};
-
 const contrct_launchCurve = async (tokenAddr) => {
     let tokenContract = null;
     try {
