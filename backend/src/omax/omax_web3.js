@@ -5,22 +5,20 @@ const { Token,
     TokenPrice
 } = require('../db');
 const { sleep } = require('../utils/basic');
-const { getWalletFromPrivateKey,
-    mySendAndConfirmTransaction
-} = require('./utils');
-const { createPool,
-    getPoolInfo
-} = require('./pool');
-const { getTokenBalance,
-    burnTokens
-} = require('./engine');
+const { getWalletFromPrivateKey } = require('./utils');
 const { pumpfunabi } = require('./pumpfun');
 const { erc20abi } = require('./erc20');
+const { factoryabi } = require('./factory');
 const { ethers } = require('ethers');
 
 dotenv.config();
 
 const adminWallet = getWalletFromPrivateKey(process.env.ADMIN_PRIVKEY);
+
+async function getTimestampFromBlock(blockNumber) {
+    const block = await config.provider.getBlock(blockNumber);
+    return block.timestamp;
+}
 
 const contrct_curvInfo = async (tokenAddr) => {
     let pumpfunContract = null;
@@ -35,65 +33,109 @@ const contrct_curvInfo = async (tokenAddr) => {
     return curveInfo;
 };
 
-const contract_withdraw = async (baseToken) => {
-    // console.log('contract_withdraw - start');
+const contrct_launchCurve = async (tokenAddr) => {
+    let tokenContract = null;
+    try {
+        tokenContract = new ethers.Contract(tokenAddr, erc20abi, config.provider);
+    } catch (error) {
+        console.log('contract error', error);
+        return CSSFontFeatureValuesRule;
+    }
 
-    // const admin = adminWallet.publicKey;
-    // const program = getProgram(adminWallet);
-    // const mainStateKey = await Keys.getMainStateKey();
-    // const mainStateInfo = await program.account.mainState.fetch(mainStateKey);
-    // if (!mainStateInfo)
-    //     throw new Error("Failed to fetch mainState!");
+    const launched = await tokenContract._launched();
+    console.log('launched: ', launched);
+    if (launched == true) return true;
+    let pumpfunContract = null;
+    try {
+        pumpfunContract = new ethers.Contract(config.pumpfunAddress, pumpfunabi, config.provider);
+    } catch (error) {
+        console.log('contract error', error);
+        return false;
+    }
 
-    // const owner = mainStateInfo.owner;
+    const account = new ethers.Wallet(adminWallet.privateKey, config.provider);
+    const nonce = await account.getNonce();
+    const gasPrice = await config.web3.eth.getGasPrice();
+    const func = lpContract.getFunction("launchCurve");
+    const launchData = await func.populateTransaction(tokenAddr);
+    console.log("launch tx: ", launchData);
+    const tx = {
+        chainId: config.chainId,
+        type: 0,
+        gasLimit: 200000,
+        gasPrice: gasPrice,
+        data: launchData.data,
+        to: launchData.to,
+        nonce: nonce,
+    };
 
-    // const baseMint = new PublicKey(baseToken);
-    // if (!baseMint) {
-    //     throw new Error("Invalid token");
-    // }
-    // const quoteMint = NATIVE_MINT;
-    // const poolStateKey = await Keys.getPoolStateKey(baseMint, quoteMint);
+    const signedTx = await account.signTransaction(tx);
+    const txResponse = await config.web3.eth.sendSignedTransaction(signedTx);
+    const result = await config.provider.waitForTransaction(txResponse.transactionHash.toString(), 10);
+    if (result.status == 1) {
+        return true;
+    } else {
+        return false;
+    }
+};
 
-    // const reserverBaseAta = getAssociatedTokenAddressSync(baseMint, poolStateKey, true);
-    // const reserverQuoteAta = getAssociatedTokenAddressSync(quoteMint, poolStateKey, true);
-    // const adminBaseAta = getAssociatedTokenAddressSync(baseMint, admin);
-    // const adminQuoteAta = getAssociatedTokenAddressSync(quoteMint, admin);
+const contrct_burnLP = async (tokenAddr) => {
+    let factoryContract = null;
+    try {
+        factoryContract = new ethers.Contract(config.factoryAddress, factoryabi, config.provider);
+    } catch (error) {
+        console.log('contract error', error);
+        return false;
+    }
 
-    // const tx = new Transaction().add(
-    //     await program.methods
-    //         .withdraw()
-    //         .accounts({
-    //             admin, owner, 
-    //             mainState: mainStateKey, 
-    //             poolState: poolStateKey, 
-    //             baseMint, quoteMint, 
-    //             reserverBaseAta, reserverQuoteAta, 
-    //             adminBaseAta, adminQuoteAta, 
-    //             systemProgram: SystemProgram.programId, 
-    //             tokenProgram: TOKEN_PROGRAM_ID, 
-    //             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-    //         })
-    //     // .preInstructions([web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 })]);
-    //     .instruction()
-    // );
+    const lpToken = await factoryContract.getPair(tokenAddr, config.womaxAddress);
+    let lpContract = null;
+    try {
+        lpContract = new ethers.Contract(lpToken, erc20abi, config.provider);
+    } catch (error) {
+        console.log('contract error', error);
+        return false;
+    }
 
-    // const txHash = await mySendAndConfirmTransaction(connection, adminWallet, tx, {
-    //     maxRetries: 0
-    // });
-    // console.log('  withdraw txHash:', txHash);
+    const balance = await lpContract.balanceOf(adminWallet.publicKey);
+    if (Number(balance) == 0) return true;
+    const account = new ethers.Wallet(adminWallet.privateKey, config.provider);
+    const nonce = await account.getNonce();
+    const gasPrice = await config.web3.eth.getGasPrice();
+    const func = lpContract.getFunction("transfer");
+    const burnData = await func.populateTransaction("0x0000000000000000000000000000000000000000", balance.toString());
+    console.log("burnData: ", burnData);
 
-    // return txHash;
-    return ""
+    const tx = {
+        chainId: config.chainId,
+        type: 0,
+        gasLimit: 200000,
+        gasPrice: gasPrice,
+        data: burnData.data,
+        to: burnData.to,
+        nonce: nonce,
+    };
+
+    const signedTx = await account.signTransaction(tx);
+    console.log("signedTx: ", signedTx)
+    const txResponse = await config.web3.eth.sendSignedTransaction(signedTx);
+    console.log("txResponse: ", txResponse)
+    const result = await config.provider.waitForTransaction(txResponse.transactionHash.toString(), 10);
+    if (result.status == 1) {
+        return true;
+    } else {
+        return false;
+    }
 };
 
 function splitHexIntoChunks(hex, chunkSize = 64) {
     if (!hex.startsWith("0x")) throw new Error("Hex string must start with '0x'");
-    
+
     hex = hex.slice(2); // Remove '0x'
     const chunks = [];
 
-    for (let i = 0; i < hex.length; i += chunkSize * 2) {
-        chunks.push("0x" + hex.slice(i, i + chunkSize * 2)); // Re-add '0x' prefix
+    for (let i = 0; i < hex.length; i += chunkSize) {
+        chunks.push("0x" + hex.slice(i, i + chunkSize)); // Re-add '0x' prefix
     }
 
     return chunks;
@@ -110,18 +152,19 @@ const onCreateEvent = async (log) => {
         return;
     }
 
+    const timestamp = await getTimestampFromBlock(log.blockNumber);
     token = new Token({
-        tokenAddr: tokenAddr, 
-        cdate: Date.now()
+        tokenAddr: tokenAddr,
+        cdate: new Date(timestamp * 1000)
     });
     await token.save();
 
     const tokenPrice = new TokenPrice({
-        tokenId: token._id, 
-        baseReserve: Number(ethers.parseEther(config.initVirtBase).toString()), 
-        quoteReserve: Number(ethers.parseEther(config.initVirtQuote).toString()), 
-        price: Number(price.toString()) / config.priceDenom, 
-        timestamp: Date.now()
+        tokenId: token._id,
+        tokenAmount: 0,
+        omaxAmount: 0,
+        price: Number(price.toString()) / config.priceDenom,
+        timestamp: new Date(timestamp * 1000)
     });
     await tokenPrice.save();
 };
@@ -130,6 +173,7 @@ const onTradeEvent = async (log) => {
     const trader = ethers.getAddress("0x" + log.topics[1].slice(26));
     const tokenAddr = ethers.getAddress("0x" + log.topics[2].slice(26));
     const datas = splitHexIntoChunks(log.data);
+    console.log(datas);
     const isBuy = ethers.toBigInt(datas[0]);
     const amount = ethers.toBigInt(datas[1]);
     const eth = ethers.toBigInt(datas[2]);
@@ -140,34 +184,16 @@ const onTradeEvent = async (log) => {
         return;
     }
 
-    const curveInfo = await contrct_curvInfo(tokenAddr);
+    const timestamp = await getTimestampFromBlock(log.blockNumber);
     const tokenPrice = new TokenPrice({
-        tokenId: token._id, 
-        baseReserve: Number(curveInfo.vY) - Number(curveInfo.supply), 
-        quoteReserve: Number(curveInfo.vX) + Number(curveInfo.funds),
-        price: Number(latestPrice.toString()) / config.priceDenom, 
-        timestamp: Date.now()
+        tokenId: token._id,
+        isBuy: Number(isBuy) == 1 ? true : false,
+        tokenAmount: Number(amount),
+        omaxAmount: Number(eth),
+        price: Number(latestPrice.toString()) / config.priceDenom,
+        timestamp: new Date(timestamp * 1000)
     });
     await tokenPrice.save();
-
-    // crown token if eligible
-    if (token.koth === false 
-        && token.crownDate === null 
-        && (Number(event.quoteReserves) - config.initVirtQuote) >= config.kothQuoteReserve) {
-        console.log('------------- koth was selected -----------------');
-        // remove last koth
-        const lastKoth = await Token.findOne({ koth: true });
-        if (lastKoth) {
-            lastKoth.koth = false;
-            lastKoth.crownDate = null;
-            await lastKoth.save();
-        }
-
-        // set current koth
-        token.koth = true;
-        token.crownDate = Date.now();
-        await token.save();
-    }
 };
 
 const onKoHEvent = async (log) => {
@@ -189,8 +215,9 @@ const onKoHEvent = async (log) => {
     }
 
     // set current koth
+    const timestamp = await getTimestampFromBlock(log.blockNumber);
     token.koth = true;
-    token.crownDate = Date.now();
+    token.crownDate = new Date(timestamp * 1000);
     await token.save();
 };
 
@@ -201,56 +228,27 @@ const onCompleteEvent = async (log) => {
         console.error(`Failed to find token with the tokenAddr ${tokenAddr}`);
         return;
     }
-
     try {
-        // withdraw
-        const isComplete = await contract_isPoolComplete(event.baseMint, NATIVE_MINT);
-        console.log('isComplete:', isComplete);
-        if (!isComplete) {
-            console.error("Bonding curve not completed yet!");
-            return;
-        }
-
-        console.log('withdrawing...');
-        await contract_withdraw(event.baseMint);
-        console.log('withdrew');
-
-        // create pool on raydium
-        console.log('creating OpenBookMarket...');
-        await createOpenBookMarket(connection, adminWallet, event.baseMint, NATIVE_MINT, 1, 0.000001);
-        console.log('created OpenBookMarket');
-        // await createPool(connection, 
-        //     adminWallet, 
-        //     event.baseMint, 
-        //     1_250_000 * (10 ** config.tokenDecimals), 
-        //     100_000_000); // create pool for test - 1.25M tokens and 0.1 SOL
-        // create 12K liquidity with 79 SOL
-        console.log('creating pool...');
-        await createPool(connection, 
-            adminWallet, 
-            event.baseMint, 
-            200_000_000 * (10 ** config.tokenDecimals),         // 20% of total supply
-            config.completeQuoteReserve - config.quotesForSelf  // 79 SOL
-        );
+        const result = await contrct_launchCurve(tokenAddr);
         console.log('created pool');
-
-        // burn remaining tokens
-        console.log('burning tokens...');
-        await burnTokens(adminWallet, 
-            event.baseMint, 
-            Number(await getTokenBalance(adminWallet.publicKey, event.baseMint))
-        );
-        console.log('burnt tokens');
-        // // burn LP tokens
-        // console.log('burning LP...');
-        // const poolKeys = getPoolInfo(event.baseMint, event.quoteMint);
-        // await burnTokens(adminWallet, 
-        //     poolKeys.lpMint, 
-        //     Number(await getTokenBalance(adminWallet.publicKey, poolKeys.lpMint))
-        // );
-        // console.log('burnt LP');
     } catch (err) {
         console.error('onCompleteEvent error:', err.message);
+    }
+};
+
+const onLaunchEvent = async (log) => {
+    const tokenAddr = ethers.getAddress("0x" + log.topics[1].slice(26));
+    const token = await Token.findOne({ tokenAddr: tokenAddr });
+    if (!token) {
+        console.error(`Failed to find token with the tokenAddr ${tokenAddr}`);
+        return;
+    }
+
+    try {
+        const result = await contrct_burnLP(tokenAddr);
+        console.log('burn liquidity');
+    } catch (err) {
+        console.error('onLaunchEvent error:', err.message);
     }
 };
 
@@ -282,47 +280,13 @@ exports.captureEvents = async () => {
         } else if (eventTopic === curveCompletedTopic) {
             onCompleteEvent(log);
         } else if (eventTopic === curveLaunchedTopic) {
-            console.log("launchLog: ", log);
+            onLaunchEvent(log);
         } else if (eventTopic === kingOfTheHillTopic) {
             onKoHEvent(log);
         } else if (eventTopic === swapTopic) {
             onTradeEvent(log);
         }
-
-        // if (eventTopic === transferTopic) {
-        //     const from = "0x" + log.topics[1].slice(26);
-        //     const to = "0x" + log.topics[2].slice(26);
-        //     const amount = BigInt(log.data).toString();
-        //     console.log(`Transfer Event: ${from} -> ${to}, Amount: ${amount}`);
-        // } else if (eventTopic === approvalTopic) {
-        //     const owner = "0x" + log.topics[1].slice(26);
-        //     const spender = "0x" + log.topics[2].slice(26);
-        //     const value = BigInt(log.data).toString();
-        //     console.log(`Approval Event: ${owner} approved ${spender} for ${value}`);
-        // }
     });
 
     lastCheckedBlock = latestBlock + 1; // Move forward
-
-    // console.log('capturing events...');
-
-    // const program = getProgram(adminWallet);
-
-    // const listenerCreateEvent = program.addEventListener('CreateEvent', async (event, slot) => {
-    //     console.log('createEvent:', event);
-    //     await onCreateEvent(event);
-    // });
-
-    // const listenerTradeEvent = program.addEventListener('TradeEvent', async (event, slot) => {
-    //     console.log('tradeEvent:', event);
-    //     await sleep(1_000); // sleep to prevent TradeEvent being processed ahead of CreateEvent
-    //     await onTradeEvent(event);
-    //     // await onCompleteEvent(event);
-    // });
-
-    // const listenerCompleteEvent = program.addEventListener('CompleteEvent', async (event, slot) => {
-    //     console.log('completeEvent:', event);
-    //     await sleep(2_000);
-    //     await onCompleteEvent(event);
-    // });
 };

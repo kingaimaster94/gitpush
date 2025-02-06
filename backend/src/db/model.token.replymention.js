@@ -8,8 +8,8 @@ const tokenReplyMentionSchema = new Schema({
     replyId: { type: Schema.Types.ObjectId, ref: 'TokenReplyMention' },
     mentionerId: { type: Schema.Types.ObjectId, ref: 'User' },
     buySell: { type: Number, default: 0 }, // 0: none, 1: buy, 2: sell
-    baseAmount: { type: Number, default: 0 },
-    quoteAmount: { type: Number, default: 0 },
+    tokenAmount: { type: Number, default: 0 },
+    omaxAmount: { type: Number, default: 0 },
     comment: { type: String, default: null },
     image: { type: String, default: null },
     cdate: { type: Date, default: Date.now() },

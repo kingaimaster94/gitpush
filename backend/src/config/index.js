@@ -18,9 +18,7 @@ exports.config = {
         https: 2101,
         wss: 2102,
     },
-    rpcUrl: (process.env.TEST_MODE === 'true')
-        ? 'https://testapi.omaxray.com'
-        : 'https://mainapi.omaxscan.com',
+    rpcUrl: rpcUrl,
 
     scanUrl: (process.env.TEST_MODE === 'true')
         ? 'https://testnet.omaxscan.com'
@@ -28,10 +26,14 @@ exports.config = {
 
     pumpfunAddress: (process.env.TEST_MODE === 'true')
         ? '0xaF218243096aeb4e37d119ea28F83e1473EcC011'
-        : 'https://omaxscan.com',
+        : '0xaF218243096aeb4e37d119ea28F83e1473EcC011',
+
+    factoryAddress: "0x441b9333D1D1ccAd27f2755e69d24E60c9d8F9CF",
+    womaxAddress: "0x373e4b4E4D328927bc398A9B50e0082C6f91B7bb",
 
     web3: web3,
     provider: provider,
+    chainId: (process.env.TEST_MODE === 'true') ? 332 : 311,
     tokenDecimals: 18,
     tokenTotalSupply: 10_000_000_000,   // 10 B
     initVirtBase: 10_000_000_000,       // 10 B

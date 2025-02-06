@@ -4,9 +4,6 @@ const axios = require('axios');
 const { User,
     Token: TokenModel
 } = require('../db/');
-const { connection,
-    mySendAndConfirmTransaction
-} = require("./utils");
 const { ethers } = require('ethers');
 const { erc20abi } = require('./erc20');
 
@@ -115,36 +112,9 @@ async function getTokenBalance(owner, tokenAddr = '') {
     return -1;
 }
 
-async function burnTokens(keypair, mint, amount) {
-    // const tokenAccount = await getOrCreateAssociatedTokenAccount(
-    //     connection,
-    //     keypair,
-    //     mint,
-    //     keypair.publicKey
-    // );
-    // // console.log("  tokenAccount:", tokenAccount);
-
-    // const recentBlockhash = await connection.getLatestBlockhash();
-    // const transaction = new Transaction({
-    //     recentBlockhash: recentBlockhash.blockhash,
-    //     feePayer: keypair.publicKey
-    // })
-    // .add(
-    //     createBurnInstruction(tokenAccount.address, mint, keypair.publicKey, amount)
-    // );
-
-    // const burnSig = await mySendAndConfirmTransaction(connection, keypair, transaction, {
-    //     // skipPreflight: true,
-    //     maxRetries: 0
-    // });
-    // console.log("  burnTokens txhash:", burnSig);
-}
-
-
 module.exports = {
     getTokensHeld,
     getTokenHolderDistribution,
     getWalletTokenAccounts,
-    getTokenBalance,
-    burnTokens
+    getTokenBalance
 };

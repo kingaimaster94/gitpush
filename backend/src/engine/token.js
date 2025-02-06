@@ -44,7 +44,9 @@ const updateToken = async (req, resp) => {
         // check if tokenAddr info exists
         let token = await Token.findOne({ tokenAddr: query.tokenAddr });
         if (!token) {
+            console.log("event monitoring failed");
             token = new Token({tokenAddr: query.tokenAddr});
+            token.cdate = Date.now();
         }
 
         let creator = await User.findOne({ _id: req.userId });
@@ -61,7 +63,6 @@ const updateToken = async (req, resp) => {
         token.twitter = query.twitterLink;
         token.telegram = query.tgLink;
         token.website = query.websiteLink;
-        token.cdate = Date.now();
         await token.save();
 
         broadcastMessage({
@@ -417,8 +418,8 @@ const getThreadData = async (req, resp) => {
                     image: reply.image, 
                     cdate: reply.cdate, 
                     buySell: reply.buySell, 
-                    baseAmount: reply.baseAmount, 
-                    quoteAmount: reply.quoteAmount, 
+                    tokenAmount: reply.tokenAmount, 
+                    omaxAmount: reply.omaxAmount, 
                     likes: await TokenReplyMentionLike.countDocuments({ replyMentionId: reply._id, status: true }), 
                     liked: await TokenReplyMentionLike.countDocuments({ replyMentionId: reply._id, likerId: parsedUserId, status: true }) > 0 ? true : false, 
                     mentions: await TokenReplyMention.find({ replyMentionId: reply._id, mentionerId: {$ne: null} }, { _id: 1 })
@@ -595,8 +596,8 @@ const getTradeHist = async (req, resp) => {
                 avatar: trade.traderId.avatar, 
                 username: trade.traderId.username, 
                 isBuy: trade.isBuy, 
-                baseAmount: trade.baseAmount, 
-                quoteAmount: trade.quoteAmount, 
+                tokenAmount: trade.tokenAmount, 
+                omaxAmount: trade.omaxAmount, 
                 date: trade.timestamp, 
                 txhash: trade.txhash
             });
@@ -631,9 +632,9 @@ const tradeToken = async (req, resp) => {
             tokenId: token._id,
             traderId: req.userId,
             isBuy: query.isBuy,
-            baseAmount: query.baseAmount,
-            quoteAmount: query.quoteAmount,
-            timestamp: Date.now(),
+            tokenAmount: query.tokenAmount,
+            omaxAmount: query.omaxAmount,
+            timestamp: new Date(query.timestamp * 1000),
             txhash: query.txhash
         });
         await trade.save();
@@ -644,8 +645,8 @@ const tradeToken = async (req, resp) => {
                 replierId: req.userId,
                 buySell: (query.isBuy ? 0 : 1) + 1,
                 comment: query.comment,
-                baseAmount: query.baseAmount,
-                quoteAmount: query.quoteAmount,
+                tokenAmount: query.tokenAmount,
+                omaxAmount: query.omaxAmount,
                 cdate: Date.now()
             });
             await replyMention.save();
@@ -660,8 +661,8 @@ const tradeToken = async (req, resp) => {
                 tokenAddr: token.tokenAddr, 
                 tokenName: token.name, 
                 logo: token.logo, 
-                baseAmount: query.baseAmount,
-                quoteAmount: query.quoteAmount,
+                tokenAmount: query.tokenAmount,
+                omaxAmount: query.omaxAmount,
                 isBuy: query.isBuy, 
                 cdate: token.cdate
             }

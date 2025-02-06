@@ -61,8 +61,8 @@ server.listen(port, async () => {
         tokenName: lastTrade?.tokenId?.name, 
         logo: lastTrade?.tokenId?.logo, 
 
-        baseAmount: lastTrade?.baseAmount,
-        quoteAmount: lastTrade?.quoteAmount,
+        tokenAmount: lastTrade?.tokenAmount,
+        omaxAmount: lastTrade?.omaxAmount,
         isBuy: lastTrade?.isBuy, 
         cdate: lastTradeDate
     };
