@@ -94,7 +94,7 @@ async function getTokenBalance(owner, tokenAddr = '') {
     try {
         tokenContract = new ethers.Contract(tokenAddr, erc20abi, config.provider);
     } catch (error) {
-        afx.errorLog('getWalletTokenBalance', error)
+        console.log('getWalletTokenBalance', error)
         return -1
     }
 

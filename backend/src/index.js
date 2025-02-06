@@ -11,10 +11,11 @@ const routesApi = require('./routes/app.route');
 const auth = require('./routes/auth');
 const user = require('./routes/user');
 const token = require('./routes/token');
+const { captureEvents } = require('./omax/omax_web3');
 
 const app = express();
 dotenv.config();
-app.use(cors({origin: '*'}));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(fileUpload({ createParentPath: true }));
 
@@ -33,3 +34,5 @@ app.listen(port, async () => {
     console.log(`Server is running on PORT ${port}`);
     connect();
 });
+
+setInterval(captureEvents, 10000);

@@ -1,6 +1,6 @@
 
 const dotenv = require('dotenv');
-const Web3 = require('web3');
+const { Web3 } = require('web3');
 const { ethers } = require('ethers');
 
 dotenv.config();
@@ -29,7 +29,7 @@ exports.config = {
     pumpfunAddress: (process.env.TEST_MODE === 'true')
         ? '0xaF218243096aeb4e37d119ea28F83e1473EcC011'
         : 'https://omaxscan.com',
-        
+
     web3: web3,
     provider: provider,
     tokenDecimals: 18,
@@ -40,7 +40,7 @@ exports.config = {
     completeQuoteReserve: 2_000_000,    // +2_000_000 OMAX
     createFee: 1_000,                   // 1_000 OMAX
     quotesForSelf: 100_000,             // 100_000 OMAX
-
+    priceDenom: 1_000_000_000_000,
     dataType: {
         lastToken: 0xFF01,
         lastTrade: 0xFF02,
