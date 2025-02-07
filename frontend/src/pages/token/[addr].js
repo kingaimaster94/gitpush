@@ -25,10 +25,10 @@ import prime_twitter from "../../assets/images/prime_twitter.png";
 import web from "../../assets/images/web.svg";
 
 import { useAccount, useChainId, WagmiContext } from "wagmi";
-import { writeContract, readContract, waitForTransactionReceipt, getBlock } from "@wagmi/core";
+import { writeContract, readContract, readContracts, waitForTransactionReceipt, getBlock } from "@wagmi/core";
 import { parseEther } from "viem";
 
-import { EXPLORER_URL, EXPLORER_URL_TESTNET, PUMPFUN_ADDRESS, PUMPFUN_ADDRESS_TESTNET, OMAX_ROUTER_ADDRESS, WOMAX_ADDRESS } from "@/contexts/contracts/constants";
+import { EXPLORER_URL, EXPLORER_URL_TESTNET, PUMPFUN_ADDRESS, PUMPFUN_ADDRESS_TESTNET, OMAX_ROUTER_ADDRESS, WOMAX_ADDRESS, OMAX_FACTORY_ADDRESS } from "@/contexts/contracts/constants";
 
 import { TOKEN_DECIMALS } from "@/engine/consts";
 import {
@@ -48,6 +48,8 @@ import img_bg from "../../assets/images/img_bg.png";
 import { pumpfunabi } from "@/contexts/contracts/pumpfun";
 import { erc20abi } from "@/contexts/contracts/erc20";
 import { omaxswapv2_router } from "@/contexts/contracts/omaxswapv2_router";
+import { factoryabi } from "@/contexts/contracts/factory";
+import { pairabi } from "@/contexts/contracts/pair";
 
 const rajdhani = Rajdhani({
   weight: ["300", "400", "500", "600", "700"],
@@ -1460,19 +1462,79 @@ function TradeDialog({
         const deadline = Math.floor(Date.now() / 1000) + 60;
 
         if (isBuy) {
-          tx = await writeContract(config, {
-            abi: omaxswapv2_router,
-            address: OMAX_ROUTER_ADDRESS,
-            functionName: "swapExactETHForTokens",
-            args: [
-              '1',
-              [WOMAX_ADDRESS, tokenAddr],
-              account.address,
-              deadline
-            ],
-            chainId: chainID,
-            value: parseEther(amount.toString())
-          });
+          if (currentCoin == "omax") {
+            tx = await writeContract(config, {
+              abi: omaxswapv2_router,
+              address: OMAX_ROUTER_ADDRESS,
+              functionName: "swapExactETHForTokens",
+              args: [
+                '1',
+                [WOMAX_ADDRESS, tokenAddr],
+                account.address,
+                deadline
+              ],
+              chainId: chainID,
+              value: parseEther(amount.toString())
+            });
+          } else {
+            const pairAddress = await readContract(config, {
+              address: OMAX_FACTORY_ADDRESS,
+              abi: factoryabi,
+              functionName: "getPair",
+              args: [WOMAX_ADDRESS, tokenAddr],
+              chainId: chainID
+            });
+
+            const results = await readContracts(config, {
+              contracts: [
+                {
+                  abi: pairabi,
+                  address: pairAddress,
+                  functionName: "getReserves",
+                  args: [],
+                  chainId: chainID
+                },
+                {
+                  abi: pairabi,
+                  address: pairAddress,
+                  functionName: "token0",
+                  args: [],
+                  chainId: chainID
+                }
+              ]
+            });
+
+            let reserveIn, reserveOut;
+            if (results[1].result.toString() == WOMAX_ADDRESS) {
+              reserveIn = results[0].result[0];
+              reserveOut = results[0].result[1];
+            } else {
+              reserveIn = results[0].result[1];
+              reserveOut = results[0].result[2];
+            }
+
+            const requiredOmax = await readContract(config, {
+              abi: omaxswapv2_router,
+              address: OMAX_ROUTER_ADDRESS,
+              functionName: "getAmountIn",
+              args: [parseEther(amount.toString()), reserveIn, reserveOut],
+              chainId: chainID
+            });
+
+            tx = await writeContract(config, {
+              abi: omaxswapv2_router,
+              address: OMAX_ROUTER_ADDRESS,
+              functionName: "swapETHForExactTokens",
+              args: [
+                parseEther(amount.toString()),
+                [WOMAX_ADDRESS, tokenAddr],
+                account.address,
+                deadline
+              ],
+              chainId: chainID,
+              value: requiredOmax
+            });
+          }
         } else {
           const approveTx = await writeContract(config, {
             abi: erc20abi,
@@ -1528,14 +1590,33 @@ function TradeDialog({
       const deadline = Math.floor(Date.now() / 1000) + 60;
       console.log("parseEther(amount.toString(): ", parseEther(amount.toString()));
       if (isBuy) {
-        tx = await writeContract(config, {
-          abi: pumpfunabi,
-          address: pumpfunAddress,
-          functionName: "buy",
-          args: [tokenAddr, '1', deadline.toString()],
-          chainId: chainID,
-          value: parseEther(amount.toString())
-        });
+        if (currentCoin == "omax") {
+          tx = await writeContract(config, {
+            abi: pumpfunabi,
+            address: pumpfunAddress,
+            functionName: "buy",
+            args: [tokenAddr, '1', deadline.toString()],
+            chainId: chainID,
+            value: parseEther(amount.toString())
+          });
+        } else {
+          const requiredOmax = await readContract(config, {
+            abi: pumpfunabi,
+            address: pumpfunAddress,
+            functionName: "getAmountInETH",
+            args: [parseEther(amount.toString()), tokenAddr],
+            chainId: chainID
+          });
+
+          tx = await writeContract(config, {
+            abi: pumpfunabi,
+            address: pumpfunAddress,
+            functionName: "buy",
+            args: [tokenAddr, parseEther(amount.toString()), deadline.toString()],
+            chainId: chainID,
+            value: requiredOmax
+          });
+        }
       } else {
         const approveTx = await writeContract(config, {
           abi: erc20abi,
