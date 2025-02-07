@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev -p 3030",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start -p 3030",
+    "serve": "pm2 start npm --name omaxpump_frontend -- run start"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",

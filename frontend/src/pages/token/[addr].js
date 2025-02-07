@@ -1652,9 +1652,6 @@ function TradeDialog({
       const recipt = await waitForTransactionReceipt(config, { hash: tx });
       console.log('txHash:', recipt);
       const timestamp = await getTimestampFromBlock(recipt.logs[0].blockNumber);
-      // console.log('tx:', tx);
-      console.log("  trade txHash:", recipt);
-
       toast.dismiss(id);
       toast.success("Trade complete!");
 
@@ -1664,8 +1661,8 @@ function TradeDialog({
         isBuy,
         isBuy ? 0 : Number(parseEther(amount.toString())), // To do - cryptoprince
         isBuy ? Number(parseEther(amount.toString())) : 0, // To do - cryptoprince
-        tx,
-        comment.current,
+        recipt.transactionHash,
+        comment.current.valueOf(),
         timestamp
       );
 

@@ -584,7 +584,7 @@ const getTradeHist = async (req, resp) => {
             return resp.status(400).json({ error: `Failed to find the token with tokenAddr ${query.tokenAddr}` });
         }
 
-        const tradeHist = await TokenTrade.find({ tokenId: token._id }).populate('traderId');
+        const tradeHist = await TokenTrade.find({ tokenId: token._id }).populate('traderId').sort({timestamp: -1});
         let histData = [];
         
         for (const trade of tradeHist) {

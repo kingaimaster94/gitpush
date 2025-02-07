@@ -52,6 +52,7 @@ export default function CreateCoin() {
   const twitterLink = useRef(null);
   const telegramLink = useRef(null);
   const website = useRef(null);
+  const [agreed, setAgreed] = useState(false);
 
   const handleCreateCoin = () => {
     if (coinName.current?.value === "") {
@@ -298,8 +299,8 @@ export default function CreateCoin() {
             borderRadius: "3px !important",
           }}
           id="terms"
-        // checked={agreed}
-        // onCheckedChange={(value) => setAgreed(value as boolean)}
+          value={agreed}
+          onChange={() => setAgreed(!agreed)}
         />
         <label htmlFor="terms" className="label text-white ml-1">
           I agree to the OMAX Terms and Conditions and Token Profile Policy.
@@ -321,6 +322,7 @@ export default function CreateCoin() {
           width: "300px",
           height: "45px",
         }}
+        disabled={!agreed}
       >
         Create Coin
       </button>
