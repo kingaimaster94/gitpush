@@ -69,9 +69,9 @@ export async function mentionReply(replyMentionId, message, imageFile) {
   return result
 }
 
-export async function trade(tokenAddr, trader, isBuy, baseAmount, quoteAmount, txhash, comment, timestamp) {
+export async function trade(tokenAddr, trader, isBuy, tokenAmount, omaxAmount, txhash, comment, timestamp) {
   const result = await axiosPrivate.post(`/token/trade`, {
-    tokenAddr, trader, isBuy, baseAmount, quoteAmount, txhash, comment, timestamp
+    tokenAddr, trader, isBuy, tokenAmount, omaxAmount, txhash, comment, timestamp
   });
   return result.data;
 }

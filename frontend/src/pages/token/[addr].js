@@ -25,12 +25,11 @@ import prime_twitter from "../../assets/images/prime_twitter.png";
 import web from "../../assets/images/web.svg";
 
 import { useAccount, useChainId, WagmiContext } from "wagmi";
-import { writeContract, readContract, readContracts, waitForTransactionReceipt, getBlock } from "@wagmi/core";
+import { writeContract, simulateContract, readContract, readContracts, waitForTransactionReceipt, getBlock } from "@wagmi/core";
 import { parseEther } from "viem";
+import { decimalToEth } from "@/engine/utils";
 
 import { EXPLORER_URL, EXPLORER_URL_TESTNET, PUMPFUN_ADDRESS, PUMPFUN_ADDRESS_TESTNET, OMAX_ROUTER_ADDRESS, WOMAX_ADDRESS, OMAX_FACTORY_ADDRESS } from "@/contexts/contracts/constants";
-
-import { TOKEN_DECIMALS } from "@/engine/consts";
 import {
   getToken,
   getThreadData,
@@ -615,12 +614,12 @@ export default function TokenPage() {
                           </div>
                           {item.buySell === 1 && (
                             <p className="flex gap-1 items-center text-[#3FDC4F]">
-                              {`bought ${item.quoteAmount} OMAX`}
+                              {`bought ${decimalToEth(item.omaxAmount)} OMAX`}
                             </p>
                           )}
                           {item.buySell === 2 && (
                             <p className="flex gap-1 items-center text-red-600">
-                              {`sold ${item.baseAmount}${tokenInfo?.ticker}`}
+                              {`sold ${decimalToEth(item.tokenAmount)}${tokenInfo?.ticker}`}
                             </p>
                           )}
                         </div>
@@ -753,10 +752,10 @@ export default function TokenPage() {
                             {item.isBuy === true ? "buy" : "sell"}
                           </p>
                           <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center">
-                            {item.quoteAmount}
+                            {decimalToEth(item.omaxAmount)}
                           </p>
                           <p className="text-sm font-medium text-[#9F9F9F] w-[15%] text-center">
-                            {item.baseAmount}
+                            {decimalToEth(item.tokenAmount)}
                           </p>
                           <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center">
                             {format(
@@ -1459,7 +1458,7 @@ function TradeDialog({
 
       try {
         let tx = null;
-        const deadline = Math.floor(Date.now() / 1000) + 60;
+        const deadline = Math.floor(Date.now() / 1000) + 600;
 
         if (isBuy) {
           if (currentCoin == "omax") {
@@ -1546,12 +1545,12 @@ function TradeDialog({
 
           const reciptApprove = await waitForTransactionReceipt(config, { hash: approveTx });
 
-          tx = await writeContract(config, {
+          const { request } = await simulateContract(config, {
             abi: omaxswapv2_router,
             address: OMAX_ROUTER_ADDRESS,
             functionName: "swapExactTokensForETH",
             args: [
-              parseEther(amount.toString()).toString(),
+              parseEther(amount.toString()),
               '1',
               [tokenAddr, WOMAX_ADDRESS],
               account.address,
@@ -1559,7 +1558,10 @@ function TradeDialog({
             ],
             chainId: chainID
           });
-        }
+          console.log('simulate result: ', request);
+          tx = await writeContract(config, request);
+        }        
+
         const recipt = await waitForTransactionReceipt(config, { hash: tx });
         console.log("  trade txHash:", recipt);
 
@@ -1650,8 +1652,8 @@ function TradeDialog({
         tokenAddr,
         account.address,
         isBuy,
-        isBuy ? 0 : Number(amount), // To do - cryptoprince
-        isBuy ? Number(amount) : 0, // To do - cryptoprince
+        isBuy ? 0 : Number(parseEther(amount.toString())), // To do - cryptoprince
+        isBuy ? Number(parseEther(amount.toString())) : 0, // To do - cryptoprince
         tx,
         comment.current,
         timestamp

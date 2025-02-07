@@ -296,7 +296,7 @@ const onLaunchEvent = async (log) => {
     }
 };
 
-let lastCheckedBlock = 6961915;
+let lastCheckedBlock = 0;//6961915;
 const curveCreatedTopic = ethers.id("CurveCreated(address,address,uint256)");
 const curveCompletedTopic = ethers.id("CurveCompleted(address)");
 const curveLaunchedTopic = ethers.id("CurveLaunched(address)");

@@ -136,7 +136,7 @@ export default function Header() {
                   />
                   <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.username}</p>
                 </Link>
-                <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.isBuy === true ? 'bought' : 'sold'} {lastTradeInfo.quoteAmount} OMAX of</p>
+                <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.isBuy === true ? 'bought' : 'sold'} {lastTradeInfo.omaxAmount} OMAX of</p>
                 <Link href={`/token/${lastTradeInfo.tokenAddr}`} className="flex items-center gap-1">
                   <p className={`text-sm 2xl:text-xl hover:underline ${rajdhani.className}`}>{lastTradeInfo.tokenName}</p>
                   <Image
@@ -252,7 +252,7 @@ export default function Header() {
             />
             <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.username}</p>
           </Link>
-          <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.isBuy === true ? 'bought' : 'sold'} {lastTradeInfo.quoteAmount} OMAX of</p>
+          <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.isBuy === true ? 'bought' : 'sold'} {lastTradeInfo.omaxAmount} OMAX of</p>
           <Link href={`/${lastTradeInfo.tokenAddr}`} className="flex items-center gap-1">
             <p className={`text-sm 2xl:text-xl hover:underline ${rajdhani.className}`}>{lastTradeInfo.tokenName}</p>
             <Image
