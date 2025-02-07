@@ -1482,6 +1482,8 @@ function TradeDialog({
             chainId: chainID
           });
 
+          const reciptApprove = await waitForTransactionReceipt(config, { hash: approveTx });
+
           tx = await writeContract(config, {
             abi: omaxswapv2_router,
             address: OMAX_ROUTER_ADDRESS,
@@ -1542,6 +1544,8 @@ function TradeDialog({
           args: [pumpfunAddress, parseEther(amount.toString())],
           chainId: chainID
         });
+
+        const reciptApprove = await waitForTransactionReceipt(config, { hash: approveTx });
 
         tx = await writeContract(config, {
           abi: pumpfunabi,
