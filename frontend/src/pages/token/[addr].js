@@ -95,7 +95,7 @@ export default function TokenPage() {
   const below800 = useMedia("(max-width: 800px)");
   const [isPoolComplete, setIsPoolComplete] = useState(false);
 
-  const [scanAddress, setScanAddress] = useState(EXPLORER_URL);
+  const [scanUrl, setScanUrl] = useState(EXPLORER_URL);
   const [pumpfunAddress, setPumpfunAddress] = useState(PUMPFUN_ADDRESS);
 
   const chartHeight = isMobile ? 400 : 600;
@@ -114,15 +114,15 @@ export default function TokenPage() {
   useEffect(() => {
     if (chainID == 311) {
       setPumpfunAddress(PUMPFUN_ADDRESS);
-      setScanAddress(EXPLORER_URL);
+      setScanUrl(EXPLORER_URL);
     }
     else if (chainID == 332) {
       setPumpfunAddress(PUMPFUN_ADDRESS_TESTNET);
-      setScanAddress(EXPLORER_URL_TESTNET);
+      setScanUrl(EXPLORER_URL_TESTNET);
     }
     else {
       setPumpfunAddress('');
-      setScanAddress("");
+      setScanUrl("");
     }
   }, [chainID]);
 
@@ -362,7 +362,7 @@ export default function TokenPage() {
                 <CopyTextWithTooltip textToCopy={""} />{" "}
                 {truncateAddress(tokenInfo?.walletAddr || "")}
                 <a
-                  href={`${scanAddress}/address/${tokenInfo?.walletAddr}`}
+                  href={`${scanUrl}/address/${tokenInfo?.walletAddr}`}
                   target="_blank"
                 >
                   EXP <AiOutlineExport size={15} />
@@ -386,7 +386,7 @@ export default function TokenPage() {
               <Typography sx={{ fontWeight: "600" }} className="text_">
                 <CopyTextWithTooltip textToCopy={""} />{" "}
                 {truncateAddress(addr || "")}{" "}
-                <a href={`${scanAddress}/address/${addr}`} target="_blank">
+                <a href={`${scanUrl}/address/${addr}`} target="_blank">
                   EXP <AiOutlineExport size={15} />
                 </a>
               </Typography>
@@ -407,7 +407,7 @@ export default function TokenPage() {
               <Typography sx={{ fontWeight: "600" }} className="text_">
                 <CopyTextWithTooltip textToCopy={""} />{" "}
                 {truncateAddress(addr || "")}{" "}
-                <a href={`${scanAddress}/address/${addr}`} target="_blank">
+                <a href={`${scanUrl}/address/${addr}`} target="_blank">
                   EXP <AiOutlineExport size={15} />
                 </a>
               </Typography>
@@ -764,7 +764,7 @@ export default function TokenPage() {
                           </p>
                         </div>
                         <a
-                          href={`${scanAddress}/tx/${item.txhash}`}
+                          href={`${scanUrl}/tx/${item.txhash}`}
                           target="_blank"
                           className="text-sm font-medium text-[#9F9F9F] hover:underline"
                         >
@@ -1210,7 +1210,7 @@ export default function TokenPage() {
                     return (
                       <div key={index} className="flex justify-between">
                         <a
-                          href={`https://omaxscacn.com/address/${item.walletAddr}`}
+                          href={`${scanUrl}/address/${item.walletAddr}`}
                           target="_blank"
                           className="hover:underline"
                         >
@@ -1240,6 +1240,7 @@ export default function TokenPage() {
         tokenAddr={addr}
         ticker={tokenInfo?.ticker}
         amount={amount}
+        currentCoin={currentCoin}
         isBuy={currentMode === "buy"}
       />
       <SlippageDialog
@@ -1384,6 +1385,7 @@ function TradeDialog({
   tokenAddr,
   ticker,
   amount,
+  currentCoin,
   isBuy,
 }) {
   const comment = useRef("");
@@ -1391,22 +1393,24 @@ function TradeDialog({
   const config = useContext(WagmiContext);
   const chainID = useChainId();
 
-  const [scanAddress, setScanAddress] = useState(EXPLORER_URL);
+  const [scanUrl, setScanUrl] = useState(EXPLORER_URL);
   const [pumpfunAddress, setPumpfunAddress] = useState(PUMPFUN_ADDRESS);
+
+  console.log("amount: ", amount);
 
 
   useEffect(() => {
     if (chainID == 311) {
       setPumpfunAddress(PUMPFUN_ADDRESS);
-      setScanAddress(EXPLORER_URL);
+      setScanUrl(EXPLORER_URL);
     }
     else if (chainID == 332) {
       setPumpfunAddress(PUMPFUN_ADDRESS_TESTNET);
-      setScanAddress(EXPLORER_URL_TESTNET);
+      setScanUrl(EXPLORER_URL_TESTNET);
     }
     else {
       setPumpfunAddress('');
-      setScanAddress("");
+      setScanUrl("");
     }
   }, [chainID]);
 
@@ -1436,7 +1440,7 @@ function TradeDialog({
   };
 
   async function getTimestampFromBlock(blockNumber) {
-    const block = await getBlock(config, {blockNumber: blockNumber});
+    const block = await getBlock(config, { blockNumber: blockNumber });
     return block.timestamp;
   }
 
@@ -1467,15 +1471,23 @@ function TradeDialog({
               deadline
             ],
             chainId: chainID,
-            value: parseEther(amount)
+            value: parseEther(amount.toString())
           });
         } else {
+          const approveTx = await writeContract(config, {
+            abi: erc20abi,
+            address: tokenAddr,
+            functionName: "approve",
+            args: [OMAX_ROUTER_ADDRESS, parseEther(amount.toString())],
+            chainId: chainID
+          });
+
           tx = await writeContract(config, {
             abi: omaxswapv2_router,
             address: OMAX_ROUTER_ADDRESS,
             functionName: "swapExactTokensForETH",
             args: [
-              parseEther(amount),
+              parseEther(amount.toString()).toString(),
               '1',
               [tokenAddr, WOMAX_ADDRESS],
               account.address,
@@ -1512,22 +1524,30 @@ function TradeDialog({
       let tx = null;
 
       const deadline = Math.floor(Date.now() / 1000) + 60;
-      console.log(`amount: ${amount}, ${parseEther(amount)}`);
+      console.log("parseEther(amount.toString(): ", parseEther(amount.toString()));
       if (isBuy) {
         tx = await writeContract(config, {
           abi: pumpfunabi,
           address: pumpfunAddress,
           functionName: "buy",
-          args: [tokenAddr, '0', deadline.toString()],
+          args: [tokenAddr, '1', deadline.toString()],
           chainId: chainID,
-          value: parseEther(amount)
+          value: parseEther(amount.toString())
         });
       } else {
+        const approveTx = await writeContract(config, {
+          abi: erc20abi,
+          address: tokenAddr,
+          functionName: "approve",
+          args: [pumpfunAddress, parseEther(amount.toString())],
+          chainId: chainID
+        });
+
         tx = await writeContract(config, {
           abi: pumpfunabi,
           address: pumpfunAddress,
           functionName: "sell",
-          args: [tokenAddr, parseEther(amount), 0, deadline.toString()],
+          args: [tokenAddr, parseEther(amount.toString()), '1', deadline.toString()],
           chainId: chainID
         });
       }
