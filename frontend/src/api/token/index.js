@@ -80,3 +80,8 @@ export async function getTradeHistory(tokenAddr) {
   const result = await axiosPublic.get(`/token/get_trade_hist?tokenAddr=${tokenAddr}`)
   return result.data
 }
+
+export async function getRecentTrade() {
+  const result = await axiosPublic.get(`/token/get_recent_trade`);
+  return result.data
+}

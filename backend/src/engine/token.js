@@ -609,6 +609,28 @@ const getTradeHist = async (req, resp) => {
     }
 };
 
+const getRecentTrade = async (req, resp) => {
+    try {
+        const trades = await TokenTrade.find().sort({ timestamp: -1 }); // Ascending order
+        let histData = []
+        for (let i = 0; i < trades.length; i++) {
+            if (trades[i].isBuy == true) {
+                const token = await Token.findOne({_id: trades[i].tokenId});
+                histData.push({
+                    walletAddr: trades[i].trader, 
+                    logo: token.logo,
+                    omaxAmount: trades[i].omaxAmount,
+                });
+            }
+            if (histData.length == 3) break;
+        }
+        return resp.status(200).json(histData);
+    } catch (error) {
+        console.error('getRecentTrade error:', error);
+        return resp.status(400).json({ error: error.message });
+    }
+};
+
 const tradeToken = async (req, resp) => {
     const query = req.body;
     console.log('tradeToken - query:', query);
@@ -692,6 +714,7 @@ module.exports = { upload_metadata,
     likeReply, 
     dislikeReply, 
     mentionReply, 
-    getTradeHist, 
+    getTradeHist,
+    getRecentTrade,
     tradeToken
 };

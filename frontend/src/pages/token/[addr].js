@@ -614,12 +614,12 @@ export default function TokenPage() {
                           </div>
                           {item.buySell === 1 && (
                             <p className="flex gap-1 items-center text-[#3FDC4F]">
-                              {`bought ${decimalToEth(item.omaxAmount)} OMAX`}
+                              {`bought ${decimalToEth(item.omaxAmount).toFixed(2)} OMAX`}
                             </p>
                           )}
                           {item.buySell === 2 && (
                             <p className="flex gap-1 items-center text-red-600">
-                              {`sold ${decimalToEth(item.tokenAmount)}${tokenInfo?.ticker}`}
+                              {`sold ${decimalToEth(item.tokenAmount).toFixed(2)}${tokenInfo?.ticker}`}
                             </p>
                           )}
                         </div>
@@ -752,10 +752,10 @@ export default function TokenPage() {
                             {item.isBuy === true ? "buy" : "sell"}
                           </p>
                           <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center">
-                            {decimalToEth(item.omaxAmount)}
+                            {decimalToEth(item.omaxAmount).toFixed(2)}
                           </p>
                           <p className="text-sm font-medium text-[#9F9F9F] w-[15%] text-center">
-                            {decimalToEth(item.tokenAmount)}
+                            {decimalToEth(item.tokenAmount).toFixed(2)}
                           </p>
                           <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center">
                             {format(
@@ -1535,11 +1535,21 @@ function TradeDialog({
             });
           }
         } else {
+          const balance = await readContract(config, {
+            abi: erc20abi,
+            address: tokenAddr,
+            functionName: "balanceOf",
+            args: [account.address],
+            chainId: chainID
+          });
+
+          let amountWei = Math.min(Number(balance), Number(parseEther(amount.toString())));
+
           const approveTx = await writeContract(config, {
             abi: erc20abi,
             address: tokenAddr,
             functionName: "approve",
-            args: [OMAX_ROUTER_ADDRESS, parseEther(amount.toString())],
+            args: [OMAX_ROUTER_ADDRESS, amountWei.toString()],
             chainId: chainID
           });
 
@@ -1550,7 +1560,7 @@ function TradeDialog({
             address: OMAX_ROUTER_ADDRESS,
             functionName: "swapExactTokensForETH",
             args: [
-              parseEther(amount.toString()),
+              amountWei.toString(),
               '1',
               [tokenAddr, WOMAX_ADDRESS],
               account.address,

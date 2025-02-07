@@ -91,7 +91,7 @@ export default function BoardPage() {
 
   const getKingToken = async () => {
     const result = await getKing();
-    // console.log(result)
+    console.log(result)
     setKingToken(result);
   };
 
