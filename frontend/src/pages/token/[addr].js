@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Rajdhani } from "next/font/google";
 import localFont from "next/font/local";
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import Image from "next/image";
 import { Progress } from "flowbite-react";
 import {
@@ -24,8 +24,11 @@ import logo_ from "../../assets/images/logo_.svg";
 import prime_twitter from "../../assets/images/prime_twitter.png";
 import web from "../../assets/images/web.svg";
 
-import { useAccount, useChainId } from "wagmi";
-import { EXPLORER_URL, EXPLORER_URL_TESTNET, PUMPFUN_ADDRESS, PUMPFUN_ADDRESS_TESTNET } from "@/contexts/contracts/constants";
+import { useAccount, useChainId, WagmiContext } from "wagmi";
+import { writeContract, readContract, waitForTransactionReceipt, getBlock } from "@wagmi/core";
+import { parseEther } from "viem";
+
+import { EXPLORER_URL, EXPLORER_URL_TESTNET, PUMPFUN_ADDRESS, PUMPFUN_ADDRESS_TESTNET, OMAX_ROUTER_ADDRESS, WOMAX_ADDRESS } from "@/contexts/contracts/constants";
 
 import { TOKEN_DECIMALS } from "@/engine/consts";
 import {
@@ -37,12 +40,14 @@ import {
   mentionReply,
   trade,
   getTradeHistory,
-  getMarketId,
 } from "@/api/token";
 import { getUserId, truncateAddress } from "@/utils";
 import { Box, Grid, Typography } from "@mui/material";
 import CopyTextWithTooltip from "@/components/CopyTextWithTooltip";
 import img_bg from "../../assets/images/img_bg.png";
+import { pumpfunabi } from "@/contexts/contracts/pumpfun";
+import { erc20abi } from "@/contexts/contracts/erc20";
+import { omaxswapv2_router } from "@/contexts/contracts/omaxswapv2_router";
 
 const rajdhani = Rajdhani({
   weight: ["300", "400", "500", "600", "700"],
@@ -67,9 +72,9 @@ export default function TokenPage() {
   const { query } = useRouter();
   const { addr } = query;
 
-  const { isConnected } = useAccount();
-  const walletCtx = useWallet();
+  const account = useAccount();
   const chainID = useChainId();
+  const config = useContext(WagmiContext);
 
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const [isTradeDialogOpen, setIsTradeDialogOpen] = useState(false);
@@ -106,7 +111,6 @@ export default function TokenPage() {
     return () => clearInterval(interval);
   }, []);
 
-
   useEffect(() => {
     if (chainID == 311) {
       setPumpfunAddress(PUMPFUN_ADDRESS);
@@ -123,8 +127,8 @@ export default function TokenPage() {
   }, [chainID]);
 
   useEffect(() => {
-    if (walletCtx.publicKey !== null) checkCompleted();
-  }, [walletCtx]);
+    if (account.status == 'connected') checkCompleted();
+  }, [account]);
 
   useEffect(() => {
     setIsMobile(below600);
@@ -143,12 +147,18 @@ export default function TokenPage() {
   }, [addr, currentTab]);
 
   const checkCompleted = async () => {
-    // if (walletCtx.publicKey !== null && addr !== undefined) {
-    //   // console.log("================")
-    //   const result = await isPoolCompleted(addr, NATIVE_MINT);
-    //   setIsPoolComplete(result);
-    //   // console.log(result)
-    // }
+    const curveInfo = await readContract(config, {
+      abi: pumpfunabi,
+      address: pumpfunAddress,
+      functionName: "curveInfo",
+      args: [addr]
+    });
+    console.log(curveInfo)
+    if (Number(curveInfo.funds) >= Number(curveInfo.hardcap)) {
+      setIsPoolComplete(true);
+    } else {
+      setIsPoolComplete(false);
+    }
   };
 
   const getTradeHistoryInfo = async () => {
@@ -165,7 +175,7 @@ export default function TokenPage() {
   console.log(tokenInfo);
 
   const getThreadInfo = async () => {
-    if (isConnected) {
+    if (account.status == 'connected') {
       const userId = getUserId();
       const result = await getThreadData(addr, userId);
       // console.log(result)
@@ -179,7 +189,7 @@ export default function TokenPage() {
   };
 
   const onTrade = (e) => {
-    if (!isConnected) {
+    if (account.status != 'connected') {
       toast.error("Not connected wallet!");
       return;
     }
@@ -205,7 +215,7 @@ export default function TokenPage() {
   };
 
   const handleReply = async (comment, imageFile) => {
-    if (walletCtx.connected === false) {
+    if (account.status != "connected") {
       toast.error("Please connect wallet!");
       return;
     }
@@ -220,7 +230,7 @@ export default function TokenPage() {
   };
 
   const handleMentionReply = async (replyMentionId, comment, imageFile) => {
-    if (walletCtx.connected === false) {
+    if (account.status !== 'connected') {
       toast.error("Please connect wallet!");
       return;
     }
@@ -233,6 +243,7 @@ export default function TokenPage() {
     getThreadInfo();
     setIsPostDialogOpen(false);
   };
+
   function formatDuration(timestamp) {
     const now = Date.now();
     const diffInSeconds = Math.floor((now - timestamp) / 1000);
@@ -257,6 +268,7 @@ export default function TokenPage() {
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays}d ago`;
   }
+
   return (
     <Grid container spacing={2} className={`z-10 mt-10`}>
       <Grid item md={9} sm={12} xs={12}>
@@ -1006,23 +1018,23 @@ export default function TokenPage() {
                     <button
                       type="button"
                       className="bg-[#1A1A1A] px-4 py-1 text-sm text-white"
-                      onClick={() => setAmount(1)}
+                      onClick={() => setAmount(10000)}
                     >
-                      1 OMAX
+                      10k OMAX
                     </button>
                     <button
                       type="button"
                       className="bg-[#1A1A1A] px-4 py-1 text-sm text-white"
-                      onClick={() => setAmount(5)}
+                      onClick={() => setAmount(50000)}
                     >
-                      5 OMAX
+                      50k OMAX
                     </button>
                     <button
                       type="button"
                       className="bg-[#1A1A1A] px-4 py-1 text-sm text-white"
-                      onClick={() => setAmount(10)}
+                      onClick={() => setAmount(100000)}
                     >
-                      10 OMAX
+                      100k OMAX
                     </button>
                   </div>
                 ) : (
@@ -1226,7 +1238,7 @@ export default function TokenPage() {
       <TradeDialog
         isTradeDialogOpen={isTradeDialogOpen}
         setIsTradeDialogOpen={setIsTradeDialogOpen}
-        tokenMint={addr}
+        tokenAddr={addr}
         ticker={tokenInfo?.ticker}
         amount={amount}
         isBuy={currentMode === "buy"}
@@ -1370,115 +1382,181 @@ function PostDialog({
 function TradeDialog({
   isTradeDialogOpen,
   setIsTradeDialogOpen,
-  tokenMint,
+  tokenAddr,
   ticker,
   amount,
   isBuy,
 }) {
   const comment = useRef("");
-  const walletCtx = useAccount();
+  const account = useAccount();
+  const config = useContext(WagmiContext);
+  const chainID = useChainId();
+
+  const [scanAddress, setScanAddress] = useState(EXPLORER_URL);
+  const [pumpfunAddress, setPumpfunAddress] = useState(PUMPFUN_ADDRESS);
+
+
+  useEffect(() => {
+    if (chainID == 311) {
+      setPumpfunAddress(PUMPFUN_ADDRESS);
+      setScanAddress(EXPLORER_URL);
+    }
+    else if (chainID == 332) {
+      setPumpfunAddress(PUMPFUN_ADDRESS_TESTNET);
+      setScanAddress(EXPLORER_URL_TESTNET);
+    }
+    else {
+      setPumpfunAddress('');
+      setScanAddress("");
+    }
+  }, [chainID]);
+
+  const checkCompleted = async () => {
+    const curveInfo = await readContract(config, {
+      abi: pumpfunabi,
+      address: pumpfunAddress,
+      functionName: "curveInfo",
+      args: [addr]
+    });
+    console.log(curveInfo)
+    if (Number(curveInfo.funds) >= Number(curveInfo.hardcap)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const checkPoolCreated = async () => {
+    const launched = await readContract(config, {
+      abi: erc20abi,
+      address: tokenAddr,
+      functionName: "_launched",
+      args: []
+    });
+    return launched;
+  };
+
+  async function getTimestampFromBlock(blockNumber) {
+    const block = await getBlock(config, {blockNumber: blockNumber});
+    return block.timestamp;
+  }
 
   const onTrade = async () => {
-    if (!walletCtx.isConnected) {
+    if (account.status != 'connected') {
       toast.error("Not connected wallet!");
       return;
     }
 
-    // const isPoolCompleted = await isPoolComplete(tokenMint, NATIVE_MINT);
-    // if (isPoolCompleted) {
-    //   // swap on Omax protocol
-    //   const id = toast.loading(`Trading ${ticker}...`);
+    const created = await checkPoolCreated(tokenAddr);
+    if (created) {
+      // swap on Omax protocol
+      const id = toast.loading(`Trading ${ticker}...`);
 
-    //   try {
-    //     let inputTokenAmount;
-    //     let outputToken;
+      try {
+        let tx = null;
+        const deadline = Date.now() / 1000 + 60;
 
-    //     if (isBuy) {
-    //       inputTokenAmount = new TokenAmount(
-    //         Token.WSOL,
-    //         BigInt(Math.trunc(Number(amount) * LAMPORTS_PER_SOL))
-    //       );
-    //       outputToken = new Token(TOKEN_PROGRAM_ID, tokenMint, TOKEN_DECIMALS);
-    //     } else {
-    //       inputTokenAmount = new TokenAmount(
-    //         new Token(TOKEN_PROGRAM_ID, tokenMint, TOKEN_DECIMALS),
-    //         BigInt(Math.trunc(Number(amount) * 10 ** TOKEN_DECIMALS))
-    //       );
-    //       outputToken = Token.WSOL;
-    //     }
+        if (isBuy) {
+          tx = await writeContract(config, {
+            abi: omaxswapv2_router,
+            address: OMAX_ROUTER_ADDRESS,
+            functionName: "swapExactETHForTokens",
+            args: [
+              '1',
+              [WOMAX_ADDRESS, tokenAddr],
+              account.address,
+              deadline
+            ],
+            chainId: chainID,
+            value: parseEther(amount)
+          });
+        } else {
+          tx = await writeContract(config, {
+            abi: omaxswapv2_router,
+            address: OMAX_ROUTER_ADDRESS,
+            functionName: "swapExactTokensForETH",
+            args: [
+              parseEther(amount),
+              '1',
+              [tokenAddr, WOMAX_ADDRESS],
+              account.address,
+              deadline
+            ],
+            chainId: chainID
+          });
+        }
+        const recipt = await waitForTransactionReceipt(config, { hash: tx });
+        console.log("  trade txHash:", recipt);
 
-    //     const marketId = await getMarketId(
-    //       tokenMint,
-    //       Token.WSOL.mint.toBase58()
-    //     );
-    //     // console.log('marketId:', marketId);
-    //     const txHashes = await swap(
-    //       walletCtx,
-    //       inputTokenAmount,
-    //       outputToken,
-    //       new PublicKey(marketId),
-    //       isBuy
-    //     );
-    //     console.log("  trade txHashes:", txHashes);
+        toast.dismiss(id);
+        toast.success("Swap complete!");
 
-    //     toast.dismiss(id);
-    //     toast.success("Swap complete!");
+        setIsTradeDialogOpen(false);
+      } catch (err) {
+        console.error(err);
+        toast.dismiss(id);
+        toast.error(err.message);
+      }
 
-    //     // await trade(tokenMint, isBuy,
-    //     //   isBuy ? 0 : Number(amount), // To do - cryptoprince
-    //     //   isBuy ? Number(amount) : 0, // To do - cryptoprince
-    //     //   txHashes[0],
-    //     //   comment.current.value
-    //     // );
+      return;
+    }
 
-    //     setIsTradeDialogOpen(false);
-    //   } catch (err) {
-    //     console.error(err);
-    //     toast.dismiss(id);
-    //     toast.error(err.message);
-    //   }
+    const isPoolCompleted = await checkCompleted(tokenAddr);
+    if (!isPoolCompleted) {
+      toast.error(`Pool not created for token '${tokenAddr}'`);
+      return;
+    }
 
-    //   return;
-    // }
+    const id = toast.loading(`Trading ${ticker}...`);
 
-    // const created = await isPoolCreated(tokenMint, NATIVE_MINT);
-    // if (!created) {
-    //   toast.error(`Pool not created for token '${tokenMint}'`);
-    //   return;
-    // }
+    try {
+      let tx = null;
 
-    // const id = toast.loading(`Trading ${ticker}...`);
+      const deadline = Date.now() / 1000 + 60;
+      if (isBuy) {
+        tx = await writeContract(config, {
+          abi: pumpfunabi,
+          address: pumpfunAddress,
+          functionName: "buy",
+          args: [tokenAddr, '0', deadline.toString()],
+          chainId: chainID,
+          value: parseEther(amount)
+        });
+      } else {
+        tx = await writeContract(config, {
+          abi: pumpfunabi,
+          address: pumpfunAddress,
+          functionName: "sell",
+          args: [tokenAddr, parseEther(amount), 0, deadline.toString()],
+          chainId: chainID
+        });
+      }
 
-    // try {
-    //   let tx = null;
+      const recipt = await waitForTransactionReceipt(config, { hash: tx });
+      console.log('txHash:', recipt);
+      const timestamp = await getTimestampFromBlock(recipt.logs[0].blockNumber);
+      // console.log('tx:', tx);
+      console.log("  trade txHash:", recipt);
 
-    //   if (isBuy)
-    //     tx = new Transaction().add(await getBuyTx(tokenMint, Number(amount)));
-    //   else
-    //     tx = new Transaction().add(await getSellTx(tokenMint, Number(amount)));
-    //   // console.log('tx:', tx);
+      toast.dismiss(id);
+      toast.success("Trade complete!");
 
-    //   const txHash = await send(connection, walletCtx, tx);
-    //   console.log("  trade txHash:", txHash);
+      await trade(
+        tokenAddr,
+        isBuy,
+        isBuy ? 0 : Number(amount), // To do - cryptoprince
+        isBuy ? Number(amount) : 0, // To do - cryptoprince
+        tx,
+        comment.current,
+        timestamp
+      );
 
-    //   toast.dismiss(id);
-    //   toast.success("Trade complete!");
-
-    //   await trade(
-    //     tokenMint,
-    //     isBuy,
-    //     isBuy ? 0 : Number(amount), // To do - cryptoprince
-    //     isBuy ? Number(amount) : 0, // To do - cryptoprince
-    //     txHash,
-    //     comment.current.value
-    //   );
-
-    //   setIsTradeDialogOpen(false);
-    // } catch (err) {
-    //   console.error(err);
-    //   toast.dismiss(id);
-    //   toast.error(err.message);
-    // }
+      setIsTradeDialogOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(id);
+      toast.error(err.message);
+    }
   };
 
   return (

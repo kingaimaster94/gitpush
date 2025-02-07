@@ -10,9 +10,9 @@ import { axiosPublic } from "../axiosPublic";
 //   return await response.data;
 // }
 
-export async function updateToken(name, ticker, desc, logo, twitter, telegram, website, tokenAddr) {
+export async function updateToken(name, ticker, desc, logo, twitter, telegram, website, tokenAddr, timestamp) {
   const result = await axiosPrivate.post(`/token/update_token`, {
-    name, ticker, desc, logo, twitter, telegram, website, tokenAddr
+    name, ticker, desc, logo, twitter, telegram, website, tokenAddr, timestamp
   });
   return result.data;
 }
@@ -69,19 +69,14 @@ export async function mentionReply(replyMentionId, message, imageFile) {
   return result
 }
 
-export async function trade(tokenAddr, isBuy, baseAmount, quoteAmount, txhash, comment) {
+export async function trade(tokenAddr, isBuy, baseAmount, quoteAmount, txhash, comment, timestamp) {
   const result = await axiosPrivate.post(`/token/trade`, {
-    tokenAddr, isBuy, baseAmount, quoteAmount, txhash, comment
+    tokenAddr, isBuy, baseAmount, quoteAmount, txhash, comment, timestamp
   });
   return result.data;
 }
 
 export async function getTradeHistory(tokenAddr) {
   const result = await axiosPublic.get(`/token/get_trade_hist?tokenAddr=${tokenAddr}`)
-  return result.data
-}
-
-export async function getMarketId(baseMint, quoteMint) {
-  const result = await axiosPublic.get(`/token/get_marketid?baseMint=${baseMint}&quoteMint=${quoteMint}`)
   return result.data
 }

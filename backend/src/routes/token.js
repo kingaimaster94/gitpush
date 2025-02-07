@@ -14,8 +14,7 @@ const { upload_metadata,
     dislikeReply, 
     mentionReply, 
     getTradeHist, 
-    tradeToken, 
-    getMarketId
+    tradeToken
 } = require('../engine/token');
 
 
@@ -39,8 +38,5 @@ router.post('/reply_mention', verify, mentionReply);
 
 router.get('/get_trade_hist', getTradeHist);
 router.post('/trade', verify, tradeToken);
-
-router.get('/get_marketid', getMarketId);
-
 
 module.exports = router;

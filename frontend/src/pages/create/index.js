@@ -12,13 +12,12 @@ import { useRef, useState, useContext, useEffect } from "react";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import { useAccount, useChainId, WagmiContext } from "wagmi";
-import { writeContract, readContracts, waitForTransactionReceipt, watchContractEvent } from "@wagmi/core";
-import { parseEther, parseUnits } from "viem";
+import { writeContract, readContracts, waitForTransactionReceipt, getBlock } from "@wagmi/core";
+import { parseEther } from "viem";
 import { pumpfunabi } from "@/contexts/contracts/pumpfun";
 import { PUMPFUN_ADDRESS, PUMPFUN_ADDRESS_TESTNET, EXPLORER_URL, EXPLORER_URL_TESTNET } from "@/contexts/contracts/constants";
 import { decimalToEth } from "@/engine/utils";
 
-import { TOKEN_TOTAL_SUPPLY } from "@/engine/consts";
 import { createMetadata } from "../../engine/createMetadata";
 import { updateToken } from "@/api/token";
 import { Box, Button, Checkbox, Grid, Typography } from "@mui/material";
@@ -412,7 +411,7 @@ function CreateCoinDialog({
       setScanAddress("");
     }
     if (pumpfunAddress != '') {
-      fetchData();      
+      fetchData();
     }
   }, [chainID]);
 
@@ -420,6 +419,13 @@ function CreateCoinDialog({
     if (Number(e.target.value) < 0) return;
     setAmount(e.target.value);
   };
+
+  async function getTimestampFromBlock(blockNumber) {
+    const block = await getBlock(config, {
+      blockNumber: blockNumber
+    });
+    return block.timestamp;
+  }
 
   const handleCreateCoin = async () => {
     if (wallet.status == "disconnected") {
@@ -459,6 +465,7 @@ function CreateCoinDialog({
 
       const recipt = await waitForTransactionReceipt(config, { hash: tx });
       console.log('txHash:', recipt);
+      const timestamp = await getTimestampFromBlock(recipt.logs[0].blockNumber);
       const result = await updateToken(
         name,
         ticker,
@@ -467,7 +474,8 @@ function CreateCoinDialog({
         twitterLink,
         telegramLink,
         websiteLink,
-        recipt.logs[0].address
+        recipt.logs[0].address,
+        timestamp
       );
       if (!result) {
         toast.dismiss(id);

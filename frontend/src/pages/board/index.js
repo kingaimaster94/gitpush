@@ -323,7 +323,7 @@ export default function BoardPage() {
               <p className={`text-xl text-white`}>
                 Follow some of your friends to start curating your feed
               </p>
-              {wallet.address !== null && (
+              {wallet.status == "connected" && (
                 <div className="flex gap-6">
                   <p className={`text-xl text-white`}>People you may know</p>
                   <button

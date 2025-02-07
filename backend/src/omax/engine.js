@@ -113,7 +113,7 @@ async function getTokenBalance(owner, tokenAddr = '') {
     return -1;
 }
 
-const getCurvInfo = async (tokenAddr) => {
+const getCurveInfo = async (tokenAddr) => {
     let pumpfunContract = null;
     try {
         pumpfunContract = new ethers.Contract(config.pumpfunAddress, pumpfunabi, config.provider);
@@ -131,5 +131,5 @@ module.exports = {
     getTokenHolderDistribution,
     getWalletTokenAccounts,
     getTokenBalance,
-    getCurvInfo
+    getCurveInfo
 };

@@ -8,7 +8,7 @@ const { User,
     TokenTrade
 } = require('../db');
 const { uploadMetadata } = require('../omax/metadata');
-const { getTokenHolderDistribution, getTokenBalance, getCurvInfo } = require('../omax/engine');
+const { getTokenHolderDistribution, getTokenBalance, getCurveInfo } = require('../omax/engine');
 const { PROGRAMIDS, 
     connection
 } = require('../omax/utils');
@@ -46,7 +46,6 @@ const updateToken = async (req, resp) => {
         if (!token) {
             console.log("event monitoring failed");
             token = new Token({tokenAddr: query.tokenAddr});
-            token.cdate = Date.now();
         }
 
         let creator = await User.findOne({ _id: req.userId });
@@ -63,6 +62,7 @@ const updateToken = async (req, resp) => {
         token.twitter = query.twitterLink;
         token.telegram = query.tgLink;
         token.website = query.websiteLink;
+        token.cdate = new Date(query.timestamp * 1000);
         await token.save();
 
         broadcastMessage({
@@ -268,7 +268,7 @@ const getTokenInfo = async (req, resp) => {
         }
         // console.log('token:', token);
 
-        const curveInfo = await getCurvInfo(query.tokenAddr);
+        const curveInfo = await getCurveInfo(query.tokenAddr);
 
         const lastPrice = (await TokenPrice.aggregate([
             { $match: {tokenId: token._id} },
@@ -675,28 +675,6 @@ const tradeToken = async (req, resp) => {
     }
 };
 
-const getMarketId = async (req, resp) => {
-    const query = req.query;
-    console.log('getMarketId - query:', query);
-
-    try {
-        const accounts = await Market.findAccountsByMints(connection, 
-            new PublicKey(query.baseMint), new PublicKey(query.quoteMint), PROGRAMIDS.OPENBOOK_MARKET);
-        if (accounts.length === 0) {
-            console.error("  Failed to find OpenBook market");
-            return resp.status(200).json();
-        }
-
-        const marketId = accounts[0].publicKey;
-        console.log('marketId:', marketId.toBase58());
-        return resp.status(200).json(marketId.toBase58());
-    } catch (err) {
-        console.error('getMarketId error:', err);
-        return resp.status(400).json({ error: err.message });
-    }
-};
-
-
 module.exports = { upload_metadata, 
     updateToken, 
     findTokens, 
@@ -709,6 +687,5 @@ module.exports = { upload_metadata,
     dislikeReply, 
     mentionReply, 
     getTradeHist, 
-    tradeToken, 
-    getMarketId
+    tradeToken
 };

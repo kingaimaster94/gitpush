@@ -2,7 +2,7 @@ import { createThirdwebClient } from "thirdweb";
 import { upload } from "thirdweb/storage";
 
 const client = createThirdwebClient({
-    clientId: "d7a770935e5e9a9d19ddfefa05474a16",
+    clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT,
 });
 
 export const createMetadata = async (imgFile) => {

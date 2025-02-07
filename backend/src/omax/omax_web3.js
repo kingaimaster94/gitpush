@@ -2,7 +2,8 @@ const dotenv = require('dotenv');
 
 const { config } = require('../config');
 const { Token,
-    TokenPrice
+    TokenPrice,
+    User
 } = require('../db');
 const { sleep } = require('../utils/basic');
 const { getWalletFromPrivateKey } = require('./utils');
@@ -10,6 +11,7 @@ const { pumpfunabi } = require('./pumpfun');
 const { erc20abi } = require('./erc20');
 const { factoryabi } = require('./factory');
 const { ethers } = require('ethers');
+const { getCurveInfo } = require('./engine');
 
 dotenv.config();
 
@@ -20,7 +22,7 @@ async function getTimestampFromBlock(blockNumber) {
     return block.timestamp;
 }
 
-const contrct_launchCurve = async (tokenAddr) => {
+const launchCurve = async (tokenAddr) => {
     let tokenContract = null;
     try {
         tokenContract = new ethers.Contract(tokenAddr, erc20abi, config.provider);
@@ -135,13 +137,28 @@ const onCreateEvent = async (log) => {
     const price = ethers.toBigInt(log.data);
     let token = await Token.findOne({ tokenAddr: tokenAddr });
     if (token) {
-        console.error(`Already registered token with tokenAddr ${tokenAddr}`);
+        console.log(`Already registered token with tokenAddr ${tokenAddr}`);
         return;
     }
 
     const timestamp = await getTimestampFromBlock(log.blockNumber);
+    const curveInfo = await getCurveInfo(tokenAddr);
+    const user = await User.findOne({walletAddr: creator});
+    let creatorId = null;
+    if (user) {
+        creatorId = user.id;
+    }
+    
     token = new Token({
         tokenAddr: tokenAddr,
+        name: curveInfo.name,
+        ticker: curveInfo.symbol,
+        desc: curveInfo.desc,
+        logo: curveInfo.logo,
+        twitter: curveInfo.twitter,
+        telegram: curveInfo.telegram,
+        website: curveInfo.website,
+        creatorId: creatorId,
         cdate: new Date(timestamp * 1000)
     });
     await token.save();
@@ -151,6 +168,7 @@ const onCreateEvent = async (log) => {
         tokenAmount: 0,
         omaxAmount: 0,
         price: Number(price.toString()) / config.priceDenom,
+        hash: log.transactionHash,
         timestamp: new Date(timestamp * 1000)
     });
     await tokenPrice.save();
@@ -172,12 +190,26 @@ const onTradeEvent = async (log) => {
     }
 
     const timestamp = await getTimestampFromBlock(log.blockNumber);
+    let tokenPriceOld = await TokenPrice.findOne({
+        tokenId: token._id,
+        isBuy: Number(isBuy) == 1 ? true : false,
+        tokenAmount: Number(amount),
+        omaxAmount: Number(eth),
+        price: Number(latestPrice.toString()) / config.priceDenom,
+        hash: log.transactionHash,
+        timestamp: new Date(timestamp * 1000)
+    });
+    if (tokenPriceOld) {
+        console.log(`Already registered token price with tokenAddr ${tokenAddr}`);
+        return;
+    }
     const tokenPrice = new TokenPrice({
         tokenId: token._id,
         isBuy: Number(isBuy) == 1 ? true : false,
         tokenAmount: Number(amount),
         omaxAmount: Number(eth),
         price: Number(latestPrice.toString()) / config.priceDenom,
+        hash: log.transactionHash,
         timestamp: new Date(timestamp * 1000)
     });
     await tokenPrice.save();
@@ -216,7 +248,7 @@ const onCompleteEvent = async (log) => {
         return;
     }
     try {
-        const result = await contrct_launchCurve(tokenAddr);
+        const result = await launchCurve(tokenAddr);
         console.log('created pool');
     } catch (err) {
         console.error('onCompleteEvent error:', err.message);
@@ -259,21 +291,20 @@ exports.captureEvents = async () => {
         topics: [[curveCreatedTopic, curveCompletedTopic, curveLaunchedTopic, kingOfTheHillTopic, swapTopic]],
     });
 
-    logs.forEach(log => {
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
         const eventTopic = log.topics[0]; // Identify the event type
-
         if (eventTopic === curveCreatedTopic) {
-            onCreateEvent(log);
+            await onCreateEvent(log);
         } else if (eventTopic === curveCompletedTopic) {
-            onCompleteEvent(log);
+            await onCompleteEvent(log);
         } else if (eventTopic === curveLaunchedTopic) {
-            onLaunchEvent(log);
+            await onLaunchEvent(log);
         } else if (eventTopic === kingOfTheHillTopic) {
-            onKoHEvent(log);
+            await onKoHEvent(log);
         } else if (eventTopic === swapTopic) {
-            onTradeEvent(log);
+            await onTradeEvent(log);
         }
-    });
-
+    }
     lastCheckedBlock = latestBlock + 1; // Move forward
 };
