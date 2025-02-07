@@ -10,7 +10,6 @@ export const createMetadata = async (imgFile) => {
         client,
         files: [imgFile],
     });
-    console.log("uris: ", uris);
     const imageUrl = uris.replace("ipfs://", "https://ipfs.io/ipfs/");
     return { imageUrl };
 };

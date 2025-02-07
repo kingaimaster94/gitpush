@@ -84,7 +84,6 @@ export default function Header() {
       if (data.type === DATATYPE_LASTTOKEN)
         setLastTokenInfo(data.data)
       else if (data.type === DATATYPE_LASTTRADE) {
-        // console.log(data)
         setLastTradeInfo(data.data)
         getCheckoutStatus()
       }

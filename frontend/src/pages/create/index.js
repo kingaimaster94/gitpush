@@ -76,7 +76,6 @@ export default function CreateCoin() {
 
   const handleFileRead = (event) => {
     const imageBuffer = event.target.result;
-    // console.log('imageBuffer:', imageBuffer);
     setImageBuffer(imageBuffer);
   };
 

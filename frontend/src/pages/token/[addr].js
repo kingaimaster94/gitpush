@@ -153,7 +153,7 @@ export default function TokenPage() {
       functionName: "curveInfo",
       args: [addr]
     });
-    console.log(curveInfo)
+    console.log("curveInfo: ", curveInfo);
     if (Number(curveInfo.funds) >= Number(curveInfo.hardcap)) {
       setIsPoolComplete(true);
     } else {
@@ -169,10 +169,9 @@ export default function TokenPage() {
   const getTokenInfo = async () => {
     const userId = getUserId();
     const result = await getToken(addr, userId);
-    // console.log(result)
     setTokenInfo(result);
   };
-  console.log(tokenInfo);
+  console.log("tokenInfo: ", tokenInfo);
 
   const getThreadInfo = async () => {
     if (account.status == 'connected') {
@@ -1416,9 +1415,9 @@ function TradeDialog({
       abi: pumpfunabi,
       address: pumpfunAddress,
       functionName: "curveInfo",
-      args: [addr]
+      args: [tokenAddr]
     });
-    console.log(curveInfo)
+    console.log("curveInfo: ", curveInfo);
     if (Number(curveInfo.funds) >= Number(curveInfo.hardcap)) {
       return true;
     } else {
@@ -1454,7 +1453,7 @@ function TradeDialog({
 
       try {
         let tx = null;
-        const deadline = Date.now() / 1000 + 60;
+        const deadline = Math.floor(Date.now() / 1000) + 60;
 
         if (isBuy) {
           tx = await writeContract(config, {
@@ -1502,7 +1501,7 @@ function TradeDialog({
     }
 
     const isPoolCompleted = await checkCompleted(tokenAddr);
-    if (!isPoolCompleted) {
+    if (isPoolCompleted) {
       toast.error(`Pool not created for token '${tokenAddr}'`);
       return;
     }
@@ -1512,7 +1511,8 @@ function TradeDialog({
     try {
       let tx = null;
 
-      const deadline = Date.now() / 1000 + 60;
+      const deadline = Math.floor(Date.now() / 1000) + 60;
+      console.log(`amount: ${amount}, ${parseEther(amount)}`);
       if (isBuy) {
         tx = await writeContract(config, {
           abi: pumpfunabi,
@@ -1543,6 +1543,7 @@ function TradeDialog({
 
       await trade(
         tokenAddr,
+        account.address,
         isBuy,
         isBuy ? 0 : Number(amount), // To do - cryptoprince
         isBuy ? Number(amount) : 0, // To do - cryptoprince

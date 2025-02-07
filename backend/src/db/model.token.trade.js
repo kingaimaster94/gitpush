@@ -4,7 +4,8 @@ const { Schema, model } = require('mongoose');
 
 const tokenTradeSchema = new Schema({
     tokenId: { type: Schema.Types.ObjectId, ref: 'Token', required: true },
-    traderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    traderId: { type: Schema.Types.ObjectId, ref: 'User' },
+    trader: { type: String, default: null },
     isBuy: { type: Boolean, default: false },
     tokenAmount: { type: Number, default: 0 },
     omaxAmount: { type: Number, default: 0 },

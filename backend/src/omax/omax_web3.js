@@ -3,7 +3,8 @@ const dotenv = require('dotenv');
 const { config } = require('../config');
 const { Token,
     TokenPrice,
-    User
+    User,
+    TokenTrade
 } = require('../db');
 const { sleep } = require('../utils/basic');
 const { getWalletFromPrivateKey } = require('./utils');
@@ -133,7 +134,6 @@ function splitHexIntoChunks(hex, chunkSize = 64) {
 const onCreateEvent = async (log) => {
     const creator = ethers.getAddress("0x" + log.topics[1].slice(26));
     const tokenAddr = ethers.getAddress("0x" + log.topics[2].slice(26));
-    // const datas = splitHexIntoChunks(log.data);
     const price = ethers.toBigInt(log.data);
     let token = await Token.findOne({ tokenAddr: tokenAddr });
     if (token) {
@@ -143,12 +143,12 @@ const onCreateEvent = async (log) => {
 
     const timestamp = await getTimestampFromBlock(log.blockNumber);
     const curveInfo = await getCurveInfo(tokenAddr);
-    const user = await User.findOne({walletAddr: creator});
+    const user = await User.findOne({ walletAddr: creator });
     let creatorId = null;
     if (user) {
         creatorId = user.id;
     }
-    
+
     token = new Token({
         tokenAddr: tokenAddr,
         name: curveInfo.name,
@@ -159,6 +159,7 @@ const onCreateEvent = async (log) => {
         telegram: curveInfo.telegram,
         website: curveInfo.website,
         creatorId: creatorId,
+        creator: creator,
         cdate: new Date(timestamp * 1000)
     });
     await token.save();
@@ -178,7 +179,6 @@ const onTradeEvent = async (log) => {
     const trader = ethers.getAddress("0x" + log.topics[1].slice(26));
     const tokenAddr = ethers.getAddress("0x" + log.topics[2].slice(26));
     const datas = splitHexIntoChunks(log.data);
-    console.log(datas);
     const isBuy = ethers.toBigInt(datas[0]);
     const amount = ethers.toBigInt(datas[1]);
     const eth = ethers.toBigInt(datas[2]);
@@ -188,7 +188,6 @@ const onTradeEvent = async (log) => {
         console.error(`Failed to find token with the tokenAddr ${tokenAddr}`);
         return;
     }
-
     const timestamp = await getTimestampFromBlock(log.blockNumber);
     let tokenPriceOld = await TokenPrice.findOne({
         tokenId: token._id,
@@ -199,20 +198,46 @@ const onTradeEvent = async (log) => {
         hash: log.transactionHash,
         timestamp: new Date(timestamp * 1000)
     });
-    if (tokenPriceOld) {
-        console.log(`Already registered token price with tokenAddr ${tokenAddr}`);
-        return;
+    if (!tokenPriceOld) {
+        const tokenPrice = new TokenPrice({
+            tokenId: token._id,
+            isBuy: Number(isBuy) == 1 ? true : false,
+            tokenAmount: Number(amount),
+            omaxAmount: Number(eth),
+            price: Number(latestPrice.toString()) / config.priceDenom,
+            hash: log.transactionHash,
+            timestamp: new Date(timestamp * 1000)
+        });
+        await tokenPrice.save();
     }
-    const tokenPrice = new TokenPrice({
+    let tokenTradeOld = await TokenTrade.findOne({
         tokenId: token._id,
         isBuy: Number(isBuy) == 1 ? true : false,
         tokenAmount: Number(amount),
         omaxAmount: Number(eth),
-        price: Number(latestPrice.toString()) / config.priceDenom,
-        hash: log.transactionHash,
+        txhash: log.transactionHash,
+        trader: trader,
         timestamp: new Date(timestamp * 1000)
     });
-    await tokenPrice.save();
+    if (!tokenTradeOld) {
+        const user = await User.findOne({ walletAddr: trader });
+        let traderId = null;
+        if (user) {
+            traderId = user.id;
+        }
+        const tokenTrade = new TokenTrade({
+            tokenId: token._id,
+            traderId: traderId,
+            trader: trader,
+            isBuy: Number(isBuy) == 1 ? true : false,
+            tokenAmount: Number(amount),
+            omaxAmount: Number(eth),
+            txhash: log.transactionHash,
+            timestamp: new Date(timestamp * 1000)
+        });
+        await tokenTrade.save();
+    }
+
 };
 
 const onKoHEvent = async (log) => {

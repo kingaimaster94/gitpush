@@ -9,9 +9,6 @@ const { User,
 } = require('../db');
 const { uploadMetadata } = require('../omax/metadata');
 const { getTokenHolderDistribution, getTokenBalance, getCurveInfo } = require('../omax/engine');
-const { PROGRAMIDS, 
-    connection
-} = require('../omax/utils');
 const { generateSHA } = require('../utils/basic');
 const fetchOMAXPrice = require('../utils/omax_price');
 const { broadcastMessage } = require('../utils/socket');
@@ -58,6 +55,7 @@ const updateToken = async (req, resp) => {
         token.ticker = query.ticker;
         token.desc = query.desc;
         token.creatorId = req.userId;
+        token.creator = query.creator;
         token.logo = query.logo;
         token.twitter = query.twitterLink;
         token.telegram = query.tgLink;
@@ -68,9 +66,9 @@ const updateToken = async (req, resp) => {
         broadcastMessage({
             type: config.dataType.lastToken, 
             data: {
-                walletAddr: creator.walletAddr, 
-                avatar: creator.avatar, 
-                username: creator.username, 
+                walletAddr: query.creator, 
+                avatar: creator?.avatar, 
+                username: creator?.username, 
                 tokenAddr: token.tokenAddr, 
                 tokenName: token.name, 
                 logo: token.logo, 
@@ -205,9 +203,9 @@ const findTokens = async (req, resp) => {
                 desc: token.desc, 
                 logo: token.logo, 
                 tokenAddr: token.tokenAddr, 
-                avatar: token.creatorId.avatar, 
-                username: token.creatorId.username, 
-                walletAddr: token.creatorId.walletAddr, 
+                avatar: token.creatorId?.avatar, 
+                username: token.creatorId?.username, 
+                walletAddr: token.creator,
                 marketCap: (price * config.tokenTotalSupply * omaxPrice) / 1000, 
                 replies: await TokenReplyMention.countDocuments({ tokenId: token._id, mentionerId: null })
             });
@@ -226,7 +224,7 @@ const getKingOfTheHill = async (req, resp) => {
     console.log('getKingOfTheHill - query:', query);
 
     try {
-        let kingOfTheHill = await Token.findOne({ koth: true })?.populate('creatorId');
+        let kingOfTheHill = await Token.findOne({ koth: true })?.populate('creator');
         // console.log('kingOfTheHill:', kingOfTheHill);
         if (!kingOfTheHill) return resp.status(200).json(null);
 
@@ -302,12 +300,12 @@ const getTokenInfo = async (req, resp) => {
             marketCap: lastPrice.price * config.tokenTotalSupply * omaxPrice, 
             virtLiq: (Number(curveInfo.vX) + Number(curveInfo.funds)) / (10 ** config.tokenDecimals) * omaxPrice * 2, 
             
-            walletAddr: token.creatorId.walletAddr, 
-            username: token.creatorId.username, 
-            avatar: token.creatorId.avatar, 
+            walletAddr: token.creator, 
+            username: token.creatorId?.username, 
+            avatar: token.creatorId?.avatar, 
             
-            tokenBalance: Number(tokenBalance) / (10 ** config.tokenDecimals), 
-            omaxBalance: Number(omaxBalance) / (10 ** config.tokenDecimals), 
+            tokenBalance: tokenBalance, 
+            omaxBalance: omaxBalance, 
             replies: await TokenReplyMention.countDocuments({ tokenId: token._id, mentionerId: null }), 
             bondingCurveProgress: Math.min(Number(curveInfo.funds) / (10 ** config.tokenDecimals) / config.completeQuoteReserve, 1) * 100, 
             kingOfTheHillProgress: Math.min(Number(curveInfo.funds) / (10 ** config.tokenDecimals) / config.kothQuoteReserve, 1) * 100, 
@@ -592,9 +590,9 @@ const getTradeHist = async (req, resp) => {
         for (const trade of tradeHist) {
             // console.log('  trade:', trade);
             histData.push({
-                walletAddr: trade.traderId.walletAddr, 
-                avatar: trade.traderId.avatar, 
-                username: trade.traderId.username, 
+                walletAddr: trade.trader, 
+                avatar: trade.traderId?.avatar, 
+                username: trade.traderId?.username, 
                 isBuy: trade.isBuy, 
                 tokenAmount: trade.tokenAmount, 
                 omaxAmount: trade.omaxAmount, 
@@ -623,21 +621,29 @@ const tradeToken = async (req, resp) => {
         }
 
         let trader = await User.findOne({ _id: req.userId });
-        if (!trader) {
-            console.error(`tradeToken error: Failed to find the user with id ${req.userId}`);
-            return resp.status(400).json({ error: `Failed to find the user with id ${req.userId}` });
-        }
-
-        const trade = new TokenTrade({
+        let tokenTradeOld = await TokenTrade.findOne({
             tokenId: token._id,
-            traderId: req.userId,
             isBuy: query.isBuy,
             tokenAmount: query.tokenAmount,
             omaxAmount: query.omaxAmount,
-            timestamp: new Date(query.timestamp * 1000),
-            txhash: query.txhash
+            txhash: query.txhash,
+            timestamp: new Date(query.timestamp * 1000)
         });
-        await trade.save();
+        if (tokenTradeOld) {
+            tokenTradeOld.traderId = req.userId;
+            tokenTradeOld.save();
+        } else {
+            const trade = new TokenTrade({
+                tokenId: token._id,
+                traderId: req.userId,
+                isBuy: query.isBuy,
+                tokenAmount: query.tokenAmount,
+                omaxAmount: query.omaxAmount,
+                timestamp: new Date(query.timestamp * 1000),
+                txhash: query.txhash
+            });
+            await trade.save();
+        }        
 
         if (query.comment) {
             const replyMention = new TokenReplyMention({
