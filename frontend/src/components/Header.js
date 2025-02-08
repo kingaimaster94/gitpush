@@ -29,6 +29,7 @@ import {
 } from "../engine/consts";
 import { Box, Typography } from "@mui/material";
 import { usePathname } from "next/navigation";
+import MobileDrawer from "./MobileDrawer"
 
 
 const EurostileMNFont = localFont({ src: '../assets/font/eurostile-mn-extended-bold.ttf' })
@@ -61,6 +62,17 @@ export default function Header() {
   async function connectWallet() {
     modal.open();
   }
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const toggleDrawer = () => {
+    setDrawerOpen((prevState) => !prevState);
+  };
+
+  const closeDrawer = () => {
+    setDrawerOpen(false);
+  };
+
 
   useEffect(() => {
     if (wallet.status == "connected")
@@ -176,6 +188,7 @@ export default function Header() {
             )}
           </div> */}
         </div>
+        
         <Box className="hidden xl:flex gap-5" sx={{
           "& a,p": {
             fontFamily: "JostBold",
@@ -204,7 +217,7 @@ export default function Header() {
               <Typography component={"img"} src={prime_twitter.src} width={"36px"} height={"36px"} />
             </a>
           </div>
-
+          <MobileDrawer  open={drawerOpen} onClose={closeDrawer} onOpen={toggleDrawer} />
           <Box sx={{
             "& .wallet-adapter-button": {
               backgroundColor: "#F0FF42",

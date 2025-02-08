@@ -22,7 +22,9 @@ import crown_frame from "../../assets/images/crown_frame.png";
 import image_bg from "../../assets/images/image_bg.png";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { useAccount } from "wagmi";
+import logos_telegram from "../../assets/images/logos_telegram.png";
 
+import prime_twitter from "../../assets/images/prime_twitter.png";
 
 const EurostileMNFont = localFont({
   src: "../../assets/font/eurostile-mn-extended-bold.ttf",
@@ -564,6 +566,7 @@ export default function BoardPage() {
 
                 <Box sx={{
                   display: { sm: "flex" },
+                  width: "100%",
                   flex: 1,
                   justifyContent: { sm: "flex-end" },
 
@@ -702,12 +705,13 @@ export default function BoardPage() {
                                 href={`/token/${item.tokenAddr}`}
                                 className="flex gap-2 items-start p-2"
                               >
-                                <Box>
+                                <Box className="pl-2 w-full"> 
                                   <div className="flex flex-col">
-                                    <div className="flex gap-2 items-center">
-                                      <p className={`text-xl text-black`} style={{ fontSize: "14px" }}>Created by</p>
+                                   {/* <div className="flex gap-2 items-center">
+                                      <p className={`text-xl text-black`} style={{ fontSize: "14px" }}>Created by: </p>
                                       <div className="flex gap-1 items-center">
-                                        <Image
+                                        
+                                         <Image
                                           src={
                                             item.avatar === null
                                               ? "/img3.png"
@@ -723,20 +727,31 @@ export default function BoardPage() {
                                           style={{ fontSize: "14px" }}
                                         >
                                           {item.username}
-                                        </Link>
+                                        </Link> 
                                       </div>
-                                    </div>
-                                    <p className={`text-xl text-[#339E33]`} style={{ fontSize: "14px" }}>
-                                      Market cap: {item.marketCap.toFixed(2)}K
+                                    </div>*/}
+                                     <p className={`text-xl text-[#000]`} style={{ fontSize: "14px" }}>
+                                      <strong>Name:</strong> {item.name}
                                     </p>
                                     <p className={`text-xl text-[#000]`} style={{ fontSize: "14px" }}>
-                                      Reply: {item.replies}
+                                    <strong>Ticker:</strong> {item.ticker}
                                     </p>
-                                    <p className={`text-base text-[#000]`} style={{ fontSize: "12px", opacity: "50%", lineHeight: "normal" }}>
+                                    <p className={`text-xl text-[#000]`} style={{ fontSize: "14px" }}>
+                                    <strong>Market cap:</strong> {item.marketCap.toFixed(2)}K
+                                    </p>
+                                   
+                                    <p className={`text-xl text-[#000]`} style={{ fontSize: "14px" }}>
                                       {/* <span className="font-bold" style={{fontSize:"10px"}}>{`${item.name} (ticker: ${item.ticker}): `}</span> */}
-                                      {item?.desc.slice(0, 50)}...
+                                      <strong>Description:</strong> {item?.desc.slice(0, 25)}...
                                     </p>
+                                    
                                   </div>
+                                  
+                                  <div className={`flex justify-end text-xl text-[#000] text-right`}  style={{ width: "100%" , fontSize: "14px" , textAlign: "right"}}>
+                                      {/* <span className="font-bold" style={{fontSize:"10px"}}>{`${item.name} (ticker: ${item.ticker}): `}</span> */}
+                                    {item?.twitter &&  <a href={item?.twitter} > <img src={prime_twitter.src} width={"25px"}  height={"25px"} /></a> }
+                                    {item?.telegram &&  <a href={item?.telegram} > <img src={logos_telegram.src} width={"25px"}  height={"25px"} /></a> }
+                                    </div>
                                 </Box>
 
                               </Link>

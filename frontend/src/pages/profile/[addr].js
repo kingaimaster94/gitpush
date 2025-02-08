@@ -244,12 +244,12 @@ export default function MyProfile() {
                   />
                   <div className='flex flex-col w-full'>
                     <div className='flex justify-between'>
-                      <p className='text-xl text-white'>{item.balance.toFixed(0)} {item.ticker}</p>
-                      <div className='text-xl text-white cursor-pointer'>[Refresh]</div>
+                      <p className='text-md text-white'>{item.balance.toFixed(0)} {item.ticker}</p>
+                      <div className='text-md text-white cursor-pointer'>[Refresh]</div>
                     </div>
                     <div className='flex justify-between'>
-                      <p className='text-xl text-[#97FF73]'>{item.lamports.toFixed(3)} OMAX</p>
-                      <Link href={`/token/${item.tokenAddr}`} className='text-xl text-[#97FF73] cursor-pointer'>[View Coin]</Link>
+                      <p className='text-md text-[#97FF73]'>{item.lamports.toFixed(3)} OMAX</p>
+                      <Link href={`/token/${item.tokenAddr}`} className='text-md text-[#97FF73] cursor-pointer'>[View Coin]</Link>
                     </div>
                   </div>
                 </div>
