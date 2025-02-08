@@ -22,7 +22,7 @@ const CopyRight = () => {
         @2025 All rights reserved
       </Typography>
       <Typography>
-
+        Terms and Conditions
       </Typography>
       <Typography>
         Powered by OMAX

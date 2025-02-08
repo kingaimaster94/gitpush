@@ -408,7 +408,7 @@ export default function TokenPage() {
               <Typography sx={{ fontWeight: "600" }} className="text_">
                 <CopyTextWithTooltip textToCopy={""} />{" "}
                 {truncateAddress(addr || "")}{" "}
-                <a href={`${scanUrl}/address/${addr}`} target="_blank">
+                <a href={`${scanUrl}/address/${pumpfunAddress}`} target="_blank">
                   EXP <AiOutlineExport size={15} />
                 </a>
               </Typography>
