@@ -950,7 +950,7 @@ export default function TokenPage() {
                         currentCoin === "omax" ? logo_.src : tokenInfo?.logo
                       }
                       width={20}
-                      // height={20}
+                      height={20}
                       style={{ borderRadius: "50%" }}
                       alt="omax"
                     />
@@ -1177,7 +1177,7 @@ export default function TokenPage() {
                 <br />
                 There are{" "}
                 {tokenInfo?.tokensAvailableForSale !== null
-                  ? tokenInfo?.tokensAvailableForSale.toFixed(0)
+                  ? parseFloat(tokenInfo?.tokensAvailableForSale.toFixed(0))
                   : "751,404,142"}{" "}
                 tokens still available for sale in the bonding curve, and there are{" "}
                 {tokenInfo?.realQuoteReserve !== null

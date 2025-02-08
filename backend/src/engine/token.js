@@ -620,7 +620,10 @@ const getRecentTrade = async (req, resp) => {
                 histData.push({
                     walletAddr: trades[i].trader,
                     logo: token.logo,
+                    ticker: token.ticker,
                     omaxAmount: trades[i].omaxAmount,
+                    tokenAmount: trades[i].tokenAmount,
+                    tokenAddr: token.tokenAddr
                 });
             }
             if (histData.length == 3) break;

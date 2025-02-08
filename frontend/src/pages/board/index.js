@@ -133,7 +133,8 @@ export default function BoardPage() {
               sx={{
                 fontFamily: "JostBold",
                 color: "#5FE461",
-                fontSize: { sm: "63.47px", xs: "35px" },
+                fontSize: { sm: "63.47px", xs: "30px" },
+                textAlign: { sm: "left", xs: "center" },
               }}
             >
               Where Degens Unite
@@ -683,7 +684,7 @@ export default function BoardPage() {
                             justifyContent: "flex-end",
                           }}>
                             <Box sx={{
-                              pl: "4.5rem !important",
+                              pl: { md: "4.5rem !important", xs: "6rem !important" },
                               background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(153,153,153,1) 100%)",
                               borderRadius: "10px",
                               // position:"relative",
@@ -701,9 +702,6 @@ export default function BoardPage() {
                                 href={`/token/${item.tokenAddr}`}
                                 className="flex gap-2 items-start p-2"
                               >
-
-
-
                                 <Box>
                                   <div className="flex flex-col">
                                     <div className="flex gap-2 items-center">

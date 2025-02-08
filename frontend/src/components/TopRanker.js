@@ -4,9 +4,11 @@ import icon from "../assets/images/Frame.svg";
 import { getRecentTrade } from "@/api/token";
 import { decimalToEth } from "@/engine/utils";
 import { truncateAddress } from "@/utils";
+import { EXPLORER_URL, EXPLORER_URL_TESTNET, PUMPFUN_ADDRESS, PUMPFUN_ADDRESS_TESTNET, OMAX_ROUTER_ADDRESS, WOMAX_ADDRESS, OMAX_FACTORY_ADDRESS } from "@/contexts/contracts/constants";
 
 const TopRanker = () => {
   const [recentTrade, setRecentTrade] = useState(null);
+  const [scanUrl, setScanUrl] = useState(EXPLORER_URL_TESTNET);
   const getRecentTradeInfo = async () => {
     const result = await getRecentTrade();
     console.log("top: ", result);
@@ -69,8 +71,9 @@ const TopRanker = () => {
                 >
                   {truncateAddress(item.walletAddr)}
                 </span>{" "}
-                <span style={{ color: "#2D8E2F", fontSize: "14px", fontFamily: "Inter" }} className="w-max text-nowrap">
-                  {"BUY " + decimalToEth(item.omaxAmount).toFixed(2) + " OMAX"}
+                <span style={{ color: "#2D8E2F", fontSize: "14px", fontFamily: "Inter" }} className="flex w-max text-nowrap">
+                  {"BUY " + decimalToEth(item.tokenAmount).toFixed(2) + " "}
+                  <a href={`${scanUrl}/tx/${item.txhash}`}>{item.ticker}</a>
                 </span>
               </Typography>
             );
