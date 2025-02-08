@@ -146,6 +146,12 @@ export default function CreateCoin() {
               style={{ display: "none" }}
               onChange={(e) => {
                 if (e.target.files.length > 0) {
+                  const size = e.target.files[0].size ; 
+                  if(size > 5*1024*1024){
+                    alert("File size exceeds max allowed: 5 MB")
+                    return false;
+
+                  }
                   const src = URL.createObjectURL(e.target.files[0]);
                   setCoinImage(src);
                   setImageName(e.target.files[0].name);

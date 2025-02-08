@@ -188,30 +188,251 @@ export default function TokenPage() {
     setAmount(e.target.value);
   };
 
-  const onTrade = (e) => {
+  const checkPoolCreated = async () => {
+    const launched = await readContract(config, {
+      abi: erc20abi,
+      address: addr,
+      functionName: "_launched",
+      args: []
+    });
+    return launched;
+  };
+
+  async function getTimestampFromBlock(blockNumber) {
+    const block = await getBlock(config, { blockNumber: blockNumber });
+    return block.timestamp;
+  }
+
+  const onTrade = async () => {
     if (account.status != 'connected') {
       toast.error("Not connected wallet!");
       return;
     }
 
-    if (amount === "") {
-      toast.warning("Please input amount");
+    const isBuy = currentMode == "buy" ; 
+    const tokenAddr = addr ;
+
+    const created = await checkPoolCreated(tokenAddr);
+    if (created) {
+      // swap on Omax protocol
+      const id = toast.loading(`Trading ${tokenInfo?.ticker}...`);
+
+      try {
+        let tx = null;
+        const deadline = Math.floor(Date.now() / 1000) + 600;
+
+        if (isBuy) {
+          if (currentCoin == "omax") {
+            tx = await writeContract(config, {
+              abi: omaxswapv2_router,
+              address: OMAX_ROUTER_ADDRESS,
+              functionName: "swapExactETHForTokens",
+              args: [
+                '1',
+                [WOMAX_ADDRESS, tokenAddr],
+                account.address,
+                deadline
+              ],
+              chainId: chainID,
+              value: parseEther(amount.toString())
+            });
+          } else {
+            const pairAddress = await readContract(config, {
+              address: OMAX_FACTORY_ADDRESS,
+              abi: factoryabi,
+              functionName: "getPair",
+              args: [WOMAX_ADDRESS, tokenAddr],
+              chainId: chainID
+            });
+
+            const results = await readContracts(config, {
+              contracts: [
+                {
+                  abi: pairabi,
+                  address: pairAddress,
+                  functionName: "getReserves",
+                  args: [],
+                  chainId: chainID
+                },
+                {
+                  abi: pairabi,
+                  address: pairAddress,
+                  functionName: "token0",
+                  args: [],
+                  chainId: chainID
+                }
+              ]
+            });
+
+            let reserveIn, reserveOut;
+            if (results[1].result.toString() == WOMAX_ADDRESS) {
+              reserveIn = results[0].result[0];
+              reserveOut = results[0].result[1];
+            } else {
+              reserveIn = results[0].result[1];
+              reserveOut = results[0].result[2];
+            }
+
+            const requiredOmax = await readContract(config, {
+              abi: omaxswapv2_router,
+              address: OMAX_ROUTER_ADDRESS,
+              functionName: "getAmountIn",
+              args: [parseEther(amount.toString()), reserveIn, reserveOut],
+              chainId: chainID
+            });
+
+            tx = await writeContract(config, {
+              abi: omaxswapv2_router,
+              address: OMAX_ROUTER_ADDRESS,
+              functionName: "swapETHForExactTokens",
+              args: [
+                parseEther(amount.toString()),
+                [WOMAX_ADDRESS, tokenAddr],
+                account.address,
+                deadline
+              ],
+              chainId: chainID,
+              value: requiredOmax
+            });
+          }
+        } else {
+          const balance = await readContract(config, {
+            abi: erc20abi,
+            address: tokenAddr,
+            functionName: "balanceOf",
+            args: [account.address],
+            chainId: chainID
+          });
+
+          let amountWei = Math.min(Number(balance), Number(parseEther(amount.toString())));
+
+          const approveTx = await writeContract(config, {
+            abi: erc20abi,
+            address: tokenAddr,
+            functionName: "approve",
+            args: [OMAX_ROUTER_ADDRESS, amountWei.toString()],
+            chainId: chainID
+          });
+
+          const reciptApprove = await waitForTransactionReceipt(config, { hash: approveTx });
+
+          const { request } = await simulateContract(config, {
+            abi: omaxswapv2_router,
+            address: OMAX_ROUTER_ADDRESS,
+            functionName: "swapExactTokensForETH",
+            args: [
+              amountWei.toString(),
+              '1',
+              [tokenAddr, WOMAX_ADDRESS],
+              account.address,
+              deadline
+            ],
+            chainId: chainID
+          });
+          console.log('simulate result: ', request);
+          tx = await writeContract(config, request);
+        }
+
+        const recipt = await waitForTransactionReceipt(config, { hash: tx });
+        console.log("  trade txHash:", recipt);
+
+        toast.dismiss(id);
+        toast.success("Swap complete!");
+
+        setIsTradeDialogOpen(false);
+      } catch (err) {
+        console.error(err);
+        toast.dismiss(id);
+        toast.error(err.message);
+      }
+
       return;
     }
 
-    if (currentMode === "buy") {
-      if (tokenInfo?.omaxBalance < amount) {
-        toast.error("Insufficient balance!");
-        return;
-      }
-    } else {
-      if (tokenInfo?.tokenBalance < amount) {
-        toast.error("Insufficient balance!");
-        return;
-      }
+    const isPoolCompleted = await checkCompleted(tokenAddr);
+    if (isPoolCompleted) {
+      toast.error(`Pool not created for token '${tokenAddr}'`);
+      return;
     }
 
-    setIsTradeDialogOpen(true);
+    const id = toast.loading(`Trading ${ticker}...`);
+
+    try {
+      let tx = null;
+
+      const deadline = Math.floor(Date.now() / 1000) + 60;
+      console.log("parseEther(amount.toString(): ", parseEther(amount.toString()));
+      if (isBuy) {
+        if (currentCoin == "omax") {
+          tx = await writeContract(config, {
+            abi: pumpfunabi,
+            address: pumpfunAddress,
+            functionName: "buy",
+            args: [tokenAddr, '1', deadline.toString()],
+            chainId: chainID,
+            value: parseEther(amount.toString())
+          });
+        } else {
+          const requiredOmax = await readContract(config, {
+            abi: pumpfunabi,
+            address: pumpfunAddress,
+            functionName: "getAmountInETH",
+            args: [parseEther(amount.toString()), tokenAddr],
+            chainId: chainID
+          });
+
+          tx = await writeContract(config, {
+            abi: pumpfunabi,
+            address: pumpfunAddress,
+            functionName: "buy",
+            args: [tokenAddr, parseEther(amount.toString()), deadline.toString()],
+            chainId: chainID,
+            value: requiredOmax
+          });
+        }
+      } else {
+        const approveTx = await writeContract(config, {
+          abi: erc20abi,
+          address: tokenAddr,
+          functionName: "approve",
+          args: [pumpfunAddress, parseEther(amount.toString())],
+          chainId: chainID
+        });
+
+        const reciptApprove = await waitForTransactionReceipt(config, { hash: approveTx });
+
+        tx = await writeContract(config, {
+          abi: pumpfunabi,
+          address: pumpfunAddress,
+          functionName: "sell",
+          args: [tokenAddr, parseEther(amount.toString()), '1', deadline.toString()],
+          chainId: chainID
+        });
+      }
+
+      const recipt = await waitForTransactionReceipt(config, { hash: tx });
+      console.log('txHash:', recipt);
+      const timestamp = await getTimestampFromBlock(recipt.logs[0].blockNumber);
+      toast.dismiss(id);
+      toast.success("Trade complete!");
+
+      await trade(
+        tokenAddr,
+        account.address,
+        isBuy,
+        isBuy ? 0 : Number(parseEther(amount.toString())), // To do - cryptoprince
+        isBuy ? Number(parseEther(amount.toString())) : 0, // To do - cryptoprince
+        recipt.transactionHash,
+        comment.current.valueOf(),
+        timestamp
+      );
+
+      setIsTradeDialogOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(id);
+      toast.error(err.message);
+    }
   };
 
   const handleReply = async (comment, imageFile) => {
@@ -950,7 +1171,7 @@ export default function TokenPage() {
                         currentCoin === "omax" ? logo_.src : tokenInfo?.logo
                       }
                       width={20}
-                      // height={20}
+                      height={20}
                       style={{ borderRadius: "50%" }}
                       alt="omax"
                     />
@@ -1434,249 +1655,7 @@ function TradeDialog({
     }
   };
 
-  const checkPoolCreated = async () => {
-    const launched = await readContract(config, {
-      abi: erc20abi,
-      address: tokenAddr,
-      functionName: "_launched",
-      args: []
-    });
-    return launched;
-  };
 
-  async function getTimestampFromBlock(blockNumber) {
-    const block = await getBlock(config, { blockNumber: blockNumber });
-    return block.timestamp;
-  }
-
-  const onTrade = async () => {
-    if (account.status != 'connected') {
-      toast.error("Not connected wallet!");
-      return;
-    }
-
-    const created = await checkPoolCreated(tokenAddr);
-    if (created) {
-      // swap on Omax protocol
-      const id = toast.loading(`Trading ${ticker}...`);
-
-      try {
-        let tx = null;
-        const deadline = Math.floor(Date.now() / 1000) + 600;
-
-        if (isBuy) {
-          if (currentCoin == "omax") {
-            tx = await writeContract(config, {
-              abi: omaxswapv2_router,
-              address: OMAX_ROUTER_ADDRESS,
-              functionName: "swapExactETHForTokens",
-              args: [
-                '1',
-                [WOMAX_ADDRESS, tokenAddr],
-                account.address,
-                deadline
-              ],
-              chainId: chainID,
-              value: parseEther(amount.toString())
-            });
-          } else {
-            const pairAddress = await readContract(config, {
-              address: OMAX_FACTORY_ADDRESS,
-              abi: factoryabi,
-              functionName: "getPair",
-              args: [WOMAX_ADDRESS, tokenAddr],
-              chainId: chainID
-            });
-
-            const results = await readContracts(config, {
-              contracts: [
-                {
-                  abi: pairabi,
-                  address: pairAddress,
-                  functionName: "getReserves",
-                  args: [],
-                  chainId: chainID
-                },
-                {
-                  abi: pairabi,
-                  address: pairAddress,
-                  functionName: "token0",
-                  args: [],
-                  chainId: chainID
-                }
-              ]
-            });
-
-            let reserveIn, reserveOut;
-            if (results[1].result.toString() == WOMAX_ADDRESS) {
-              reserveIn = results[0].result[0];
-              reserveOut = results[0].result[1];
-            } else {
-              reserveIn = results[0].result[1];
-              reserveOut = results[0].result[2];
-            }
-
-            const requiredOmax = await readContract(config, {
-              abi: omaxswapv2_router,
-              address: OMAX_ROUTER_ADDRESS,
-              functionName: "getAmountIn",
-              args: [parseEther(amount.toString()), reserveIn, reserveOut],
-              chainId: chainID
-            });
-
-            tx = await writeContract(config, {
-              abi: omaxswapv2_router,
-              address: OMAX_ROUTER_ADDRESS,
-              functionName: "swapETHForExactTokens",
-              args: [
-                parseEther(amount.toString()),
-                [WOMAX_ADDRESS, tokenAddr],
-                account.address,
-                deadline
-              ],
-              chainId: chainID,
-              value: requiredOmax
-            });
-          }
-        } else {
-          const balance = await readContract(config, {
-            abi: erc20abi,
-            address: tokenAddr,
-            functionName: "balanceOf",
-            args: [account.address],
-            chainId: chainID
-          });
-
-          let amountWei = Math.min(Number(balance), Number(parseEther(amount.toString())));
-
-          const approveTx = await writeContract(config, {
-            abi: erc20abi,
-            address: tokenAddr,
-            functionName: "approve",
-            args: [OMAX_ROUTER_ADDRESS, amountWei.toString()],
-            chainId: chainID
-          });
-
-          const reciptApprove = await waitForTransactionReceipt(config, { hash: approveTx });
-
-          const { request } = await simulateContract(config, {
-            abi: omaxswapv2_router,
-            address: OMAX_ROUTER_ADDRESS,
-            functionName: "swapExactTokensForETH",
-            args: [
-              amountWei.toString(),
-              '1',
-              [tokenAddr, WOMAX_ADDRESS],
-              account.address,
-              deadline
-            ],
-            chainId: chainID
-          });
-          console.log('simulate result: ', request);
-          tx = await writeContract(config, request);
-        }
-
-        const recipt = await waitForTransactionReceipt(config, { hash: tx });
-        console.log("  trade txHash:", recipt);
-
-        toast.dismiss(id);
-        toast.success("Swap complete!");
-
-        setIsTradeDialogOpen(false);
-      } catch (err) {
-        console.error(err);
-        toast.dismiss(id);
-        toast.error(err.message);
-      }
-
-      return;
-    }
-
-    const isPoolCompleted = await checkCompleted(tokenAddr);
-    if (isPoolCompleted) {
-      toast.error(`Pool not created for token '${tokenAddr}'`);
-      return;
-    }
-
-    const id = toast.loading(`Trading ${ticker}...`);
-
-    try {
-      let tx = null;
-
-      const deadline = Math.floor(Date.now() / 1000) + 60;
-      console.log("parseEther(amount.toString(): ", parseEther(amount.toString()));
-      if (isBuy) {
-        if (currentCoin == "omax") {
-          tx = await writeContract(config, {
-            abi: pumpfunabi,
-            address: pumpfunAddress,
-            functionName: "buy",
-            args: [tokenAddr, '1', deadline.toString()],
-            chainId: chainID,
-            value: parseEther(amount.toString())
-          });
-        } else {
-          const requiredOmax = await readContract(config, {
-            abi: pumpfunabi,
-            address: pumpfunAddress,
-            functionName: "getAmountInETH",
-            args: [parseEther(amount.toString()), tokenAddr],
-            chainId: chainID
-          });
-
-          tx = await writeContract(config, {
-            abi: pumpfunabi,
-            address: pumpfunAddress,
-            functionName: "buy",
-            args: [tokenAddr, parseEther(amount.toString()), deadline.toString()],
-            chainId: chainID,
-            value: requiredOmax
-          });
-        }
-      } else {
-        const approveTx = await writeContract(config, {
-          abi: erc20abi,
-          address: tokenAddr,
-          functionName: "approve",
-          args: [pumpfunAddress, parseEther(amount.toString())],
-          chainId: chainID
-        });
-
-        const reciptApprove = await waitForTransactionReceipt(config, { hash: approveTx });
-
-        tx = await writeContract(config, {
-          abi: pumpfunabi,
-          address: pumpfunAddress,
-          functionName: "sell",
-          args: [tokenAddr, parseEther(amount.toString()), '1', deadline.toString()],
-          chainId: chainID
-        });
-      }
-
-      const recipt = await waitForTransactionReceipt(config, { hash: tx });
-      console.log('txHash:', recipt);
-      const timestamp = await getTimestampFromBlock(recipt.logs[0].blockNumber);
-      toast.dismiss(id);
-      toast.success("Trade complete!");
-
-      await trade(
-        tokenAddr,
-        account.address,
-        isBuy,
-        isBuy ? 0 : Number(parseEther(amount.toString())), // To do - cryptoprince
-        isBuy ? Number(parseEther(amount.toString())) : 0, // To do - cryptoprince
-        recipt.transactionHash,
-        comment.current.valueOf(),
-        timestamp
-      );
-
-      setIsTradeDialogOpen(false);
-    } catch (err) {
-      console.error(err);
-      toast.dismiss(id);
-      toast.error(err.message);
-    }
-  };
 
   return (
     <Transition appear show={isTradeDialogOpen}>
@@ -1717,7 +1696,7 @@ function TradeDialog({
                   <button
                     type="button"
                     className="bg-white rounded-xl w-full h-[50px] text-xl font-bold"
-                    onClick={onTrade}
+                    
                   >
                     Place Trade
                   </button>
