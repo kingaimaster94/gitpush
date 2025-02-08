@@ -684,7 +684,7 @@ export default function BoardPage() {
                             justifyContent: "flex-end",
                           }}>
                             <Box sx={{
-                              pl: { md: "4.5rem !important", xs: "6rem !important" },
+                              pl: { md: "4.5rem !important", xs: "5.5rem !important" },
                               background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(153,153,153,1) 100%)",
                               borderRadius: "10px",
                               // position:"relative",
