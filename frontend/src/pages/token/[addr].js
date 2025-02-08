@@ -656,36 +656,42 @@ export default function TokenPage() {
               </div>
             ) : (
               <div
-                className="flex flex-col gap-1"
+                className="flex flex-col gap-1 overflow-auto"
                 style={{
                   background: "hsl(0deg 0% 100% / 6%)",
                   border: "1px solid #353535",
                   borderRadius: "10px",
                   padding: "16px",
+                  overflowX: "auto",
                 }}
               >
                 <div
                   className="flex p-3 justify-between border border-[#282828] rounded-lg"
-                  style={{ background: "rgba(0, 0, 0, 0.12)" }}
+                  style={{
+                    background: "rgba(0, 0, 0, 0.12)",
+                    top: 0,
+                    zIndex: 10,
+                    minWidth: "600px", // Minimum width for columns to prevent overlap
+                  }}
                 >
-                  <div className="flex w-[80%]">
-                    <p className="text-sm font-medium text-[#9F9F9F] w-[30%]">
+                  <div className="flex w-[90%]">
+                    <p className="text-sm font-medium text-[#9F9F9F] w-[20%] align-middle">
                       account
                     </p>
-                    <p className="text-sm font-medium text-[#9F9F9F] w-[15%] text-center">
+                    <p className="text-sm font-medium text-[#9F9F9F] w-[15%] text-center align-middle">
                       type
                     </p>
-                    <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center">
+                    <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center align-middle">
                       OMAX
                     </p>
-                    <p className="text-sm font-medium text-[#9F9F9F] w-[15%] text-center">
+                    <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center align-middle">
                       {tokenInfo?.ticker}
                     </p>
-                    <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center">
+                    <p className="text-sm font-medium text-[#9F9F9F] w-[25%] text-center align-middle">
                       date
                     </p>
                   </div>
-                  <p className="text-sm font-medium text-[#9F9F9F]">
+                  <p className="text-sm font-medium text-[#9F9F9F] align-middle">
                     transaction
                   </p>
                 </div>
@@ -711,9 +717,10 @@ export default function TokenPage() {
                         }}
                         key={index}
                         className="flex p-3 justify-between rounded-lg bg-[#121212]"
+                        style={{ minWidth: "600px" }} // Ensure columns don't overlap
                       >
-                        <div className="flex w-[80%]">
-                          <div className="flex items-center gap-1 w-[30%]">
+                        <div className="flex w-[90%]">
+                          <div className="flex items-center gap-1 w-[20%] items-center">
                             {item.avatar !== null &&
                               item.avatar !== undefined ? (
                               <Image
@@ -743,7 +750,7 @@ export default function TokenPage() {
                           </div>
                           <p
                             className={clsx(
-                              "text-sm font-medium w-[15%] text-center",
+                              "text-sm font-medium w-[15%] text-center leading-none",
                               item.isBuy === true
                                 ? "text-[#3FDC4F]"
                                 : "text-red-600"
@@ -751,13 +758,13 @@ export default function TokenPage() {
                           >
                             {item.isBuy === true ? "buy" : "sell"}
                           </p>
-                          <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center">
+                          <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center items-center leading-none">
                             {decimalToEth(item.omaxAmount).toFixed(2)}
                           </p>
-                          <p className="text-sm font-medium text-[#9F9F9F] w-[15%] text-center">
+                          <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center items-center leading-none">
                             {decimalToEth(item.tokenAmount).toFixed(2)}
                           </p>
-                          <p className="text-sm font-medium text-[#9F9F9F] w-[20%] text-center">
+                          <p className="text-sm font-medium text-[#9F9F9F] w-[25%] text-center items-center">
                             {format(
                               new Date(item.date),
                               "MM/dd/yyyy, HH:mm:ss"
@@ -767,7 +774,7 @@ export default function TokenPage() {
                         <a
                           href={`${scanUrl}/tx/${item.txhash}`}
                           target="_blank"
-                          className="text-sm font-medium text-[#9F9F9F] hover:underline"
+                          className="text-sm font-medium text-[#9F9F9F] hover:underline leading-none"
                         >
                           {item.txhash.substr(0, 6)}
                         </a>
@@ -1166,16 +1173,16 @@ export default function TokenPage() {
                 />
               </div>
               <p className="text-sm font-medium text-[#9F9F9F] pt-4">
-                when the market cap reaches $50,000 all the liquidity from the
-                bonding curve will be deposited into Omax protocol and burned.
-                progression increases as the price goes up.
+                When the market cap reaches $50,000, all the liquidity from the
+                bonding curve will be deposited into the Omax Swap and liquidity will be burned.
+                The progression increases as the price rises.
                 <br />
                 <br />
-                there are{" "}
+                There are{" "}
                 {tokenInfo?.tokensAvailableForSale !== null
                   ? tokenInfo?.tokensAvailableForSale.toFixed(0)
                   : "751,404,142"}{" "}
-                tokens still available for sale in the bonding curve and there is{" "}
+                tokens still available for sale in the bonding curve, and there are{" "}
                 {tokenInfo?.realQuoteReserve !== null
                   ? tokenInfo?.realQuoteReserve.toFixed(2)
                   : "1,213"}{" "}
@@ -1184,7 +1191,7 @@ export default function TokenPage() {
               <div className="flex flex-col gap-2 pt-2">
                 {tokenInfo?.crownDate ? (
                   <p className="text-sm text-[#ffff00] font-medium">
-                    Crowned king of the fun on {tokenInfo?.crownDate}
+                    Crowned King of the fun on {tokenInfo?.crownDate}
                   </p>
                 ) : (
                   <>
@@ -1570,7 +1577,7 @@ function TradeDialog({
           });
           console.log('simulate result: ', request);
           tx = await writeContract(config, request);
-        }        
+        }
 
         const recipt = await waitForTransactionReceipt(config, { hash: tx });
         console.log("  trade txHash:", recipt);

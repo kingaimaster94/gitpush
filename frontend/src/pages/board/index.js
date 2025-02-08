@@ -133,7 +133,7 @@ export default function BoardPage() {
               sx={{
                 fontFamily: "JostBold",
                 color: "#5FE461",
-                fontSize: {sm:"63.47px",xs:"35px"},
+                fontSize: { sm: "63.47px", xs: "35px" },
               }}
             >
               Where Degens Unite
@@ -144,7 +144,7 @@ export default function BoardPage() {
               component={Link}
               href="/create"
               sx={{
-                mt:'1rem',
+                mt: '1rem',
                 background:
                   "linear-gradient(0deg, rgba(88,96,99,1) 0%, rgba(238,243,245,1) 52%, rgba(102,102,102,1) 100%)",
                 width: "160px",
@@ -211,7 +211,7 @@ export default function BoardPage() {
                         textAlign: "center",
                       }}
                     >
-                      king of the fun
+                      King of the fun
                     </Box>
                     <Box
                       className="flex gap-[10px]"
@@ -244,14 +244,14 @@ export default function BoardPage() {
                             className={`text-base`}
                             style={{ fontSize: "16px" }}
                           >
-                            Created by:{" "}
+                            <span className="hidden sm:block">Created by:{" "}</span>
                             <span style={{ color: "#000" }}>
                               {kingToken?.username}
                             </span>
                           </p>
 
                           {/* <p className={`text-base`}>Replies: {kingToken?.replies}</p> */}
-                          <Typography component={"p"} sx={{ fontSize: "14px",display:{sm:"block",xs:"none"} }}>
+                          <Typography component={"p"} sx={{ fontSize: "14px", display: { sm: "block", xs: "none" } }}>
                             {kingToken?.ticker} is making waves in the meme
                             token space, bringing the moon to your wallet. With
                             a powerful community and viral marketing, it’s
@@ -259,8 +259,8 @@ export default function BoardPage() {
                             traders alike. No presale, no team allocation—just
                             pure meme energy!
                           </Typography>
-                          <Typography component={"p"} sx={{ fontSize: "14px",display:{sm:"none",xs:"block"} }}>
-                            {kingToken?.ticker} 
+                          <Typography component={"p"} sx={{ fontSize: "14px", display: { sm: "none", xs: "block" } }}>
+                            {kingToken?.ticker}
                           </Typography>
                         </div>
                       </div>
@@ -286,7 +286,7 @@ export default function BoardPage() {
        
       </div> */}
       <div className="z-10 flex flex-col gap-12">
-       
+
         <div className="flex flex-col gap-6">
           {/* <div className="flex gap-6">
             <div
@@ -385,10 +385,10 @@ export default function BoardPage() {
             <div className="flex flex-col gap-6">
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 <Box sx={{
-                  "& button":{
-                    border:"1px solid #F0FF42",
-                    fontFamily:"JostRegular",
-                    fontSize:"18px"
+                  "& button": {
+                    border: "1px solid #F0FF42",
+                    fontFamily: "JostRegular",
+                    fontSize: "18px"
                   }
                 }} className="flex gap-3">
                   <Listbox value={sortSelected} onChange={setSortSelected}>
@@ -399,7 +399,7 @@ export default function BoardPage() {
                       )}
                     >
                       {sortSelected.name}
-              <MdOutlineKeyboardArrowDown style={{fontSize:"1.5rem"}}/>
+                      <MdOutlineKeyboardArrowDown style={{ fontSize: "1.5rem" }} />
 
                     </ListboxButton>
                     <Transition
@@ -426,7 +426,7 @@ export default function BoardPage() {
                             }
                           >
                             <CheckIcon className="invisible size-4 fill-white group-data-[selected]:visible" />
-                            <div className={`text-sm text-white`} style={{fontFamily:"JostRegular"}}>
+                            <div className={`text-sm text-white`} style={{ fontFamily: "JostRegular" }}>
                               {sort.name}
                             </div>
                           </ListboxOption>
@@ -442,7 +442,7 @@ export default function BoardPage() {
                       )}
                     >
                       {orderSelected.name}
-                      <MdOutlineKeyboardArrowDown style={{fontSize:"1.5rem"}}/>
+                      <MdOutlineKeyboardArrowDown style={{ fontSize: "1.5rem" }} />
                     </ListboxButton>
                     <Transition
                       leave="transition ease-in duration-100"
@@ -469,7 +469,7 @@ export default function BoardPage() {
                           >
                             <CheckIcon className="invisible size-4 fill-white group-data-[selected]:visible" />
                             <div className={`text-sm text-white`} style={{
-                              fontFamily:"JostRegular"
+                              fontFamily: "JostRegular"
                             }}>
                               {order.name}
                             </div>
@@ -560,190 +560,190 @@ export default function BoardPage() {
                     </div>
                   </div>
                 </Box> */}
-                
-             <Box sx={{
-              display:{sm:"flex"},
-              flex:1,
-              justifyContent:{sm:"flex-end"},
-              
-              "& input":{
-                "&::focus-visble": {
-            outline: "0 !important",
-          },
-          "&:focus": {
-            boxShadow: "none !important",
-          },
-              }
-             }}>
-             <div className="relative w-full sm:w-1/2">
-          <svg
-            className="absolute right-3 inset-y-[22%] cursor-pointer"
-            width="25"
-            height="25"
-            viewBox="0 0 37 36"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            onClick={() =>
-              getTokenList(
-                searchTokenName.current.value,
-                sortSelected.name,
-                orderSelected.name,
-                includeNSFW
-              )
-            }
-          >
-            <g clipPath="url(#clip0_1_90)">
-              <path
-                d="M27.1461 24.9255L33.5706 31.3485L31.4481 33.471L25.0251 27.0465C22.6352 28.9623 19.6626 30.0044 16.5996 30C9.14761 30 3.09961 23.952 3.09961 16.5C3.09961 9.048 9.14761 3 16.5996 3C24.0516 3 30.0996 9.048 30.0996 16.5C30.104 19.563 29.0619 22.5356 27.1461 24.9255ZM24.1371 23.8125C26.0408 21.8548 27.1039 19.2306 27.0996 16.5C27.0996 10.698 22.4001 6 16.5996 6C10.7976 6 6.09961 10.698 6.09961 16.5C6.09961 22.3005 10.7976 27 16.5996 27C19.3303 27.0043 21.9544 25.9412 23.9121 24.0375L24.1371 23.8125Z"
-                fill="white"
-              />
-            </g>
-            <defs>
-              <clipPath id="clip0_1_90">
-                <rect
-                  width="36"
-                  height="36"
-                  fill="white"
-                  transform="translate(0.0996094)"
-                />
-              </clipPath>
-            </defs>
-          </svg>
-          <input
-            ref={searchTokenName}
-            type="text"
-            className={`w-full pl-8 rounded-full border border-white text-[#808080] text-xl ${EurostileMNFont.className}`}
-            style={{
-              borderColor:"#F0FF42",
-              fontFamily:"JostRegular",
-              fontSize:"16px",
-              color:"#fff",
-              background:"transparent"
-            }}
-            placeholder="Search for token..."
-            onKeyDown={(e) => {
-              if (e.key === "Enter")
-                getTokenList(
-                  searchTokenName.current.value,
-                  sortSelected.name,
-                  orderSelected.name,
-                  includeNSFW
-                );
-            }}
-          />
-        </div>
-             </Box>
+
+                <Box sx={{
+                  display: { sm: "flex" },
+                  flex: 1,
+                  justifyContent: { sm: "flex-end" },
+
+                  "& input": {
+                    "&::focus-visble": {
+                      outline: "0 !important",
+                    },
+                    "&:focus": {
+                      boxShadow: "none !important",
+                    },
+                  }
+                }}>
+                  <div className="relative w-full sm:w-1/2">
+                    <svg
+                      className="absolute right-3 inset-y-[22%] cursor-pointer"
+                      width="25"
+                      height="25"
+                      viewBox="0 0 37 36"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      onClick={() =>
+                        getTokenList(
+                          searchTokenName.current.value,
+                          sortSelected.name,
+                          orderSelected.name,
+                          includeNSFW
+                        )
+                      }
+                    >
+                      <g clipPath="url(#clip0_1_90)">
+                        <path
+                          d="M27.1461 24.9255L33.5706 31.3485L31.4481 33.471L25.0251 27.0465C22.6352 28.9623 19.6626 30.0044 16.5996 30C9.14761 30 3.09961 23.952 3.09961 16.5C3.09961 9.048 9.14761 3 16.5996 3C24.0516 3 30.0996 9.048 30.0996 16.5C30.104 19.563 29.0619 22.5356 27.1461 24.9255ZM24.1371 23.8125C26.0408 21.8548 27.1039 19.2306 27.0996 16.5C27.0996 10.698 22.4001 6 16.5996 6C10.7976 6 6.09961 10.698 6.09961 16.5C6.09961 22.3005 10.7976 27 16.5996 27C19.3303 27.0043 21.9544 25.9412 23.9121 24.0375L24.1371 23.8125Z"
+                          fill="white"
+                        />
+                      </g>
+                      <defs>
+                        <clipPath id="clip0_1_90">
+                          <rect
+                            width="36"
+                            height="36"
+                            fill="white"
+                            transform="translate(0.0996094)"
+                          />
+                        </clipPath>
+                      </defs>
+                    </svg>
+                    <input
+                      ref={searchTokenName}
+                      type="text"
+                      className={`w-full pl-8 rounded-full border border-white text-[#808080] text-xl ${EurostileMNFont.className}`}
+                      style={{
+                        borderColor: "#F0FF42",
+                        fontFamily: "JostRegular",
+                        fontSize: "16px",
+                        color: "#fff",
+                        background: "transparent"
+                      }}
+                      placeholder="Search for token..."
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter")
+                          getTokenList(
+                            searchTokenName.current.value,
+                            sortSelected.name,
+                            orderSelected.name,
+                            includeNSFW
+                          );
+                      }}
+                    />
+                  </div>
+                </Box>
               </div>
               <Grid container spacing={4} className="mt-2">
                 {tokenList !== null &&
                   tokenList.map((item, index) => {
                     return (
-                    <Grid item lg={4} sm={6}  xs={12} key={index}>
-                    <Box height={"100%"} sx={{
-                      display:"flex",
-                      pt:"10px",
-                      position:"relative"
-                    }}>
-                    
-                    
-                   <Box>
-                     <Typography 
-                        component={"img"}
-                          src={item.logo}
-                          sx={{
-                            position:"absolute",
-                            left:"9px",
-                            top:"10px",
-                            width:"107px",
-                            height:"107px",
-                            borderRadius:"50%",
-                            zIndex:"2",
-                          }}
-                          alt=""
-                        />
-                   <Typography 
-                        component={"img"}
-                          src={image_bg.src}
-                          sx={{
-                            position:"absolute",
-                            bottom:"-4px",
-                            // bottom:"0",
-                            left:"-5px",
-                            // width:"180px",
-                            // height:"132px"
-                          }}
-                          // width={"120px"}
-                          // height={"100%"}
-                          alt=""
-                        />
-                   </Box>
-                   <Box sx={{
-                    width:"100%",
-                    display:"flex",
-                    justifyContent:"flex-end",
-                   }}>
-                   <Box sx={{
-                    pl:"7rem !important",
-                        background:"linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(153,153,153,1) 100%)",
-                        borderRadius:"10px",
-                        // position:"relative",
-                        height:"120px",
-                        width:"85%",
-                        "& p,button":{
-                          fontFamily:"JostRegular",
-                          lineHeight:"normal"
-                        }
-                      }}>
+                      <Grid item lg={4} sm={6} xs={12} key={index}>
+                        <Box height={"100%"} sx={{
+                          display: "flex",
+                          pt: "10px",
+                          position: "relative"
+                        }}>
 
-                      <Link
-                        key={index}
-                        ref={index === 0 ? tokenDiv : null}
-                        href={`/token/${item.tokenAddr}`}
-                        className="flex gap-2 items-start p-2"
-                      >
-                    
-                       
-                     
-                      <Box>
-                        <div className="flex flex-col">
-                          <div className="flex gap-2 items-center">
-                            <p className={`text-xl text-black`} style={{fontSize:"14px"}}>Created by</p>
-                            <Image
-                              src={
-                                item.avatar === null
-                                  ? "/img3.png"
-                                  : `${process.env.NEXT_PUBLIC_AVATAR_URL}/${item.avatar}`
-                              }
-                              width={24}
-                              height={24}
+
+                          <Box>
+                            <Typography
+                              component={"img"}
+                              src={item.logo}
+                              sx={{
+                                position: "absolute",
+                                left: "9px",
+                                top: "10px",
+                                width: "107px",
+                                height: "107px",
+                                borderRadius: "50%",
+                                zIndex: "2",
+                              }}
                               alt=""
                             />
-                            <Link
-                              href={`/profile/${item.walletAddr}`}
-                              className={`text-xl text-black hover:underline`}
-                              style={{fontSize:"14px"}}
-                            >
-                              {item.username}
-                            </Link>
-                          </div>
-                          <p className={`text-xl text-[#339E33]`} style={{fontSize:"14px"}}>
-                            Market cap: {item.marketCap.toFixed(2)}K
-                          </p>
-                          <p className={`text-xl text-[#000]`} style={{fontSize:"14px"}}>
-                            Reply: {item.replies}
-                          </p>
-                          <p className={`text-base text-[#000]`} style={{fontSize:"12px",opacity:"50%",lineHeight:"normal"}}>
-                            {/* <span className="font-bold" style={{fontSize:"10px"}}>{`${item.name} (ticker: ${item.ticker}): `}</span> */}
-                            {item?.desc.slice(0,50)}...
-                          </p>
-                        </div>
+                            <Typography
+                              component={"img"}
+                              src={image_bg.src}
+                              sx={{
+                                position: "absolute",
+                                bottom: "-4px",
+                                // bottom:"0",
+                                left: "-5px",
+                                // width:"180px",
+                                // height:"132px"
+                              }}
+                              // width={"120px"}
+                              // height={"100%"}
+                              alt=""
+                            />
+                          </Box>
+                          <Box sx={{
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "flex-end",
+                          }}>
+                            <Box sx={{
+                              pl: "7rem !important",
+                              background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(153,153,153,1) 100%)",
+                              borderRadius: "10px",
+                              // position:"relative",
+                              height: "120px",
+                              width: "85%",
+                              "& p,button": {
+                                fontFamily: "JostRegular",
+                                lineHeight: "normal"
+                              }
+                            }}>
+
+                              <Link
+                                key={index}
+                                ref={index === 0 ? tokenDiv : null}
+                                href={`/token/${item.tokenAddr}`}
+                                className="flex gap-2 items-start p-2"
+                              >
+
+
+
+                                <Box>
+                                  <div className="flex flex-col">
+                                    <div className="flex gap-2 items-center">
+                                      <p className={`text-xl text-black`} style={{ fontSize: "14px" }}>Created by</p>
+                                      <Image
+                                        src={
+                                          item.avatar === null
+                                            ? "/img3.png"
+                                            : `${process.env.NEXT_PUBLIC_AVATAR_URL}/${item.avatar}`
+                                        }
+                                        width={24}
+                                        height={24}
+                                        alt=""
+                                      />
+                                      <Link
+                                        href={`/profile/${item.walletAddr}`}
+                                        className={`text-xl text-black hover:underline`}
+                                        style={{ fontSize: "14px" }}
+                                      >
+                                        {item.username}
+                                      </Link>
+                                    </div>
+                                    <p className={`text-xl text-[#339E33]`} style={{ fontSize: "14px" }}>
+                                      Market cap: {item.marketCap.toFixed(2)}K
+                                    </p>
+                                    <p className={`text-xl text-[#000]`} style={{ fontSize: "14px" }}>
+                                      Reply: {item.replies}
+                                    </p>
+                                    <p className={`text-base text-[#000]`} style={{ fontSize: "12px", opacity: "50%", lineHeight: "normal" }}>
+                                      {/* <span className="font-bold" style={{fontSize:"10px"}}>{`${item.name} (ticker: ${item.ticker}): `}</span> */}
+                                      {item?.desc.slice(0, 50)}...
+                                    </p>
+                                  </div>
+                                </Box>
+
+                              </Link>
+                            </Box>
+                          </Box>
                         </Box>
-                     
-                      </Link>
-                      </Box>
-                   </Box>
-                      </Box>
-                    </Grid>
+                      </Grid>
                     );
                   })}
               </Grid>
