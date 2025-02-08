@@ -211,7 +211,7 @@ export default function BoardPage() {
                         textAlign: "center",
                       }}
                     >
-                      king of the hill
+                      king of the fun
                     </Box>
                     <Box
                       className="flex gap-[10px]"

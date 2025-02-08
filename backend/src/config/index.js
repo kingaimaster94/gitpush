@@ -37,9 +37,9 @@ exports.config = {
     tokenDecimals: 18,
     tokenTotalSupply: 10_000_000_000,   // 10 B
     initVirtBase: 10_000_000_000,       // 10 B
-    initVirtQuote: 500_000,             // 500_000 OMAX
-    kothQuoteReserve: 1_000_000,        // +1_000_000 OMAX
-    completeQuoteReserve: 2_000_000,    // +2_000_000 OMAX
+    initVirtQuote: 1_000_000,             // 500_000 OMAX
+    kothQuoteReserve: 2_000_000,        // +1_000_000 OMAX
+    completeQuoteReserve: 4_000_000,    // +2_000_000 OMAX
     createFee: 1_000,                   // 1_000 OMAX
     quotesForSelf: 100_000,             // 100_000 OMAX
     priceDenom: 1_000_000_000_000,

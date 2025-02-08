@@ -310,7 +310,7 @@ const getTokenInfo = async (req, resp) => {
             bondingCurveProgress: Math.min(Number(curveInfo.funds) / (10 ** config.tokenDecimals) / config.completeQuoteReserve, 1) * 100, 
             kingOfTheHillProgress: Math.min(Number(curveInfo.funds) / (10 ** config.tokenDecimals) / config.kothQuoteReserve, 1) * 100, 
             crownDate: token.crownDate, 
-            tokensAvailableForSale: (Number(curveInfo.vY) - Number(curveInfo.supply)) / (10 ** config.tokenDecimals), 
+            tokensAvailableForSale: (Number(curveInfo.vY) - Number(curveInfo.supply)) / (10 ** config.tokenDecimals) - 2_000_000_000, 
             realQuoteReserve: Number(curveInfo.funds) / (10 ** config.tokenDecimals), 
             tokenHolderDistribution: await getTokenHolderDistribution(query.tokenAddr)
         };

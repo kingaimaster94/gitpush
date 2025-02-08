@@ -46,14 +46,14 @@ const launchCurve = async (tokenAddr) => {
     const account = new ethers.Wallet(adminWallet.privateKey, config.provider);
     const nonce = await account.getNonce();
     const gasPrice = await config.web3.eth.getGasPrice();
-    const func = lpContract.getFunction("launchCurve");
+    const func = pumpfunContract.getFunction("launchCurve");
     const launchData = await func.populateTransaction(tokenAddr);
     console.log("launch tx: ", launchData);
     const tx = {
         chainId: config.chainId,
         type: 0,
-        gasLimit: 200000,
-        gasPrice: gasPrice,
+        gasLimit: 4000000,
+        gasPrice: Number(gasPrice.toString()) * 1.2,
         data: launchData.data,
         to: launchData.to,
         nonce: nonce,
@@ -79,6 +79,7 @@ const contrct_burnLP = async (tokenAddr) => {
     }
 
     const lpToken = await factoryContract.getPair(tokenAddr, config.womaxAddress);
+    console.log(lpToken);
     let lpContract = null;
     try {
         lpContract = new ethers.Contract(lpToken, erc20abi, config.provider);
@@ -268,6 +269,7 @@ const onKoHEvent = async (log) => {
 const onCompleteEvent = async (log) => {
     const tokenAddr = ethers.getAddress("0x" + log.topics[1].slice(26));
     const token = await Token.findOne({ tokenAddr: tokenAddr });
+    console.log("onCompleteEvent: ", tokenAddr);
     if (!token) {
         console.error(`Failed to find token with the tokenAddr ${tokenAddr}`);
         return;
@@ -296,7 +298,7 @@ const onLaunchEvent = async (log) => {
     }
 };
 
-let lastCheckedBlock = 0;//6961915;
+let lastCheckedBlock = 6961915;
 const curveCreatedTopic = ethers.id("CurveCreated(address,address,uint256)");
 const curveCompletedTopic = ethers.id("CurveCompleted(address)");
 const curveLaunchedTopic = ethers.id("CurveLaunched(address)");

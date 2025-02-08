@@ -240,31 +240,6 @@ export default function Header() {
           </Box>
         </div>
       </div>
-      {lastTradeInfo !== null && (
-        <div ref={div2Ref} className="flex sm:hidden gap-1 p-4 items-center bg-[#FF3131] rounded-xl h-[58px]">
-          <Link href={`/profile/${lastTradeInfo.walletAddr}`} className="flex items-center gap-1 hover:underline">
-            <Image
-              className="rounded-full"
-              src={lastTradeInfo.avatar === null ? "/img3.png" : `${process.env.NEXT_PUBLIC_AVATAR_URL}/${lastTradeInfo.avatar}`}
-              width={24}
-              height={24}
-              alt=""
-            />
-            <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.username}</p>
-          </Link>
-          <p className={`text-sm 2xl:text-xl ${rajdhani.className}`}>{lastTradeInfo.isBuy === true ? 'bought' : 'sold'} {lastTradeInfo.omaxAmount} OMAX of</p>
-          <Link href={`/${lastTradeInfo.tokenAddr}`} className="flex items-center gap-1">
-            <p className={`text-sm 2xl:text-xl hover:underline ${rajdhani.className}`}>{lastTradeInfo.tokenName}</p>
-            <Image
-              className="rounded-full"
-              src={lastTradeInfo.logo}
-              width={24}
-              height={24}
-              alt=""
-            />
-          </Link>
-        </div>
-      )}
       <HowItWorksDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
     </header>
   )

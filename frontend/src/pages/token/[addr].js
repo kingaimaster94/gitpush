@@ -1184,12 +1184,12 @@ export default function TokenPage() {
               <div className="flex flex-col gap-2 pt-2">
                 {tokenInfo?.crownDate ? (
                   <p className="text-sm text-[#ffff00] font-medium">
-                    Crowned king of the hill on {tokenInfo?.crownDate}
+                    Crowned king of the fun on {tokenInfo?.crownDate}
                   </p>
                 ) : (
                   <>
                     <p className="text-sm text-white font-medium">
-                      king of the hill progress:{" "}
+                      king of the fun progress:{" "}
                       {tokenInfo?.kingOfTheHillProgress.toFixed(1)}%
                     </p>
                     <Progress
