@@ -26,7 +26,7 @@ const TopRanker = () => {
     <Box
       sx={{
         background: "#000000",
-        width: { lg: "930px", xs: "100%" },
+        width: { lg: "100%", xs: "100%" },
         m: "2rem auto 0",
         borderRadius: { md: "100px", xs: "10px" },
         padding: "15px 25px",
@@ -43,11 +43,10 @@ const TopRanker = () => {
           fontSize: { sm: "16px", xs: "16px" },
           color: "#DCDCDC",
         },
-      }}
-       
-      
+      }}       
     >
-      <div className="flex max-h-[32px] gap-1 w-max space-between">
+      <div className="flex max-h-[32px] gap-1 w-full space-between">
+      <marquee width="100%">
         {recentTrade !== null &&
           recentTrade.map((item, index) => {
             return (
@@ -86,6 +85,8 @@ const TopRanker = () => {
             );
           })
         }
+      </marquee>
+
       </div>
     </Box>
   );

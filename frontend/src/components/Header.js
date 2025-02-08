@@ -217,7 +217,6 @@ export default function Header() {
               <Typography component={"img"} src={prime_twitter.src} width={"36px"} height={"36px"} />
             </a>
           </div>
-          <MobileDrawer  open={drawerOpen} onClose={closeDrawer} onOpen={toggleDrawer} />
           <Box sx={{
             "& .wallet-adapter-button": {
               backgroundColor: "#F0FF42",
@@ -239,6 +238,7 @@ export default function Header() {
                 CONNECT
               </div>
             )}
+            
             {(wallet.status == "connected") && (
               <Link href={wallet.isDisconnected ? "/#" : `/profile/${wallet.address}`}>
                 <UserCircleIcon className="size-8 fill-white" style={{
@@ -249,6 +249,8 @@ export default function Header() {
                 />
               </Link>
             )}
+          <MobileDrawer  open={drawerOpen} onClose={closeDrawer} onOpen={toggleDrawer} />
+
           </Box>
         </div>
       </div>
