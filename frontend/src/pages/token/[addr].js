@@ -209,8 +209,8 @@ export default function TokenPage() {
       return;
     }
 
-    const isBuy = currentMode == "buy" ; 
-    const tokenAddr = addr ;
+    const isBuy = currentMode == "buy";
+    const tokenAddr = addr;
 
     const created = await checkPoolCreated(tokenAddr);
     if (created) {
@@ -997,7 +997,7 @@ export default function TokenPage() {
                           target="_blank"
                           className="text-sm font-medium text-[#9F9F9F] hover:underline leading-none"
                         >
-                          {item.txhash.substr(0, 6)}
+                          {item.txhash.substr(0, 10)}
                         </a>
                       </Box>
                     );
@@ -1409,7 +1409,7 @@ export default function TokenPage() {
               <div className="flex flex-col gap-2 pt-2">
                 {tokenInfo?.crownDate ? (
                   <p className="text-sm text-[#ffff00] font-medium">
-                    Crowned King of the fun on {tokenInfo?.crownDate}
+                    Crowned King of the fun on {(new Date(tokenInfo?.crownDate)).toUTCString()}
                   </p>
                 ) : (
                   <>
@@ -1696,7 +1696,7 @@ function TradeDialog({
                   <button
                     type="button"
                     className="bg-white rounded-xl w-full h-[50px] text-xl font-bold"
-                    
+
                   >
                     Place Trade
                   </button>

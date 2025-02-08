@@ -58,11 +58,22 @@ const getTokenHolderDistribution = async (tokenAddr) => {
             const user = await User.findOne({ walletAddr: owner });
             const balance = tokenHolderlist.items[i].value;
             const totalSupply = tokenHolderlist.items[i].token.total_supply;
+            if (Number(balance) == 0) continue;
+            let bio = null;
+            if (owner == config.pumpfunAddress) {
+                bio = 'bonding curve';
+            } else if (owner == devWallet) {
+                bio = 'dev';
+            } else if (tokenHolderlist.items[i].address.is_contract == true) {
+                bio = 'Omaxswapv2';
+            } else {
+                bio = owner.substr(0, 10);
+            }
 
             holderDistrib.push({
                 walletAddr: owner,
-                username: (owner == config.pumpfunAddress) ? owner.substr(0, 6) : user?.username,
-                bio: (owner == config.pumpfunAddress) ? 'bonding curve' : (user?.walletAddr === devWallet ? 'dev' : null),
+                username: (owner == config.pumpfunAddress) ? owner.substr(0, 10) : user?.username,
+                bio: bio,
                 holdPercent: Number(balance) / Number(totalSupply) * 100
             });
         }
