@@ -52,7 +52,6 @@ export default function Header() {
   const mounted = useIsMounted();
 
   const [ws, setWs] = useState(undefined)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const div1Ref = useRef(null)
   const div2Ref = useRef(null)
   const [lastTokenInfo, setLastTokenInfo] = useState(null)
@@ -191,17 +190,17 @@ export default function Header() {
           <Link style={{ color: pathname == "/create" ? "#1005cf" : "#ffffff", textDecoration: pathname == "/create" ? "underline" : "none", textUnderlineOffset: "5px" }} href={"/create"}>
             Launch
           </Link>
-          <Typography onClick={() => setIsDialogOpen(true)}>
+          <Link style={{ color: "#ffffff" }} href={"https://docs.omax.fun"} target={"_blank"}>
             Docs
-          </Typography>
+          </Link>
         </Box>
         <div className="flex gap-4 items-center">
           <div className="hidden xl:flex gap-2 items-center">
 
-            <a href="https://nextjs.org" target="_blank">
+            <a href="https://t.me/omaxpump" target="_blank">
               <Typography component={"img"} src={logos_telegram.src} width={"36px"} height={"36px"} />
             </a>
-            <a href="https://nextjs.org" target="_blank">
+            <a href="https://x.com/omaxchain" target="_blank">
               <Typography component={"img"} src={prime_twitter.src} width={"36px"} height={"36px"} />
             </a>
           </div>
@@ -240,76 +239,6 @@ export default function Header() {
           </Box>
         </div>
       </div>
-      <HowItWorksDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
     </header>
-  )
-}
-
-function HowItWorksDialog({ isDialogOpen, setIsDialogOpen }) {
-  return (
-    <Transition appear show={isDialogOpen}>
-      <Dialog as="div" className={`relative z-30 focus:outline-none ${rajdhani.className}`} onClose={() => setIsDialogOpen(false)}>
-        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 bg-black/80">
-            <TransitionChild
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 transform-[scale(95%)]"
-              enterTo="opacity-100 transform-[scale(100%)]"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 transform-[scale(100%)]"
-              leaveTo="opacity-0 transform-[scale(95%)]"
-            >
-              <DialogPanel className="flex flex-col gap-8 p-10 w-full max-w-xl rounded-3xl bg-[#0B1821] border-none backdrop-blur-2xl">
-                <p className='text-[32px] text-bold text-white text-center' style={{ fontFamily: "JostRegular", fontSize: "20px", fontWeight: "bold" }}>How it works</p>
-                <p className='text-xl text-white text-center' style={{ fontFamily: "JostRegular", }}>Pump prevents rugs by making sure that all created tokens are safe. Each coin on pump is a <span className='text-[#5FE461]'>fair-launch</span> with no presale and <span className='text-[#F0FF42]'>no team allocation.</span></p>
-                <Box sx={{
-                  "& p,div,button": {
-                    fontFamily: "JostRegular",
-                    fontSize: "16px"
-                  }
-                }} className="flex flex-col gap-6">
-                  <div className="flex flex-col gap-2">
-                    <div className="px-3 py-1 border border-none rounded-lg text-xl text-black w-fit bg-[#5FE461]">
-                      Step 01
-                    </div>
-                    <p className="text-xl text-white">Pick a coin that you like</p>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="px-3 py-1 border border-none rounded-lg text-xl text-black w-fit bg-[#5FE461]">
-                      Step 02
-                    </div>
-                    <p className="text-xl text-white">Buy the coin on the bonding curve</p>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="px-3 py-1 border border-none rounded-lg text-xl text-black w-fit bg-[#5FE461]">
-                      Step 03
-                    </div>
-                    <p className="text-xl text-white">Sell at any time to lock in your profits or losses</p>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="px-3 py-1 border border-none rounded-lg text-xl text-black w-fit bg-[#5FE461]">
-                      Step 04
-                    </div>
-                    <p className="text-xl text-white">When enough people buy on the bonding curve it reaches a market cap of $69k</p>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="px-3 py-1 border border-none rounded-lg text-xl text-black w-fit bg-[#5FE461]">
-                      Step 05
-                    </div>
-                    <p className="text-xl text-white">$12k of liquidity is then deposited in Omax protocol and burned</p>
-                  </div>
-                </Box>
-                <button style={{
-                  background: "#F0FF42",
-                  fontFamily: "JostRegular",
-                  fontSize: "16px",
-                  fontWeight: "600"
-                }} type="button" className="bg-white rounded-xl text-xl font-bold p-3" onClick={() => setIsDialogOpen(false)}>I&apos;m ready to pump</button>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </Transition>
   )
 }

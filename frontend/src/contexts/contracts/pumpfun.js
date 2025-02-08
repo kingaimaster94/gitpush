@@ -1,4 +1,4 @@
-export const pumpfunabi = [    
+export const pumpfunabi = [
     {
         "anonymous": false,
         "inputs": [
@@ -204,19 +204,6 @@ export const pumpfunabi = [
     },
     {
         "inputs": [],
-        "name": "DEV_FEE",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
         "name": "FEE_DENOM",
         "outputs": [
             {
@@ -231,19 +218,6 @@ export const pumpfunabi = [
     {
         "inputs": [],
         "name": "PRICE_DENOM",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "TEAM_FEE",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -281,12 +255,7 @@ export const pumpfunabi = [
             },
             {
                 "internalType": "uint256",
-                "name": "devFee",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "teamFee",
+                "name": "swapFee",
                 "type": "uint256"
             }
         ],
@@ -572,19 +541,6 @@ export const pumpfunabi = [
     },
     {
         "inputs": [],
-        "name": "dev",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
         "name": "factory",
         "outputs": [
             {
@@ -666,12 +622,7 @@ export const pumpfunabi = [
             },
             {
                 "internalType": "uint256",
-                "name": "devFee",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "teamFee",
+                "name": "swapFee",
                 "type": "uint256"
             }
         ],
@@ -1007,32 +958,6 @@ export const pumpfunabi = [
         "inputs": [
             {
                 "internalType": "address",
-                "name": "_dev",
-                "type": "address"
-            }
-        ],
-        "name": "setDev",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_devFee",
-                "type": "uint256"
-            }
-        ],
-        "name": "setDevFee",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
                 "name": "_factory",
                 "type": "address"
             }
@@ -1121,19 +1046,6 @@ export const pumpfunabi = [
             }
         ],
         "name": "setTeam",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_teamFee",
-                "type": "uint256"
-            }
-        ],
-        "name": "setTeamFee",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

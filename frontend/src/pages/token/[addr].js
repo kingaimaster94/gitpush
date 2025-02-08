@@ -360,7 +360,7 @@ export default function TokenPage() {
                 Creator
               </Typography>
               <Typography sx={{ fontWeight: "600" }} className="text_">
-                <CopyTextWithTooltip textToCopy={""} />{" "}
+                <CopyTextWithTooltip textToCopy={tokenInfo?.walletAddr} />{" "}
                 {truncateAddress(tokenInfo?.walletAddr || "")}
                 <a
                   href={`${scanUrl}/address/${tokenInfo?.walletAddr}`}
@@ -385,7 +385,7 @@ export default function TokenPage() {
                 {tokenInfo?.ticker}
               </Typography>
               <Typography sx={{ fontWeight: "600" }} className="text_">
-                <CopyTextWithTooltip textToCopy={""} />{" "}
+                <CopyTextWithTooltip textToCopy={addr} />{" "}
                 {truncateAddress(addr || "")}{" "}
                 <a href={`${scanUrl}/address/${addr}`} target="_blank">
                   EXP <AiOutlineExport size={15} />
@@ -406,7 +406,7 @@ export default function TokenPage() {
                 Bonding curve
               </Typography>
               <Typography sx={{ fontWeight: "600" }} className="text_">
-                <CopyTextWithTooltip textToCopy={""} />{" "}
+                <CopyTextWithTooltip textToCopy={pumpfunAddress} />{" "}
                 {truncateAddress(pumpfunAddress || "")}{" "}
                 <a href={`${scanUrl}/address/${pumpfunAddress}`} target="_blank">
                   EXP <AiOutlineExport size={15} />

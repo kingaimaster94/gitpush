@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material'
+import Link from "next/link"
 import React from 'react'
 
 const CopyRight = () => {
@@ -22,7 +23,9 @@ const CopyRight = () => {
         @2025 All rights reserved
       </Typography>
       <Typography>
-        Terms and Conditions
+        <Link href={"https://docs.omax.fun/general-terms-and-conditions"} target={"_blank"}>
+          Terms and Conditions
+        </Link>
       </Typography>
       <Typography>
         Powered by OMAX
