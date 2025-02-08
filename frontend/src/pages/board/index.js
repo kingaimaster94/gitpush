@@ -575,7 +575,7 @@ export default function BoardPage() {
                     },
                   }
                 }}>
-                  <div className="relative w-full sm:w-1/2">
+                  <div className="relative w-full md:w-1/2">
                     <svg
                       className="absolute right-3 inset-y-[22%] cursor-pointer"
                       width="25"
@@ -612,7 +612,7 @@ export default function BoardPage() {
                     <input
                       ref={searchTokenName}
                       type="text"
-                      className={`w-full pl-8 rounded-full border border-white text-[#808080] text-xl ${EurostileMNFont.className}`}
+                      className={`w-full pl-3 md:pl-8 pr-10 rounded-full border border-white text-[#808080] text-xl ${EurostileMNFont.className}`}
                       style={{
                         borderColor: "#F0FF42",
                         fontFamily: "JostRegular",

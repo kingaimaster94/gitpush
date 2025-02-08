@@ -950,7 +950,7 @@ export default function TokenPage() {
                         currentCoin === "omax" ? logo_.src : tokenInfo?.logo
                       }
                       width={20}
-                      height={20}
+                      // height={20}
                       style={{ borderRadius: "50%" }}
                       alt="omax"
                     />
