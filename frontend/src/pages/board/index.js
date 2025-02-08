@@ -18,7 +18,7 @@ import { getFollowings, setFollow, setUnFollow } from "@/api/user";
 import { findTokens, getKing } from "@/api/token";
 import { getUserId } from "@/utils";
 import { Box, Button, Grid, Typography } from "@mui/material";
-import crown_frame from "../../assets/images/crown_frame_.png";
+import crown_frame from "../../assets/images/crown_frame.png";
 import image_bg from "../../assets/images/image_bg.png";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { useAccount } from "wagmi";
@@ -191,6 +191,7 @@ export default function BoardPage() {
                   p: "1.5rem 1rem",
                   // height:"300px"
                   width: { lg: "568px", xs: "100%" },
+                  // minWidth: { md: "550px", xs: "300px" },
                 }}
               >
                 <Link
@@ -211,7 +212,7 @@ export default function BoardPage() {
                         textAlign: "center",
                       }}
                     >
-                      King of the fun
+                      King of the FUN
                     </Box>
                     <Box
                       className="flex gap-[10px]"
@@ -226,7 +227,6 @@ export default function BoardPage() {
                         component={"img"}
                         src={kingToken?.logo}
                         width={110}
-                        height={140}
                         alt=""
                       />
                       <div className="flex flex-col gap-1">
@@ -620,7 +620,7 @@ export default function BoardPage() {
                         color: "#fff",
                         background: "transparent"
                       }}
-                      placeholder="Search for token..."
+                      placeholder="Search (name/ticker/address)"
                       onKeyDown={(e) => {
                         if (e.key === "Enter")
                           getTokenList(
@@ -683,7 +683,7 @@ export default function BoardPage() {
                             justifyContent: "flex-end",
                           }}>
                             <Box sx={{
-                              pl: "7rem !important",
+                              pl: "4.5rem !important",
                               background: "linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(153,153,153,1) 100%)",
                               borderRadius: "10px",
                               // position:"relative",
@@ -708,23 +708,25 @@ export default function BoardPage() {
                                   <div className="flex flex-col">
                                     <div className="flex gap-2 items-center">
                                       <p className={`text-xl text-black`} style={{ fontSize: "14px" }}>Created by</p>
-                                      <Image
-                                        src={
-                                          item.avatar === null
-                                            ? "/img3.png"
-                                            : `${process.env.NEXT_PUBLIC_AVATAR_URL}/${item.avatar}`
-                                        }
-                                        width={24}
-                                        height={24}
-                                        alt=""
-                                      />
-                                      <Link
-                                        href={`/profile/${item.walletAddr}`}
-                                        className={`text-xl text-black hover:underline`}
-                                        style={{ fontSize: "14px" }}
-                                      >
-                                        {item.username}
-                                      </Link>
+                                      <div className="flex gap-1 items-center">
+                                        <Image
+                                          src={
+                                            item.avatar === null
+                                              ? "/img3.png"
+                                              : `${process.env.NEXT_PUBLIC_AVATAR_URL}/${item.avatar}`
+                                          }
+                                          width={20}
+                                          height={20}
+                                          alt=""
+                                        />
+                                        <Link
+                                          href={`/profile/${item.walletAddr}`}
+                                          className={`text-xl text-black hover:underline`}
+                                          style={{ fontSize: "14px" }}
+                                        >
+                                          {item.username}
+                                        </Link>
+                                      </div>
                                     </div>
                                     <p className={`text-xl text-[#339E33]`} style={{ fontSize: "14px" }}>
                                       Market cap: {item.marketCap.toFixed(2)}K

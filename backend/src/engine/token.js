@@ -1,10 +1,10 @@
 
 const { config } = require('../config');
-const { User, 
-    Token, 
-    TokenReplyMention, 
-    TokenReplyMentionLike, 
-    TokenPrice, 
+const { User,
+    Token,
+    TokenReplyMention,
+    TokenReplyMentionLike,
+    TokenPrice,
     TokenTrade
 } = require('../db');
 const { uploadMetadata } = require('../omax/metadata');
@@ -17,7 +17,7 @@ const { broadcastMessage } = require('../utils/socket');
 const upload_metadata = async (req, resp) => {
     const query = req.body;
     console.log('upload_metadata - query:', query);
-    
+
     // if (!req.files) {
     //     console.error('upload_metadata error: No file uploaded');
     //     return resp.status(400).json({ error: 'No file uploaded' });
@@ -42,7 +42,7 @@ const updateToken = async (req, resp) => {
         let token = await Token.findOne({ tokenAddr: query.tokenAddr });
         if (!token) {
             console.log("event monitoring failed");
-            token = new Token({tokenAddr: query.tokenAddr});
+            token = new Token({ tokenAddr: query.tokenAddr });
         }
 
         let creator = await User.findOne({ _id: req.userId });
@@ -64,14 +64,14 @@ const updateToken = async (req, resp) => {
         await token.save();
 
         broadcastMessage({
-            type: config.dataType.lastToken, 
+            type: config.dataType.lastToken,
             data: {
-                walletAddr: query.creator, 
-                avatar: creator?.avatar, 
-                username: creator?.username, 
-                tokenAddr: token.tokenAddr, 
-                tokenName: token.name, 
-                logo: token.logo, 
+                walletAddr: query.creator,
+                avatar: creator?.avatar,
+                username: creator?.username,
+                tokenAddr: token.tokenAddr,
+                tokenName: token.name,
+                logo: token.logo,
                 cdate: token.cdate
             }
         });
@@ -89,124 +89,125 @@ const findTokens = async (req, resp) => {
 
     try {
         const regex = new RegExp(query.name, 'i');
-        const options = query.include_nsfw === '0' ? {
-            name: {$regex: regex},
-            twitterLink: {$ne: null},
-            tgLink: {$ne: null},
-            websiteLink: {$ne: null}
-        } : {
-            name: {$regex: regex}
+        const options = {
+            $or: [
+                { name: { $regex: regex } },
+                { ticker: { $regex: regex } },
+                { tokenAddr: { $regex: regex } }
+            ]
         };
+
         const tokens = await Token.find(options).populate('creatorId');
+
         let omaxPrice = fetchOMAXPrice();
         let temp = [];
         let ret = [];
-        
+
         switch (query.sort_condition) {
-        case 'bump order':
-            for (const token of tokens) {
-                const bumpOrder = (await TokenPrice.aggregate([
-                    { $match: {tokenId: token._id} },
-                    { $sort: {timestamp: -1} },
-                    { $limit: 1 },
-                    { $project: {_id: 0, timestamp: 1} }
-                ]))[0].timestamp;
-                // console.log('bumpOrder:', bumpOrder);
-                temp.push({
-                    ...token._doc, 
-                    bumpOrder
-                });
-            }
-            temp = temp.sort((a, b) => 
-                (query.sort_order === 'desc') ? (b.bumpOrder - a.bumpOrder) : (a.bumpOrder - b.bumpOrder)
-            );
-            temp = temp.slice(0, 30);
-            break;
+            case 'bump order':
+                for (const token of tokens) {
+                    const bumpOrder = (await TokenPrice.aggregate([
+                        { $match: { tokenId: token._id } },
+                        { $sort: { timestamp: -1 } },
+                        { $limit: 1 },
+                        { $project: { _id: 0, timestamp: 1 } }
+                    ]))[0].timestamp;
+                    // console.log('bumpOrder:', bumpOrder);
+                    temp.push({
+                        ...token._doc,
+                        bumpOrder
+                    });
+                }
+                temp = temp.sort((a, b) =>
+                    (query.sort_order === 'desc') ? (b.bumpOrder - a.bumpOrder) : (a.bumpOrder - b.bumpOrder)
+                );
+                temp = temp.slice(0, 30);
+                break;
 
-        case 'last reply':
-            for (const token of tokens) {
-                const lastReply = (await TokenReplyMention
-                .aggregate([
-                    { $match: {tokenId: token._id} },
-                    { $match: {mentionerId: null} },
-                    { $sort: {cdate: -1} },
-                    { $limit: 1 },
-                    { $project: {_id: 0, cdate: 1} }
-                ]))[0]?.cdate;
-                // console.log('lastReply:', lastReply);
-                temp.push({
-                    ...token._doc, 
-                    lastReply
-                });
-            }
-            temp = temp.sort((a, b) => 
-                (query.sort_order === 'desc') ? (b.lastReply - a.lastReply) : (a.lastReply - b.lastReply)
-            );
-            temp = temp.slice(0, 30);
-            break;
+            case 'last reply':
+                for (const token of tokens) {
+                    const lastReply = (await TokenReplyMention
+                        .aggregate([
+                            { $match: { tokenId: token._id } },
+                            { $match: { mentionerId: null } },
+                            { $sort: { cdate: -1 } },
+                            { $limit: 1 },
+                            { $project: { _id: 0, cdate: 1 } }
+                        ]))[0]?.cdate;
+                    // console.log('lastReply:', lastReply);
+                    temp.push({
+                        ...token._doc,
+                        lastReply
+                    });
+                }
+                temp = temp.sort((a, b) =>
+                    (query.sort_order === 'desc') ? (b.lastReply - a.lastReply) : (a.lastReply - b.lastReply)
+                );
+                temp = temp.slice(0, 30);
+                break;
 
-        case 'reply count':
-            for (const token of tokens) {
-                const replyCount = await TokenReplyMention.countDocuments({ tokenId: token._id, mentionerId: null });
-                console.log('replyCount:', replyCount);
-                temp.push({
-                    ...token._doc, 
-                    replyCount
-                });
-            }
-            temp = temp.sort((a, b) => 
-                (query.sort_order === 'desc') ? (b.replyCount - a.replyCount) : (a.replyCount - b.replyCount)
-            );
-            temp = temp.slice(0, 30);
-            break;
+            case 'reply count':
+                for (const token of tokens) {
+                    const replyCount = await TokenReplyMention.countDocuments({ tokenId: token._id, mentionerId: null });
+                    console.log('replyCount:', replyCount);
+                    temp.push({
+                        ...token._doc,
+                        replyCount
+                    });
+                }
+                temp = temp.sort((a, b) =>
+                    (query.sort_order === 'desc') ? (b.replyCount - a.replyCount) : (a.replyCount - b.replyCount)
+                );
+                temp = temp.slice(0, 30);
+                break;
 
-        case 'market cap':
-            for (const token of tokens) {
-                const lastPrice = (await TokenPrice.aggregate([
-                    { $match: {tokenId: token._id} },
-                    { $sort: {timestamp: -1} },
-                    { $limit: 1 },
-                    { $project: {price: 1} }
-                ]))[0].price;
-                // console.log('lastPrice:', lastPrice);
-                temp.push({
-                    ...token._doc, 
-                    marketCap: lastPrice * config.tokenTotalSupply
-                });
-            }
-            temp = temp.sort((a, b) => 
-                (query.sort_order === 'desc') ? (b.marketCap - a.marketCap) : (a.marketCap - b.marketCap)
-            );
-            temp = temp.slice(0, 30);
-            break;
+            case 'market cap':
+                for (const token of tokens) {
+                    const lastPrice = (await TokenPrice.aggregate([
+                        { $match: { tokenId: token._id } },
+                        { $sort: { timestamp: -1 } },
+                        { $limit: 1 },
+                        { $project: { price: 1 } }
+                    ]))[0].price;
+                    // console.log('lastPrice:', lastPrice);
+                    temp.push({
+                        ...token._doc,
+                        marketCap: lastPrice * config.tokenTotalSupply
+                    });
+                }
+                temp = temp.sort((a, b) =>
+                    (query.sort_order === 'desc') ? (b.marketCap - a.marketCap) : (a.marketCap - b.marketCap)
+                );
+                temp = temp.slice(0, 30);
+                break;
 
-        case 'creation time':
-            temp = tokens.sort((a, b) => 
-                (query.sort_order === 'desc') ? (b.cdate - a.cdate) : (a.cdate - b.cdate)
-            );
-            temp = temp.slice(0, 30);
-            break;
+            case 'creation time':
+                temp = tokens.sort((a, b) =>
+                    (query.sort_order === 'desc') ? (b.cdate - a.cdate) : (a.cdate - b.cdate)
+                );
+                temp = temp.slice(0, 30);
+                break;
         }
 
         // console.log('temp:', temp);
         for (const token of temp) {
             const price = (await TokenPrice.aggregate([
-                { $match: {tokenId: token._id} },
-                { $sort: {timestamp: -1} },
+                { $match: { tokenId: token._id } },
+                { $sort: { timestamp: -1 } },
                 { $limit: 1 },
-                { $project: {price: 1} }
+                { $project: { price: 1 } }
             ]))[0].price;
 
             ret.push({
-                name: token.name, 
-                ticker: token.ticker, 
-                desc: token.desc, 
-                logo: token.logo, 
-                tokenAddr: token.tokenAddr, 
-                avatar: token.creatorId?.avatar, 
-                username: token.creatorId?.username, 
+                name: token.name,
+                ticker: token.ticker,
+                desc: token.desc,
+                logo: token.logo,
+                tokenAddr: token.tokenAddr,
+                avatar: token.creatorId?.avatar,
+                username: token.creatorId?.username,
                 walletAddr: token.creator,
-                marketCap: (price * config.tokenTotalSupply * omaxPrice) / 1000, 
+                marketCap: (price * config.tokenTotalSupply * omaxPrice) / 1000,
                 replies: await TokenReplyMention.countDocuments({ tokenId: token._id, mentionerId: null })
             });
         }
@@ -229,21 +230,21 @@ const getKingOfTheHill = async (req, resp) => {
         if (!kingOfTheHill) return resp.status(200).json(null);
 
         const token = (await TokenPrice.aggregate([
-            { $match: {tokenId: kingOfTheHill._id} },
-            { $sort: {timestamp: -1} },
+            { $match: { tokenId: kingOfTheHill._id } },
+            { $sort: { timestamp: -1 } },
             { $limit: 1 },
-            { $project: {price: 1} }
+            { $project: { price: 1 } }
         ]))[0];
 
         let omaxPrice = fetchOMAXPrice();
         kingOfTheHill = {
-            tokenAddr: kingOfTheHill?.tokenAddr, 
-            name: kingOfTheHill?.name, 
-            ticker: kingOfTheHill?.ticker, 
-            logo: kingOfTheHill?.logo, 
-            username: kingOfTheHill?.creatorId?.username, 
-            marketCap: (token.price * config.tokenTotalSupply * omaxPrice) / 1000, 
-            replies: await TokenReplyMention.countDocuments({ tokenId: token.tokenId, mentionerId: null }), 
+            tokenAddr: kingOfTheHill?.tokenAddr,
+            name: kingOfTheHill?.name,
+            ticker: kingOfTheHill?.ticker,
+            logo: kingOfTheHill?.logo,
+            username: kingOfTheHill?.creatorId?.username,
+            marketCap: (token.price * config.tokenTotalSupply * omaxPrice) / 1000,
+            replies: await TokenReplyMention.countDocuments({ tokenId: token.tokenId, mentionerId: null }),
         };
         // console.log('kingOfTheHill:', kingOfTheHill);
 
@@ -269,10 +270,10 @@ const getTokenInfo = async (req, resp) => {
         const curveInfo = await getCurveInfo(query.tokenAddr);
 
         const lastPrice = (await TokenPrice.aggregate([
-            { $match: {tokenId: token._id} },
-            { $sort: {timestamp: -1} },
+            { $match: { tokenId: token._id } },
+            { $sort: { timestamp: -1 } },
             { $limit: 1 },
-            { $project: {price: 1, baseReserve: 1, quoteReserve: 1} }
+            { $project: { price: 1, baseReserve: 1, quoteReserve: 1 } }
         ]))[0];
         // console.log('lastPrice:', lastPrice);
         let omaxPrice = fetchOMAXPrice();
@@ -289,29 +290,29 @@ const getTokenInfo = async (req, resp) => {
         }
 
         const ret = {
-            name: token.name, 
-            ticker: token.ticker, 
-            desc: token.desc, 
-            logo: token.logo, 
-            twitter: token.twitter, 
-            telegram: token.telegram, 
-            website: token.website, 
-            cdate: token.cdate, 
-            marketCap: lastPrice.price * config.tokenTotalSupply * omaxPrice, 
-            virtLiq: (Number(curveInfo.vX) + Number(curveInfo.funds)) / (10 ** config.tokenDecimals) * omaxPrice * 2, 
-            
-            walletAddr: token.creator, 
-            username: token.creatorId?.username, 
-            avatar: token.creatorId?.avatar, 
-            
-            tokenBalance: tokenBalance, 
-            omaxBalance: omaxBalance, 
-            replies: await TokenReplyMention.countDocuments({ tokenId: token._id, mentionerId: null }), 
-            bondingCurveProgress: Math.min(Number(curveInfo.funds) / (10 ** config.tokenDecimals) / config.completeQuoteReserve, 1) * 100, 
-            kingOfTheHillProgress: Math.min(Number(curveInfo.funds) / (10 ** config.tokenDecimals) / config.kothQuoteReserve, 1) * 100, 
-            crownDate: token.crownDate, 
-            tokensAvailableForSale: (Number(curveInfo.vY) - Number(curveInfo.supply)) / (10 ** config.tokenDecimals) - 2_000_000_000, 
-            realQuoteReserve: Number(curveInfo.funds) / (10 ** config.tokenDecimals), 
+            name: token.name,
+            ticker: token.ticker,
+            desc: token.desc,
+            logo: token.logo,
+            twitter: token.twitter,
+            telegram: token.telegram,
+            website: token.website,
+            cdate: token.cdate,
+            marketCap: lastPrice.price * config.tokenTotalSupply * omaxPrice,
+            virtLiq: (Number(curveInfo.vX) + Number(curveInfo.funds)) / (10 ** config.tokenDecimals) * omaxPrice * 2,
+
+            walletAddr: token.creator,
+            username: token.creatorId?.username,
+            avatar: token.creatorId?.avatar,
+
+            tokenBalance: tokenBalance,
+            omaxBalance: omaxBalance,
+            replies: await TokenReplyMention.countDocuments({ tokenId: token._id, mentionerId: null }),
+            bondingCurveProgress: Math.min(Number(curveInfo.funds) / (10 ** config.tokenDecimals) / config.completeQuoteReserve, 1) * 100,
+            kingOfTheHillProgress: Math.min(Number(curveInfo.funds) / (10 ** config.tokenDecimals) / config.kothQuoteReserve, 1) * 100,
+            crownDate: token.crownDate,
+            tokensAvailableForSale: (Number(curveInfo.vY) - Number(curveInfo.supply)) / (10 ** config.tokenDecimals) - 2_000_000_000,
+            realQuoteReserve: Number(curveInfo.funds) / (10 ** config.tokenDecimals),
             tokenHolderDistribution: await getTokenHolderDistribution(query.tokenAddr)
         };
         // console.log('ret:', ret);
@@ -340,20 +341,20 @@ const getFeedData = async (req, resp) => {
             console.error(`getFeedData error: Failed to find the token with tokenAddr ${query.tokenAddr}`);
             return resp.status(400).json({ error: `Failed to find the token with tokenAddr ${query.tokenAddr}` });
         }
-        
+
         for (x = from; x < to; x += interval) {
             const startTrade = (await TokenPrice.find(
-                {tokenId: token._id, timestamp: {$lt: new Date(Number(x) * 1000 + 1)}}, 
-                {price: 1, timestamp: 1}, 
-                {sort: {timestamp: -1}}
+                { tokenId: token._id, timestamp: { $lt: new Date(Number(x) * 1000 + 1) } },
+                { price: 1, timestamp: 1 },
+                { sort: { timestamp: -1 } }
             ))[0];
             // if (!startTrade)
             //     continue;
             // console.log('startTrade:', startTrade);
-            
+
             const tokenPrices = await TokenPrice.find({
-                tokenId: token._id, 
-                timestamp: {$gt: new Date(Number(x) * 1000 - 1), $lt: new Date(Number(x + interval) * 1000 + 1)}
+                tokenId: token._id,
+                timestamp: { $gt: new Date(Number(x) * 1000 - 1), $lt: new Date(Number(x + interval) * 1000 + 1) }
             });
             // console.log('tokenPrices:', tokenPrices);
 
@@ -361,20 +362,20 @@ const getFeedData = async (req, resp) => {
                 const lowPrice = Math.min(tokenPrices.reduce((low, item) => Math.min(low, item.price), Infinity), startTrade?.price);
                 const highPrice = Math.max(tokenPrices.reduce((high, item) => Math.max(high, item.price), -Infinity), startTrade?.price);
                 feedData.push({
-                    startTimestampSeconds: x, 
-                    low: lowPrice, 
-                    high: highPrice, 
-                    open: startTrade?.price, 
-                    close: tokenPrices[tokenPrices.length - 1].price, 
+                    startTimestampSeconds: x,
+                    low: lowPrice,
+                    high: highPrice,
+                    open: startTrade?.price,
+                    close: tokenPrices[tokenPrices.length - 1].price,
                     // volumeUsd: tokenPrices[0].price * 1_000_000_000
                 });
             } else if (startTrade) {
                 feedData.push({
-                    startTimestampSeconds: x, 
-                    low: startTrade?.price, 
-                    high: startTrade?.price, 
-                    open: startTrade?.price, 
-                    close: startTrade?.price, 
+                    startTimestampSeconds: x,
+                    low: startTrade?.price,
+                    high: startTrade?.price,
+                    open: startTrade?.price,
+                    close: startTrade?.price,
                     // volumeUsd: tokenPrices[0].price * 1_000_000_000
                 });
             }
@@ -405,22 +406,22 @@ const getThreadData = async (req, resp) => {
         let replyData = [];
         for (const reply of replies) {
             replyData = [
-                ...replyData, 
+                ...replyData,
                 {
-                    walletAddr: reply.replierId.walletAddr, 
-                    avatar: reply.replierId.avatar, 
-                    username: reply.replierId.username, 
-                    bio: reply.replierId.bio, 
-                    replyMentionId: reply._id, 
-                    comment: reply.comment, 
-                    image: reply.image, 
-                    cdate: reply.cdate, 
-                    buySell: reply.buySell, 
-                    tokenAmount: reply.tokenAmount, 
-                    omaxAmount: reply.omaxAmount, 
-                    likes: await TokenReplyMentionLike.countDocuments({ replyMentionId: reply._id, status: true }), 
-                    liked: await TokenReplyMentionLike.countDocuments({ replyMentionId: reply._id, likerId: parsedUserId, status: true }) > 0 ? true : false, 
-                    mentions: await TokenReplyMention.find({ replyMentionId: reply._id, mentionerId: {$ne: null} }, { _id: 1 })
+                    walletAddr: reply.replierId.walletAddr,
+                    avatar: reply.replierId.avatar,
+                    username: reply.replierId.username,
+                    bio: reply.replierId.bio,
+                    replyMentionId: reply._id,
+                    comment: reply.comment,
+                    image: reply.image,
+                    cdate: reply.cdate,
+                    buySell: reply.buySell,
+                    tokenAmount: reply.tokenAmount,
+                    omaxAmount: reply.omaxAmount,
+                    likes: await TokenReplyMentionLike.countDocuments({ replyMentionId: reply._id, status: true }),
+                    liked: await TokenReplyMentionLike.countDocuments({ replyMentionId: reply._id, likerId: parsedUserId, status: true }) > 0 ? true : false,
+                    mentions: await TokenReplyMention.find({ replyMentionId: reply._id, mentionerId: { $ne: null } }, { _id: 1 })
                 }
             ];
         }
@@ -494,7 +495,7 @@ const likeReply = async (req, resp) => {
             like.mdate = Date.now();
         }
         await like.save();
-        
+
         return resp.status(200).json({});
     } catch (err) {
         console.error('likeReply error:', err);
@@ -516,11 +517,11 @@ const dislikeReply = async (req, resp) => {
             console.warn('dislikeReply warning: Already disliked');
             return resp.status(200).json({ warning: "Already disliked" });
         }
-        
+
         like.status = false;
         like.mdate = Date.now();
         await like.save();
-        
+
         return resp.status(200).json({});
     } catch (err) {
         console.error('dislikeReply error:', err);
@@ -564,7 +565,7 @@ const mentionReply = async (req, resp) => {
             cdate: Date.now()
         });
         await mention.save();
-        
+
         return resp.status(200).json({});
     } catch (err) {
         console.error('mentionReply error:', err);
@@ -584,19 +585,19 @@ const getTradeHist = async (req, resp) => {
             return resp.status(400).json({ error: `Failed to find the token with tokenAddr ${query.tokenAddr}` });
         }
 
-        const tradeHist = await TokenTrade.find({ tokenId: token._id }).populate('traderId').sort({timestamp: -1});
+        const tradeHist = await TokenTrade.find({ tokenId: token._id }).populate('traderId').sort({ timestamp: -1 });
         let histData = [];
-        
+
         for (const trade of tradeHist) {
             // console.log('  trade:', trade);
             histData.push({
-                walletAddr: trade.trader, 
-                avatar: trade.traderId?.avatar, 
-                username: trade.traderId?.username, 
-                isBuy: trade.isBuy, 
-                tokenAmount: trade.tokenAmount, 
-                omaxAmount: trade.omaxAmount, 
-                date: trade.timestamp, 
+                walletAddr: trade.trader,
+                avatar: trade.traderId?.avatar,
+                username: trade.traderId?.username,
+                isBuy: trade.isBuy,
+                tokenAmount: trade.tokenAmount,
+                omaxAmount: trade.omaxAmount,
+                date: trade.timestamp,
                 txhash: trade.txhash
             });
         }
@@ -615,9 +616,9 @@ const getRecentTrade = async (req, resp) => {
         let histData = []
         for (let i = 0; i < trades.length; i++) {
             if (trades[i].isBuy == true) {
-                const token = await Token.findOne({_id: trades[i].tokenId});
+                const token = await Token.findOne({ _id: trades[i].tokenId });
                 histData.push({
-                    walletAddr: trades[i].trader, 
+                    walletAddr: trades[i].trader,
                     logo: token.logo,
                     omaxAmount: trades[i].omaxAmount,
                 });
@@ -665,7 +666,7 @@ const tradeToken = async (req, resp) => {
                 txhash: query.txhash
             });
             await trade.save();
-        }        
+        }
 
         if (query.comment) {
             const replyMention = new TokenReplyMention({
@@ -681,17 +682,17 @@ const tradeToken = async (req, resp) => {
         }
 
         broadcastMessage({
-            type: config.dataType.lastTrade, 
+            type: config.dataType.lastTrade,
             data: {
-                walletAddr: trader.walletAddr, 
-                avatar: trader.avatar, 
-                username: trader.username, 
-                tokenAddr: token.tokenAddr, 
-                tokenName: token.name, 
-                logo: token.logo, 
+                walletAddr: trader.walletAddr,
+                avatar: trader.avatar,
+                username: trader.username,
+                tokenAddr: token.tokenAddr,
+                tokenName: token.name,
+                logo: token.logo,
                 tokenAmount: query.tokenAmount,
                 omaxAmount: query.omaxAmount,
-                isBuy: query.isBuy, 
+                isBuy: query.isBuy,
                 cdate: token.cdate
             }
         });
@@ -703,17 +704,18 @@ const tradeToken = async (req, resp) => {
     }
 };
 
-module.exports = { upload_metadata, 
-    updateToken, 
-    findTokens, 
-    getKingOfTheHill, 
-    getTokenInfo, 
-    getFeedData, 
-    getThreadData, 
-    reply, 
-    likeReply, 
-    dislikeReply, 
-    mentionReply, 
+module.exports = {
+    upload_metadata,
+    updateToken,
+    findTokens,
+    getKingOfTheHill,
+    getTokenInfo,
+    getFeedData,
+    getThreadData,
+    reply,
+    likeReply,
+    dislikeReply,
+    mentionReply,
     getTradeHist,
     getRecentTrade,
     tradeToken

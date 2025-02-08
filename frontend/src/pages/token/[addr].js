@@ -271,12 +271,12 @@ export default function TokenPage() {
 
   return (
     <Grid container spacing={2} className={`z-10 mt-10`}>
-      <Grid item md={9} sm={12} xs={12}>
+      <Grid item lg={9} md={8} sm={12} xs={12}>
         <div className="z-10 flex flex-col w-full px-1">
           {isPoolComplete === true && (
             <div className="flex items-center gap-2 bg-[#86efac] p-4 rounded-md w-fit">
               <p className="text-black text-xl">
-                Omax pool seeded! view the coin on Omax protocol
+                Omax-swap pool seeded! view the coin on Omax protocol
               </p>
               <a
                 href={`https://dexscreener.com/${addr}`}
@@ -787,10 +787,7 @@ export default function TokenPage() {
         </div>
       </Grid>
       <Grid
-        item
-        md={3}
-        sm={12}
-        xs={12}
+        item lg={3} md={4} sm={12} xs={12}
         sx={{
           "& p": {
             fontFamily: "JostRegular",
@@ -894,7 +891,7 @@ export default function TokenPage() {
                   sell
                 </button>
                 {currentMode === "sell" && (
-                  <div className="absolute bottom-0 w-full h-[2px] bg-[#39ED6F]"></div>
+                  <div className="absolute bottom-0 w-full h-[2px] bg-[#f23645]"></div>
                 )}
               </div>
             </div>

@@ -30,8 +30,8 @@ const TopRanker = () => {
         padding: "15px 25px",
         display: "flex",
         justifyContent: { sm: "space-between", xs: "center" },
+        maxWidth: "100%",
         gap: "1rem",
-        flexWrap: "wrap",
         "& p": {
           fontFamily: "JostRegular",
           fontSize: { sm: "16px", xs: "16px" },
@@ -39,41 +39,44 @@ const TopRanker = () => {
         },
       }}
     >
-      {recentTrade !== null &&
-        recentTrade.map((item, index) => {
-          return (
-            <Typography
-              key={index}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <Typography component={"img"}
-                src={item.logo} sx={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                  zIndex: "2",
-                }}
-                alt="" />{" "}
-              <span style={{ fontWeight: "600" }}>{item.username}</span>{" "}
-              <span
-                style={{
-                  color: "#797987",
-                  fontSize: "14px",
+      <div className="flex max-h-[32px] gap-1 w-max justify-between">
+        {recentTrade !== null &&
+          recentTrade.map((item, index) => {
+            return (
+              <Typography
+                key={index}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
               >
-                {truncateAddress(item.walletAddr)}
-              </span>{" "}
-              <span style={{ color: "#2D8E2F", fontSize: "14px", fontFamily: "Inter" }}>
-                {"BUY " + decimalToEth(item.omaxAmount).toFixed(2) + " OMAX"}
-              </span>
-            </Typography>
-          );
-        })
-      }
+                <Typography component={"img"}
+                  src={item.logo} sx={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    zIndex: "2",
+                  }}
+                  alt="" />{" "}
+                <span style={{ fontWeight: "600" }} className="w-max">{item.username}</span>{" "}
+                <span
+                  style={{
+                    color: "#797987",
+                    fontSize: "14px",
+                  }}
+                  className="w-max"
+                >
+                  {truncateAddress(item.walletAddr)}
+                </span>{" "}
+                <span style={{ color: "#2D8E2F", fontSize: "14px", fontFamily: "Inter" }} className="w-max text-nowrap">
+                  {"BUY " + decimalToEth(item.omaxAmount).toFixed(2) + " OMAX"}
+                </span>
+              </Typography>
+            );
+          })
+        }
+      </div>
     </Box>
   );
 };

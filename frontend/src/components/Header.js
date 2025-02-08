@@ -197,7 +197,7 @@ export default function Header() {
         <div className="flex gap-4 items-center">
           <div className="hidden xl:flex gap-2 items-center">
 
-            <a href="https://t.me/omaxpump" target="_blank">
+            <a href="https://t.me/omaxfun" target="_blank">
               <Typography component={"img"} src={logos_telegram.src} width={"36px"} height={"36px"} />
             </a>
             <a href="https://x.com/omaxchain" target="_blank">
