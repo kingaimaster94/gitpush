@@ -147,7 +147,6 @@ const getUserProfile = async (req, resp) => {
             });
         }
         // console.log('followingsList2:', followingsList2);
-
         return resp.status(200).json({ avatar: user.avatar, 
             username: user.username, 
             bio: user.bio, 
@@ -161,6 +160,7 @@ const getUserProfile = async (req, resp) => {
             followersList: followersList2, 
             followingsList: followingsList2
         });
+        
     } catch (err) {
         console.error('getUserProfile error:', err);
         return resp.status(400).json({ error: err.message });

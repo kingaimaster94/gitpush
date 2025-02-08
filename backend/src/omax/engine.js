@@ -28,7 +28,7 @@ const fetchAPI = async (url, method, data = {}) => {
     });
 };
 
-const getTokensHeld = async (walletAddr) => {
+const getTokensHeld = async (address) => {
     const url = `${config.scanUrl}/api/v2/addresses/${address}/tokens?type=ERC20`;
     const tokenlist = await fetchAPI(url, 'GET');
     let tokens = [];

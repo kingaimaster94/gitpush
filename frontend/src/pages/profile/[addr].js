@@ -46,7 +46,7 @@ export default function MyProfile() {
   // const [tradingFee, setTradingFee] = useState(null)
   // const [devMaxBuy, setDevMaxBuy] = useState(null)
   // const [userMaxBuy, setUserMaxBuy] = useState(null)
-  
+
   const [scanAddress, setScanAddress] = useState(EXPLORER_URL)
   const [pumpfunAddress, setPumpfunAddress] = useState(PUMPFUN_ADDRESS);
 
@@ -225,8 +225,8 @@ export default function MyProfile() {
               <div className={clsx('text-base cursor-pointer', currentTab === 'Notifications' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Notifications')}>Notifications</div>
             </div>
           )}
-          <div className={clsx('text-base cursor-pointer', currentTab === 'Followers' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Followers')}>Followers</div>
-          <div className={clsx('text-base cursor-pointer', currentTab === 'Following' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Following')}>Following</div>
+          {/* <div className={clsx('text-base cursor-pointer', currentTab === 'Followers' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Followers')}>Followers</div>
+          <div className={clsx('text-base cursor-pointer', currentTab === 'Following' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Following')}>Following</div> */}
           {wallet.address === process.env.NEXT_PUBLIC_OWNER_ADDRESS && addr === wallet.address && (
             <div className={clsx('text-base cursor-pointer', currentTab === 'Dashboard' ? 'font-bold text-white' : 'text-[#808080]')} onClick={() => setCurrentTab('Dashboard')}>Dashboard</div>
           )}

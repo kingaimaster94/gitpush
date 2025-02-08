@@ -220,10 +220,10 @@ export default function Header() {
             }
           }} className="flex gap-2 items-center">
             {(wallet.status == "disconnected" || wallet.status == "connecting" || wallet.status == "reconnecting") && (
-              <div className="text-sm border border-white px-4 py-2 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-white hover:bg-white/10 transition"
+              <div className="text-md font-bold border bg-[#F0FF42] border-white shadow-xl px-4 py-2 rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-white hover:bg-white/10 transition"
                 onClick={() => connectWallet()}
               >
-                Connect Wallet
+                CONNECT
               </div>
             )}
             {(wallet.status == "connected") && (
