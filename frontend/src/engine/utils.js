@@ -54,3 +54,14 @@ export const decimalFromEth = (amount) => {
     }
     return BigInt(0);
 }
+
+export const getOMAXPPrice = async () => {
+    try {
+        const response = await axios.get('https://api.coinbase.com/v2/prices/OMAX-USD/spot');
+        const newOmaxPrice = Number(response.data.data.amount);
+        return newOmaxPrice;;
+    } catch (err) {
+        console.error('Error fetching OMAX price:', err.message);
+        return 0;
+    }
+};

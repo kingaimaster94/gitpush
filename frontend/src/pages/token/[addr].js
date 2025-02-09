@@ -49,6 +49,7 @@ import { erc20abi } from "@/contexts/contracts/erc20";
 import { omaxswapv2_router } from "@/contexts/contracts/omaxswapv2_router";
 import { factoryabi } from "@/contexts/contracts/factory";
 import { pairabi } from "@/contexts/contracts/pair";
+import { getOMAXPPrice } from "@/engine/utils";
 
 const rajdhani = Rajdhani({
   weight: ["300", "400", "500", "600", "700"],
@@ -98,6 +99,7 @@ export default function TokenPage() {
 
   const [scanUrl, setScanUrl] = useState(EXPLORER_URL_TESTNET);
   const [pumpfunAddress, setPumpfunAddress] = useState(PUMPFUN_ADDRESS);
+  const [hardcapMarcketCap, setHardcapMarketCap] = useState(0.0005216);
 
   const chartHeight = isMobile ? 400 : 600;
 
@@ -171,6 +173,8 @@ export default function TokenPage() {
     const userId = getUserId();
     const result = await getToken(addr, userId);
     setTokenInfo(result);
+    const omaxPrice = await getOMAXPPrice();
+    setHardcapMarketCap(Math.floor(omaxPrice * 12_500_500));
   };
   console.log("tokenInfo: ", tokenInfo);
 
@@ -1391,9 +1395,9 @@ export default function TokenPage() {
                 />
               </div>
               <p className="text-sm font-medium text-[#9F9F9F] pt-4">
-                When the market cap reaches $50,000, all the liquidity from the
+                {`When the market cap reaches $${hardcapMarcketCap}, all the liquidity from the
                 bonding curve will be deposited into the Omax Swap and liquidity will be burned.
-                The progression increases as the price rises.
+                The progression increases as the price rises.`}
                 <br />
                 <br />
                 There are{" "}

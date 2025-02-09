@@ -626,7 +626,7 @@ const getRecentTrade = async (req, resp) => {
                     tokenAddr: token.tokenAddr
                 });
             }
-            if (histData.length == 3) break;
+            if (histData.length == 30) break;
         }
         return resp.status(200).json(histData);
     } catch (error) {
