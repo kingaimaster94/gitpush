@@ -248,7 +248,7 @@ export default function MyProfile() {
                       <div className='text-md text-white cursor-pointer'>[Refresh]</div>
                     </div>
                     <div className='flex justify-between'>
-                      <p className='text-md text-[#97FF73]'>{item.lamports.toFixed(3)} OMAX</p>
+                      <p className='text-md text-[#97FF73]'>{item.lamports.toFixed(0)} OMAX</p>
                       <Link href={`/token/${item.tokenAddr}`} className='text-md text-[#97FF73] cursor-pointer'>[View Coin]</Link>
                     </div>
                   </div>

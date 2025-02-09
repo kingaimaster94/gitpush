@@ -23,7 +23,7 @@ import image_bg from "../../assets/images/image_bg.png";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { useAccount } from "wagmi";
 import logos_telegram from "../../assets/images/logos_telegram.png";
-
+import web from "../../assets/images/web.svg";
 import prime_twitter from "../../assets/images/prime_twitter.png";
 
 const EurostileMNFont = localFont({
@@ -648,8 +648,6 @@ export default function BoardPage() {
                           pt: "10px",
                           position: "relative"
                         }}>
-
-
                           <Box>
                             <Typography
                               component={"img"}
@@ -705,9 +703,9 @@ export default function BoardPage() {
                                 href={`/token/${item.tokenAddr}`}
                                 className="flex gap-2 items-start p-2"
                               >
-                                <Box className="pl-2 w-full"> 
+                                <Box className="pl-2 w-full">
                                   <div className="flex flex-col">
-                                   {/* <div className="flex gap-2 items-center">
+                                    {/* <div className="flex gap-2 items-center">
                                       <p className={`text-xl text-black`} style={{ fontSize: "14px" }}>Created by: </p>
                                       <div className="flex gap-1 items-center">
                                         
@@ -730,28 +728,28 @@ export default function BoardPage() {
                                         </Link> 
                                       </div>
                                     </div>*/}
-                                     <p className={`text-xl text-[#000]`} style={{ fontSize: "14px" }}>
+                                    <p className={`text-xl text-[#000]`} style={{ fontSize: "14px" }}>
                                       <strong>Name:</strong> {item.name}
                                     </p>
                                     <p className={`text-xl text-[#000]`} style={{ fontSize: "14px" }}>
-                                    <strong>Ticker:</strong> {item.ticker}
+                                      <strong>Ticker:</strong> {item.ticker}
                                     </p>
                                     <p className={`text-xl text-[#000]`} style={{ fontSize: "14px" }}>
-                                    <strong>Market cap:</strong> {item.marketCap.toFixed(2)}K
+                                      <strong>Market cap:</strong> {item.marketCap.toFixed(2)}K
                                     </p>
-                                   
+
                                     <p className={`text-xl text-[#000]`} style={{ fontSize: "14px" }}>
                                       {/* <span className="font-bold" style={{fontSize:"10px"}}>{`${item.name} (ticker: ${item.ticker}): `}</span> */}
                                       <strong>Description:</strong> {item?.desc.slice(0, 25)}...
                                     </p>
-                                    
+
                                   </div>
-                                  
-                                  <div className={`flex justify-end text-xl text-[#000] text-right`}  style={{ width: "100%" , fontSize: "14px" , textAlign: "right"}}>
-                                      {/* <span className="font-bold" style={{fontSize:"10px"}}>{`${item.name} (ticker: ${item.ticker}): `}</span> */}
-                                    {item?.twitter &&  <a href={item?.twitter} > <img src={prime_twitter.src} width={"25px"}  height={"25px"} /></a> }
-                                    {item?.telegram &&  <a href={item?.telegram} > <img src={logos_telegram.src} width={"25px"}  height={"25px"} /></a> }
-                                    </div>
+
+                                  <div className={`flex justify-end text-xl text-[#000] text-right`} style={{ width: "100%", fontSize: "14px", textAlign: "right" }}>
+                                    {item?.website && <a href={item?.website} > <img src={web.src} width={"25px"} height={"25px"} /></a>}
+                                    {item?.twitter && <a href={item?.twitter} > <img src={prime_twitter.src} width={"25px"} height={"25px"} /></a>}
+                                    {item?.telegram && <a href={item?.telegram} > <img src={logos_telegram.src} width={"25px"} height={"25px"} /></a>}
+                                  </div>
                                 </Box>
 
                               </Link>

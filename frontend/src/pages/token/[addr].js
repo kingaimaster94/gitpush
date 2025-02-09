@@ -96,7 +96,7 @@ export default function TokenPage() {
   const below800 = useMedia("(max-width: 800px)");
   const [isPoolComplete, setIsPoolComplete] = useState(false);
 
-  const [scanUrl, setScanUrl] = useState(EXPLORER_URL);
+  const [scanUrl, setScanUrl] = useState(EXPLORER_URL_TESTNET);
   const [pumpfunAddress, setPumpfunAddress] = useState(PUMPFUN_ADDRESS);
 
   const chartHeight = isMobile ? 400 : 600;
@@ -997,7 +997,7 @@ export default function TokenPage() {
                           target="_blank"
                           className="text-sm font-medium text-[#9F9F9F] hover:underline leading-none"
                         >
-                          {item.txhash.substr(0, 10)}
+                          {item.txhash.substr(0, 6)}
                         </a>
                       </Box>
                     );
@@ -1245,21 +1245,21 @@ export default function TokenPage() {
                       className="bg-[#1A1A1A] px-4 py-1 text-sm text-white"
                       onClick={() => setAmount(10000)}
                     >
-                      10k OMAX
+                      10k
                     </button>
                     <button
                       type="button"
                       className="bg-[#1A1A1A] px-4 py-1 text-sm text-white"
                       onClick={() => setAmount(50000)}
                     >
-                      50k OMAX
+                      50k
                     </button>
                     <button
                       type="button"
                       className="bg-[#1A1A1A] px-4 py-1 text-sm text-white"
                       onClick={() => setAmount(100000)}
                     >
-                      100k OMAX
+                      100k
                     </button>
                   </div>
                 ) : (
@@ -1441,7 +1441,7 @@ export default function TokenPage() {
                           className="hover:underline"
                         >
                           {index + 1}. {item.username}{" "}
-                          {item.bio === null ? "" : `(${item.bio})`}
+                          {item.bio === null || item.bio === undefined || item.bio == "undefined" ? "" : `(${item.bio})`}
                         </a>
                         <p>{item.holdPercent.toFixed(2)}%</p>
                       </div>

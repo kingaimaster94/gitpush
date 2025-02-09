@@ -2,11 +2,11 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-const { User, 
-    UserFollow, 
-    Token, 
-    TokenPrice, 
-    TokenReplyMention, 
+const { User,
+    UserFollow,
+    Token,
+    TokenPrice,
+    TokenReplyMention,
     TokenReplyMentionLike
 } = require('../db');
 const { config } = require('../config');
@@ -27,7 +27,7 @@ const getUserProfile = async (req, resp) => {
         }
         const followers = await UserFollow.find({ userId: user._id, status: true }).countDocuments();
         const likesReceived = await TokenReplyMentionLike.find({ replierId: user._id, status: true })?.countDocuments();
-        const mentionsReceived = await TokenReplyMention.find({ replierId: user._id, mentionerId: {$ne: null} })?.countDocuments();
+        const mentionsReceived = await TokenReplyMention.find({ replierId: user._id, mentionerId: { $ne: null } })?.countDocuments();
 
         // get list of holding tokens
         const tokensHeld = await getTokensHeld(walletAddr);
@@ -39,21 +39,21 @@ const getUserProfile = async (req, resp) => {
             const token = await Token.findOne({ tokenAddr: tokenInfo.tokenAddr });
             if (!token) continue;
             // console.log('token:', token);
-            
+
             const lastPrice = (await TokenPrice.aggregate([
-                { $match: {tokenId: token._id} },
-                { $sort: {timestamp: -1} },
+                { $match: { tokenId: token._id } },
+                { $sort: { timestamp: -1 } },
                 { $limit: 1 },
-                { $project: {price: 1} }
+                { $project: { price: 1 } }
             ]))[0]?.price;
             // console.log('lastPrice:', lastPrice);
 
             coinsHeld.push({
-                tokenAddr: tokenInfo.tokenAddr, 
-                ticker: token.ticker, 
-                balance: Number(tokenInfo.balance), 
-                logo: token.logo, 
-                lamports: lastPrice * Number(tokenInfo.balance)
+                tokenAddr: tokenInfo.tokenAddr,
+                ticker: token.ticker,
+                balance: Number(tokenInfo.balance) / 10 ** 18,
+                logo: token.logo,
+                lamports: lastPrice * Number(tokenInfo.balance) / 10 ** 18
             });
         }
         // console.log('coinsHeld:', coinsHeld);
@@ -63,21 +63,23 @@ const getUserProfile = async (req, resp) => {
         if (user._id == parsedUserId) {
             replies = await TokenReplyMention.find({ replierId: user._id, mentionerId: null })
                 .populate('replierId')
-                .find({}, { username: 1, 
-                    walletAddr: 1, 
-                    ctime: 1, 
-                    replyMentionId: 1, 
+                .find({}, {
+                    username: 1,
+                    walletAddr: 1,
+                    ctime: 1,
+                    replyMentionId: 1,
                     replyMsg: 1
                 });
         }
-        
+
         let notifications = {};
         if (user._id == parsedUserId) {
-            const replyMentions = await TokenReplyMention.find({ 
+            const replyMentions = await TokenReplyMention.find({
                 $or: [
-                    { replierId: user._id }, 
+                    { replierId: user._id },
                     { mentionerId: user._id }
-                ]});
+                ]
+            });
             let allLikes = [];
             for (const replyMention of replyMentions) {
                 const likes = await TokenReplyMentionLike.find({ replyMentionId: replyMention._id }, { _id: 0, likerId: 1 })
@@ -87,7 +89,7 @@ const getUserProfile = async (req, resp) => {
                     likes2.push(like.likerId.username);
                 allLikes.push(likes2);
             }
-            const mentions = await TokenReplyMention.find({ replierId: user._id, mentionerId: {$ne: null} })?.populate('mentionerId');
+            const mentions = await TokenReplyMention.find({ replierId: user._id, mentionerId: { $ne: null } })?.populate('mentionerId');
             let mentions2 = [];
             for (const mention of mentions) {
                 mentions2.push({
@@ -97,41 +99,41 @@ const getUserProfile = async (req, resp) => {
             }
             notifications = { likes: allLikes, mentions: mentions2 };
         }
-        
+
         const tokensCreated = await Token.find({ creatorId: user._id })?.populate('creatorId');
         let coinsCreated = [];
         for (const tokenInfo of tokensCreated) {
             const lastPrice = (await TokenPrice.aggregate([
-                { $match: {tokenId: tokenInfo._id} },
-                { $sort: {timestamp: -1} },
+                { $match: { tokenId: tokenInfo._id } },
+                { $sort: { timestamp: -1 } },
                 { $limit: 1 },
-                { $project: {price: 1} }
+                { $project: { price: 1 } }
             ]))[0]?.price;
             let omaxPrice = fetchOMAXPrice();
 
             coinsCreated.push({
-                walletAddr: tokenInfo.creatorId.walletAddr, 
-                avatar: tokenInfo.creatorId.avatar, 
-                username: tokenInfo.creatorId.username, 
-                tokenAddr: tokenInfo.tokenAddr, 
-                logo: tokenInfo.logo, 
-                tokenName: tokenInfo.name, 
-                ticker: tokenInfo.ticker, 
-                desc: tokenInfo.desc, 
+                walletAddr: tokenInfo.creatorId.walletAddr,
+                avatar: tokenInfo.creatorId.avatar,
+                username: tokenInfo.creatorId.username,
+                tokenAddr: tokenInfo.tokenAddr,
+                logo: tokenInfo.logo,
+                tokenName: tokenInfo.name,
+                ticker: tokenInfo.ticker,
+                desc: tokenInfo.desc,
                 marketCap: (lastPrice * omaxPrice * config.tokenTotalSupply) / 1000, // unit: K$
                 replies: await TokenReplyMention.find({ tokenId: tokenInfo._id, mentionerId: null }).countDocuments()
             });
         }
         // console.log('coinsCreated:', coinsCreated);
-        
+
         const followersList = await UserFollow.find({ userId: user._id, status: true })?.populate('followerId');
         let followersList2 = [];
         for (const followerInfo of followersList) {
             followersList2.push({
-                walletAddr: followerInfo.followerId.walletAddr, 
-                avatar: followerInfo.followerId.avatar, 
-                username: followerInfo.followerId.username, 
-                followers: await UserFollow.countDocuments({ userId: followerInfo.followerId, status: true }), 
+                walletAddr: followerInfo.followerId.walletAddr,
+                avatar: followerInfo.followerId.avatar,
+                username: followerInfo.followerId.username,
+                followers: await UserFollow.countDocuments({ userId: followerInfo.followerId, status: true }),
             });
         }
         // console.log('followersList2:', followersList2);
@@ -140,27 +142,28 @@ const getUserProfile = async (req, resp) => {
         let followingsList2 = [];
         for (const followingInfo of followingsList) {
             followingsList2.push({
-                walletAddr: followingInfo.userId.walletAddr, 
-                avatar: followingInfo.userId.avatar, 
-                username: followingInfo.userId.username, 
-                followers: await UserFollow.countDocuments({ userId: followingInfo.userId, status: true }), 
+                walletAddr: followingInfo.userId.walletAddr,
+                avatar: followingInfo.userId.avatar,
+                username: followingInfo.userId.username,
+                followers: await UserFollow.countDocuments({ userId: followingInfo.userId, status: true }),
             });
         }
         // console.log('followingsList2:', followingsList2);
-        return resp.status(200).json({ avatar: user.avatar, 
-            username: user.username, 
-            bio: user.bio, 
-            followers, 
-            likes: likesReceived, 
-            mentions: mentionsReceived, 
-            coinsHeld, 
-            replies, 
-            notifications, 
-            coinsCreated, 
-            followersList: followersList2, 
+        return resp.status(200).json({
+            avatar: user.avatar,
+            username: user.username,
+            bio: user.bio,
+            followers,
+            likes: likesReceived,
+            mentions: mentionsReceived,
+            coinsHeld,
+            replies,
+            notifications,
+            coinsCreated,
+            followersList: followersList2,
             followingsList: followingsList2
         });
-        
+
     } catch (err) {
         console.error('getUserProfile error:', err);
         return resp.status(400).json({ error: err.message });
@@ -206,8 +209,9 @@ const updateUserProfile = async (req, resp) => {
         user.mtime = Date.now();
         await user.save();
 
-        return resp.status(200).json({ avatarUrl: user.avatar, 
-            mimetype: avatar.mimetype, 
+        return resp.status(200).json({
+            avatarUrl: user.avatar,
+            mimetype: avatar.mimetype,
             size: avatar.size
         });
     } catch (err) {
@@ -219,12 +223,12 @@ const updateUserProfile = async (req, resp) => {
 const getPopularUsers = async (userId) => {
     let ret = [];
 
-    const users = await User.find({ _id: {$ne: userId} }, { _id: 1, avatar: 1, username: 1 });
+    const users = await User.find({ _id: { $ne: userId } }, { _id: 1, avatar: 1, username: 1 });
     // console.log('users:', users);
     for (const user of users) {
         ret.push({
             ...user._doc,
-            numFollowers: await UserFollow.countDocuments({ userId: user._id, status: true }), 
+            numFollowers: await UserFollow.countDocuments({ userId: user._id, status: true }),
             followed: await UserFollow.countDocuments({ userId: user._id, followerId: userId, status: true }) === 0 ? false : true
         });
     }
@@ -260,10 +264,10 @@ const followUser = async (req, resp) => {
         let follow = await UserFollow.findOne({ userId: query.followingId, followerId: req.userId });
         if (!follow) {
             follow = new UserFollow({
-                userId: query.followingId, 
-                followerId: req.userId, 
-                status: true, 
-                cdate: Date.now(), 
+                userId: query.followingId,
+                followerId: req.userId,
+                status: true,
+                cdate: Date.now(),
                 mdate: Date.now()
             });
         } else {
@@ -273,7 +277,7 @@ const followUser = async (req, resp) => {
             follow.mdate = Date.now();
         }
         await follow.save();
-        
+
         return resp.status(200).json({});
     } catch (err) {
         console.error('followUser error:', err);
@@ -307,9 +311,10 @@ const unfollowUser = async (req, resp) => {
     }
 };
 
-module.exports = { getUserProfile, 
-    updateUserProfile, 
-    getFollowingUsers, 
-    followUser, 
+module.exports = {
+    getUserProfile,
+    updateUserProfile,
+    getFollowingUsers,
+    followUser,
     unfollowUser
 };

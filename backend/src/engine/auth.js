@@ -16,7 +16,7 @@ const login = async (req, resp) => {
         let user = await User.findOne({ walletAddr });
         if (!user) {
             user = new User({
-                username: walletAddr.substr(0, 10), 
+                username: walletAddr.substr(0, 6), 
                 walletAddr, 
                 loginAt: Date.now(), 
                 status: true, 

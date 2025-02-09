@@ -33,21 +33,21 @@ const TopRanker = () => {
         display: "flex",
         justifyContent: { sm: "space-between", xs: "center" },
         maxWidth: "100%",
-        gap: "1rem", 
+        gap: "5rem",
         overflowX: {
           md: "initial",
-          xs:  "auto",
-        },         
+          xs: "auto",
+        },
         "& p": {
           fontFamily: "JostRegular",
           fontSize: { sm: "16px", xs: "16px" },
           color: "#DCDCDC",
         },
       }}
-       
-      
+
+
     >
-      <div className="flex max-h-[32px] gap-1 w-max space-between">
+      <div className="flex max-h-[32px] gap-2 w-max space-between">
         {recentTrade !== null &&
           recentTrade.map((item, index) => {
             return (

@@ -67,12 +67,12 @@ const getTokenHolderDistribution = async (tokenAddr) => {
             } else if (tokenHolderlist.items[i].address.is_contract == true) {
                 bio = 'Omaxswapv2';
             } else {
-                bio = owner.substr(0, 10);
+                bio = user?.username;
             }
 
             holderDistrib.push({
                 walletAddr: owner,
-                username: (owner == config.pumpfunAddress) ? owner.substr(0, 10) : user?.username,
+                username: owner.substr(0, 10),
                 bio: bio,
                 holdPercent: Number(balance) / Number(totalSupply) * 100
             });
