@@ -643,6 +643,11 @@ export default function BoardPage() {
                   tokenList.map((item, index) => {
                     return (
                       <Grid item lg={4} sm={6} xs={12} key={index}>
+                         <Link
+                                key={index}
+                                ref={index === 0 ? tokenDiv : null}
+                                href={`/token/${item.tokenAddr}`} 
+                              >
                         <Box height={"100%"} sx={{
                           display: "flex",
                           pt: "10px",
@@ -695,15 +700,8 @@ export default function BoardPage() {
                                 fontFamily: "JostRegular",
                                 lineHeight: "normal"
                               }
-                            }}>
-
-                              <Link
-                                key={index}
-                                ref={index === 0 ? tokenDiv : null}
-                                href={`/token/${item.tokenAddr}`}
-                                className="flex gap-2 items-start p-2"
-                              >
-                                <Box className="pl-2 w-full">
+                            }}>                            
+                                <Box className="pl-2 w-full"> 
                                   <div className="flex flex-col">
                                     {/* <div className="flex gap-2 items-center">
                                       <p className={`text-xl text-black`} style={{ fontSize: "14px" }}>Created by: </p>
@@ -752,10 +750,12 @@ export default function BoardPage() {
                                   </div>
                                 </Box>
 
-                              </Link>
                             </Box>
                           </Box>
+
                         </Box>
+                        </Link>
+
                       </Grid>
                     );
                   })}
