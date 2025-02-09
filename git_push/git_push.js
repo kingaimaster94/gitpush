@@ -16,4 +16,4 @@ async function pushToRepo(repoUrl, branch = 'main') {
 }
 
 // Example: Push to a specific GitHub repository
-pushToRepo('https://github.com/kingaimaster94/git_push.git', 'main');
+pushToRepo('https://github.com/kingaimaster94/gitpush.git', 'main');
