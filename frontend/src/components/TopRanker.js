@@ -43,49 +43,50 @@ const TopRanker = () => {
           fontSize: { sm: "16px", xs: "16px" },
           color: "#DCDCDC",
         },
-      }}       
+      }}
     >
       <div className="flex max-h-[32px] gap-1 w-full space-between">
-      <marquee width="100%">
-        {recentTrade !== null &&
-          recentTrade.map((item, index) => {
-            return (
-              <Typography
-                key={index}
-                sx={{
-                  width: "300px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <Typography component={"img"}
-                  src={item.logo} sx={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "50%",
-                    zIndex: "2",
-                  }}
-                  alt="" />{" "}
-                <span style={{ fontWeight: "600" }} className="w-max">{item.username}</span>{" "}
-                <span
-                  style={{
-                    color: "#797987",
-                    fontSize: "14px",
-                  }}
-                  className="w-max"
-                >
-                  {truncateAddress(item.walletAddr)}
-                </span>{" "}
-                <span style={{ color: "#2D8E2F", fontSize: "14px", fontFamily: "Inter" }} className="flex w-max text-nowrap">
-                  {"BUY " + decimalToEth(item.tokenAmount).toFixed(2) + " "}
-                  <a href={`${scanUrl}/tx/${item.txhash}`}>{item.ticker}</a>
-                </span>
-              </Typography>
-            );
-          })
-        }
-      </marquee>
+        <marquee width="100%">
+          <div className="flex gap-6">
+            {recentTrade !== null &&
+              recentTrade.map((item, index) => {
+                return (
+                  <Typography
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <Typography component={"img"}
+                      src={item.logo} sx={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "50%",
+                        zIndex: "2",
+                      }}
+                      alt="" />{" "}
+                    <span style={{ fontWeight: "600" }} className="w-max">{item.username}</span>{" "}
+                    <span
+                      style={{
+                        color: "#797987",
+                        fontSize: "14px",
+                      }}
+                      className="w-max"
+                    >
+                      {truncateAddress(item.walletAddr)}
+                    </span>{" "}
+                    <span style={{ color: "#2D8E2F", fontSize: "14px", fontFamily: "Inter" }} className="flex w-max text-nowrap">
+                      {"BUY " + decimalToEth(item.tokenAmount).toFixed(2)}
+                      <a href={`${scanUrl}/tx/${item.txhash}`} className="pl-2">{item.ticker}</a>
+                    </span>
+                  </Typography>
+                );
+              })
+            }
+          </div>
+        </marquee>
 
       </div>
     </Box>
