@@ -1,6 +1,0 @@
-
-export const TOKEN_TOTAL_SUPPLY = 10_000_000_000;
-export const TOKEN_DECIMALS = 18;
-
-export const DATATYPE_LASTTOKEN = 0xFF01;
-export const DATATYPE_LASTTRADE = 0xFF02;

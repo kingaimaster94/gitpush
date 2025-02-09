@@ -1,2 +1,2 @@
 # omax_pumpfun
-This is pumpfun on omax chain
+This is test of git push
