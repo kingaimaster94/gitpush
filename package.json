@@ -1,0 +1,22 @@
+{
+  "name": "omaxfunasset",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "start": "nodemon src/index.js",
+    "start-server": "pm2 start src/index.js --interpreter nodemon --name omaxfunasset",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.5",
+    "fs-extra": "^11.3.0",
+    "sharp": "^0.33.5",
+    "simple-git": "^3.27.0",
+    "thirdweb": "^5.88.1",
+    "web3": "^4.16.0"
+  }
+}
